@@ -1,0 +1,60 @@
+"use client";
+
+import { PageHeader } from "@/components/app-shell";
+import { RecordMissing } from "@/components/record-missing";
+import { SettingsView } from "@/components/settings-view";
+import { bnDate, phoneBn } from "@/lib/db/format";
+import { alarmIdOf } from "@/lib/db/selectors";
+import { useStaff } from "../use-staff";
+
+export function StaffSettings() {
+  const { db, staff } = useStaff();
+  if (!staff) return <RecordMissing title="অ্যাকাউন্ট পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
+
+  return (
+    <>
+      <PageHeader backHref="/staff/dashboard" crumb="মাঠকর্মী পোর্টাল / সেটিংস" title="সেটিংস" />
+      <SettingsView
+        name={staff.nameBn}
+        role={`মাঠকর্মী · ${staff.id}`}
+        status={staff.status === "On leave" ? "ছুটিতে" : "সক্রিয় অ্যাকাউন্ট"}
+        statusTone={staff.status === "On leave" ? "warning" : "success"}
+        facts={[
+          ["ALARM আইডি", alarmIdOf(db, staff.id)],
+          ["মোবাইল", phoneBn(staff.phone)],
+          ["যোগদান", bnDate(staff.joined)],
+        ]}
+        groups={[
+          {
+            title: "ব্যক্তিগত তথ্য",
+            icon: "person",
+            rows: [
+              ["পূর্ণ নাম", staff.nameBn],
+              ["কর্মী নম্বর", staff.id],
+              ["মোবাইল নম্বর", phoneBn(staff.phone)],
+              ["ইমেইল", staff.email],
+            ],
+          },
+          {
+            // The assigned reviewer is intentionally not shown to staff.
+            title: "কর্মএলাকা",
+            icon: "area",
+            rows: [
+              ["বিভাগ · জেলা", `${staff.division} · ${staff.district}`],
+              ["থানা / ইউনিয়ন", staff.thana],
+              ["ওয়ার্ড", staff.wards],
+            ],
+          },
+          {
+            title: "অ্যাকাউন্ট",
+            icon: "account",
+            rows: [
+              ["ভূমিকা", "মাঠকর্মী"],
+              ["যোগদানের তারিখ", bnDate(staff.joined)],
+            ],
+          },
+        ]}
+      />
+    </>
+  );
+}

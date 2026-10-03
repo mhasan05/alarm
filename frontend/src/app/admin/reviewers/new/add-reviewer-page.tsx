@@ -1,0 +1,74 @@
+"use client";
+
+import Link from "next/link";
+import { PageHeader } from "@/components/app-shell";
+import { RecordMissing } from "@/components/record-missing";
+import { nextCode, reviewerOf } from "@/lib/db/selectors";
+import { useAdmin } from "../../use-admin";
+import { staffRows } from "../../field-staff/roster";
+import { StaffForm } from "../../field-staff/new/staff-form";
+
+/** New reviewer account, or the same form pre-filled for editing. Coverage is managed in Settings. */
+export function AddReviewerPage({ edit }: { edit?: string }) {
+  const { db, admin, adminId } = useAdmin();
+  const editing = edit ? reviewerOf(db, edit) : undefined;
+  if (edit && !editing) return <RecordMissing title="পর্যালোচক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="পর্যালোচক তালিকায় ফিরুন" />;
+  const nextId = nextCode(db.reviewers.map((r) => r.id), "REV", 3);
+  const takenPhones = db.users.filter((u) => u.id !== editing?.id).map((u) => u.phone);
+
+  return (
+    <>
+      <PageHeader
+        backHref={editing ? `/admin/reviewers/${editing.id}` : "/admin/reviewers"}
+        crumb={
+          <>
+            <Link href="/admin/reviewers" className="text-primary hover:text-primary-hover">
+              পর্যালোচক
+            </Link>{" "}
+            /{" "}
+            {editing ? (
+              <>
+                <Link href={`/admin/reviewers/${editing.id}`} className="text-primary hover:text-primary-hover">
+                  {editing.id}
+                </Link>{" "}
+                / Edit
+              </>
+            ) : (
+              "নতুন পর্যালোচক"
+            )}
+          </>
+        }
+        title={
+          <>
+            {editing ? (
+              <>
+                Edit profile · <span className="font-bn">প্রোফাইল সম্পাদনা</span>
+              </>
+            ) : (
+              <>
+                Add Reviewer · <span className="font-bn">নতুন পর্যালোচক</span>
+              </>
+            )}
+            <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
+              {editing ? `${editing.name} · ${editing.id}` : "Creates a reviewer account. The chosen area becomes their first coverage area."}
+            </span>
+          </>
+        }
+      />
+      <div className="flex flex-1 flex-col px-4 pt-[22px] pb-9 sm:px-7">
+        <StaffForm
+          key={editing?.id ?? "new"}
+          nextId={nextId}
+          admin={admin?.name ?? "Admin"}
+          adminId={adminId}
+          takenPhones={takenPhones}
+          roster={staffRows(db)}
+          editing={editing && { id: editing.id, name: editing.name, phone: editing.phone, joined: editing.joined }}
+          initialRole="reviewer"
+          basePath="/admin/reviewers"
+          listLabel="Reviewers"
+        />
+      </div>
+    </>
+  );
+}
