@@ -24,7 +24,7 @@ export function ReportDetailView({ code, from }: { code: string; from: From }) {
 
   return (
     <>
-      <PageHeader backHref={back.href} crumb={`রাজনৈতিক কর্মী পোর্টাল / ${back.crumb} / বিস্তারিত`} title="কার্যক্রমের বিস্তারিত" action={<AddActivityButton />} />
+      <PageHeader backHref={back.href} crumb={`রাজনৈতিক কর্মী পোর্টাল / ${back.crumb} / বিস্তারিত`} title="কাজের বিস্তারিত" action={<AddActivityButton />} />
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <BackLink href={back.href}>{back.label}</BackLink>
         <ReportArticle report={report} dispute={dispute} disputeStatus={canDispute(db, report)} />

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ReportDetailView, type From } from "./report-detail-view";
 
-export const metadata: Metadata = { title: "কার্যক্রমের বিস্তারিত · ALARM" };
+export const metadata: Metadata = { title: "কাজের বিস্তারিত · ALARM" };
 
 const FROM: From[] = ["dashboard", "reports", "disputes"];
 

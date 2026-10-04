@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { StateCard } from "@/components/state-card";
-import { bnDate } from "@/lib/db/format";
+import { bn, bnDate } from "@/lib/db/format";
 import { analysisStatus, nameBnOf, nextCode, profileOf, submissionsFor } from "@/lib/db/selectors";
 import type { Database } from "@/lib/db/types";
 import { useAdmin } from "../use-admin";
@@ -19,9 +19,9 @@ function buildAnalysis(db: Database, profileId: string): Analysis | null {
     kind: "staff",
     category: s.category,
     title: s.title,
-    meta: `${s.origin === "self" ? "নিজের দেওয়া তথ্য" : `${nameBnOf(db, s.staffId ?? "")} (${s.staffId})`} · ${s.source} · গৃহীত ${bnDate(s.decidedAt ?? s.submittedAt)}`,
+    meta: `${s.origin === "self" ? "নিজের দেওয়া তথ্য" : `${nameBnOf(db, s.staffId ?? "")} (${s.staffId})`} · ${s.source} · গ্রহণ হয়েছে ${bnDate(s.decidedAt ?? s.submittedAt)}`,
     sources: Math.max(1, s.evidence.length),
-    href: `/admin/field-reports/${s.code}`,
+    href: `/admin/submissions/${s.code}`,
     suggested: "keep",
   }));
   const ai: Finding[] = db.aiFindings.filter((f) => f.profileId === profileId).map((f) => ({ ...f, kind: "ai" }));
@@ -50,23 +50,23 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
     const rows = db.profiles.map((p) => ({ p, st: analysisStatus(db, p.id) }));
     return (
       <>
-        <PageHeader crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / এআই বিশ্লেষণ" title={<>AI Analysis · <span className="font-bn">এআই বিশ্লেষণ</span></>} />
+        <PageHeader crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / এআই বিশ্লেষণ" title={<span className="font-bn">এআই বিশ্লেষণ</span>} />
         <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
           <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
             <div className="border-b border-line px-5 py-4">
-              <h2 className="text-[15px] font-semibold text-ink">Choose a profile</h2>
-              <p className="mt-0.5 text-[12px] text-muted">The analysis runs once a profile has accepted data and nothing waiting in review.</p>
+              <h2 className="text-[15px] font-semibold text-ink">একটি প্রোফাইল বেছে নিন</h2>
+              <p className="mt-0.5 text-[12px] text-muted">কোনো প্রোফাইলে গ্রহণ করা তথ্য থাকলে এবং যাচাই চলছে এমন কিছু না থাকলে বিশ্লেষণ চালু হয়।</p>
             </div>
             <ul>
               {rows.map(({ p, st }) => (
-                <li key={p.id} className="relative flex flex-wrap items-center gap-3 border-b border-line px-5 py-3.5 last:border-b-0 hover:bg-surface/40">
+                <li key={p.id} className="relative flex cursor-pointer flex-wrap items-center gap-3 border-b border-line px-5 py-3.5 last:border-b-0 hover:bg-surface/40">
                   <span className="flex size-9 flex-none items-center justify-center rounded-full bg-primary/12 font-bn text-[13px] font-semibold text-primary">{p.initial}</span>
                   <div className="min-w-[200px] flex-1">
-                    <Link href={`/admin/ai-review?profile=${p.id}`} className="font-bn text-[14px] font-semibold text-ink after:absolute after:inset-0 hover:text-primary">
+                    <Link href={`/admin/ai-review?profile=${p.id}`} className="font-bn text-[14px] font-semibold text-ink after:absolute after:inset-0 after:content-[''] hover:text-primary">
                       {p.name}
                     </Link>
                     <div className="text-[12px] text-muted">
-                      {p.id} · {st.accepted} accepted{st.report ? ` · ${st.report.code} v${st.report.versions[0].v}` : ""}
+                      {p.id} · {bn(st.accepted)}টি গ্রহণ হয়েছে{st.report ? ` · ${st.report.code} ভার্সন ${bn(st.report.versions[0].v)}` : ""}
                     </div>
                   </div>
                   <span
@@ -74,7 +74,7 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
                       st.ready ? "bg-success/10 text-success" : st.pending ? "bg-warning/10 text-warning" : "bg-surface text-muted"
                     }`}
                   >
-                    {st.ready ? "Ready" : st.pending ? `${st.pending} in review` : st.accepted ? "Up to date" : "No accepted data"}
+                    {st.ready ? "তৈরি" : st.pending ? `${bn(st.pending)}টির যাচাই চলছে` : st.accepted ? "আপডেট করা" : "গ্রহণ করা কোনো তথ্য নেই"}
                   </span>
                 </li>
               ))}
@@ -100,7 +100,7 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
           / {p ? p.audit.code : profileId}
         </>
       }
-      title={<span className="font-bn">{p?.name ?? "Profile not found"}</span>}
+      title={<span className="font-bn">{p?.name ?? "প্রোফাইলটি পাওয়া যায়নি"}</span>}
     />
   );
   const gate = (tone: "warning" | "neutral", title: string, body: string, actions: { label: string; href: string; kind?: "primary" | "secondary" }[]) => (
@@ -115,31 +115,31 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
   );
 
   if (!p || !analysis) return gate("neutral", "প্রোফাইলটি পাওয়া যায়নি", "ঠিকানাটি ভুল অথবা প্রোফাইলটি আর নেই।", [{ label: "প্রোফাইল বেছে নিন", href: "/admin/ai-review" }]);
-  if (generatedFor === profileId) return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Chief Executive Editor"} adminId={adminId} onGenerated={() => {}} />;
+  if (generatedFor === profileId) return <AiReviewView key={profileId} analysis={analysis} admin={admin?.nameBn ?? admin?.name ?? "প্রধান নির্বাহী সম্পাদক"} adminId={adminId} onGenerated={() => {}} />;
   if (st.pending)
     return gate(
       "warning",
       "বিশ্লেষণ শুরু করা যাবে না",
-      `এই প্রোফাইলে ${new Intl.NumberFormat("bn-BD").format(st.pending)}টি জমা এখনও নির্বাহী সম্পাদকের কাছে আছে। সারি খালি হলে বিশ্লেষণ চালু হবে।`,
+      `এই প্রোফাইলে ${bn(st.pending)}টি জমা এখনও নির্বাহী সম্পাদকের কাছে আছে। তালিকা খালি হলে বিশ্লেষণ চালু হবে।`,
       [
         { label: "প্রোফাইলের জমাগুলো দেখুন", href: back },
         { label: "অন্য প্রোফাইল", href: "/admin/ai-review", kind: "secondary" },
       ],
     );
   if (!st.accepted)
-    return gate("neutral", "বিশ্লেষণের জন্য কোনো তথ্য নেই", "এই প্রোফাইলে এখনও কোনো গৃহীত জমা নেই। তদন্ত সম্পাদক নিয়োগ দিন এবং নির্বাহী সম্পাদক সিদ্ধান্ত দিলে বিশ্লেষণ চালু হবে।", [
+    return gate("neutral", "বিশ্লেষণের জন্য কোনো তথ্য নেই", "এই প্রোফাইলে এখনও গ্রহণ করা কোনো জমা নেই। তদন্ত সম্পাদককে কাজ দিন এবং নির্বাহী সম্পাদক সিদ্ধান্ত দিলে বিশ্লেষণ চালু হবে।", [
       { label: "প্রোফাইলে ফিরুন", href: back },
     ]);
   if (!st.ready && st.report)
     return gate(
       "neutral",
-      "প্রতিবেদন হালনাগাদ আছে",
-      `${st.report.code} v${st.report.versions[0].v} সর্বশেষ গৃহীত তথ্য থেকেই তৈরি। নতুন তথ্য গৃহীত হলে নতুন সংস্করণ তৈরি করা যাবে।`,
+      "প্রতিবেদন আপডেট করা আছে",
+      `${st.report.code} ভার্সন ${bn(st.report.versions[0].v)} সর্বশেষ গ্রহণ করা তথ্য থেকেই তৈরি। নতুন তথ্য গ্রহণ হলে নতুন ভার্সন তৈরি করা যাবে।`,
       [
         { label: "প্রতিবেদন দেখুন", href: `/admin/reports/${st.report.code}` },
         { label: "অন্য প্রোফাইল", href: "/admin/ai-review", kind: "secondary" },
       ],
     );
 
-  return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Chief Executive Editor"} adminId={adminId} onGenerated={() => setGeneratedFor(profileId)} />;
+  return <AiReviewView key={profileId} analysis={analysis} admin={admin?.nameBn ?? admin?.name ?? "প্রধান নির্বাহী সম্পাদক"} adminId={adminId} onGenerated={() => setGeneratedFor(profileId)} />;
 }

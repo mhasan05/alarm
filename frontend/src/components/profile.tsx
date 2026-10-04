@@ -227,7 +227,7 @@ export function EditableAvatar({ className = "size-14 text-[20px]" }: { classNam
   return (
     <div className="flex flex-col items-center gap-1">
       <label
-        title="ছবি পরিবর্তন করতে ক্লিক করুন · JPG, PNG বা WebP · সর্বোচ্চ ২ MB"
+        title="ছবি বদলাতে ক্লিক করুন · JPG, PNG বা WebP · ২ MB পর্যন্ত"
         className="group relative flex-none cursor-pointer rounded-full"
       >
         <UserAvatar className={className} />
@@ -236,7 +236,7 @@ export function EditableAvatar({ className = "size-14 text-[20px]" }: { classNam
             <path d="M2.4 4.8h11.2v8H2.4zM5.6 4.8l1-1.6h2.8l1 1.6M8 10.6a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6" stroke="#FFFFFF" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <span className="sr-only">{photo ? "প্রোফাইল ছবি পরিবর্তন করুন" : "প্রোফাইল ছবি যোগ করুন"}</span>
+        <span className="sr-only">{photo ? "প্রোফাইল ছবি বদলান" : "প্রোফাইল ছবি যোগ করুন"}</span>
         <PhotoInput />
       </label>
       {error && (

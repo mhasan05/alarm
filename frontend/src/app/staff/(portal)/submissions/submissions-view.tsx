@@ -11,14 +11,13 @@ import { STAFF_STATE, useStaff } from "../use-staff";
 import { FILTERS, type Filter } from "./filters";
 
 const matches = (s: Submission, f: Filter) =>
-  f === "সব" || (f === "পর্যালোচনাধীন" && s.state === "Pending") || (f === "গৃহীত" && s.state === "Accepted") || (f === "বাতিল" && (s.state === "Rejected" || s.state === "Held"));
+  f === "সব" || (f === "যাচাই চলছে" && s.state === "Pending") || (f === "গ্রহণ হয়েছে" && s.state === "Accepted") || (f === "বাতিল" && s.state === "Rejected");
 
 /** One line under each submission: what happened, in staff terms. */
 export function staffNote(s: Submission) {
-  if (s.state === "Pending") return `পর্যালোচনার সারিতে অপেক্ষমাণ · ${bn(s.evidence.length)}টি প্রমাণ সংযুক্ত`;
-  if (s.state === "Accepted") return "গৃহীত — প্রোফাইলে প্রকাশিত হয়েছে।";
-  if (s.state === "Withdrawn") return "গৃহীত হয়েছিল, পরে অভিযোগের ভিত্তিতে প্রধান নির্বাহী সম্পাদক প্রত্যাহার করেছেন।";
-  return `${s.state === "Held" ? "স্থগিত" : "বাতিল"} — ${s.reason ?? ""}`;
+  if (s.state === "Pending") return `যাচাইয়ের তালিকায় অপেক্ষায় · ${bn(s.evidence.length)}টি প্রমাণ দেওয়া আছে`;
+  if (s.state === "Accepted") return "গ্রহণ হয়েছে — প্রোফাইলে দেখা যাচ্ছে।";
+  return `বাতিল — ${s.reason ?? ""}`;
 }
 
 export function StaffSubmissionsView({ filter }: { filter: Filter }) {

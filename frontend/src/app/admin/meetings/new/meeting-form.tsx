@@ -7,8 +7,10 @@ import { PageHeader } from "@/components/app-shell";
 import { Field, inputClass } from "@/components/form";
 import { AreaPicker, areaFromGeo } from "@/components/meetings/area-picker";
 import { InvitePicker } from "@/components/meetings/invite-picker";
+import { RichTextEditor } from "@/components/rich-text";
 import { bn } from "@/lib/db/format";
 import { areaMembers, createMeeting } from "@/lib/db/meetings";
+import { plainText } from "@/lib/rich-text";
 import { useNow } from "@/lib/use-client";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
 import { useAdmin } from "../../use-admin";
@@ -56,7 +58,8 @@ export function MeetingForm() {
   const when = date && time ? new Date(`${date}T${time}:00`) : null;
   const errors = {
     title: title.trim().length < 5 ? "মিটিংয়ের শিরোনাম লিখুন (কমপক্ষে ৫ অক্ষর)।" : "",
-    when: !when || Number.isNaN(when.getTime()) ? "তারিখ ও সময় দিন।" : when.getTime() < now - 5 * 60_000 ? "অতীতের সময় দেওয়া যাবে না।" : "",
+    agenda: plainText(agenda).length > 1000 ? "আলোচনার বিষয় ১০০০ অক্ষরের মধ্যে রাখুন।" : "",
+    when: !when || Number.isNaN(when.getTime()) ? "তারিখ ও সময় দিন।" : when.getTime() < now - 5 * 60_000 ? "পার হয়ে যাওয়া সময় দেওয়া যাবে না।" : "",
   };
   const firstError = (Object.keys(errors) as (keyof typeof errors)[]).find((k) => errors[k]);
   const show = (k: keyof typeof errors) => (submitted ? errors[k] : "");
@@ -64,10 +67,10 @@ export function MeetingForm() {
   const submit = () => {
     setSubmitted(true);
     if (firstError) {
-      document.getElementById(firstError === "when" ? "mt-date" : "mt-title")?.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.getElementById(`mt-${firstError === "when" ? "date" : firstError}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
       return;
     }
-    const m = createMeeting({ title: title.trim(), agenda: agenda.trim(), scheduledAt: when!.toISOString(), area: areaFromGeo(geo), invitees }, adminId);
+    const m = createMeeting({ title: title.trim(), agenda: plainText(agenda).trim() ? agenda : "", scheduledAt: when!.toISOString(), area: areaFromGeo(geo), invitees }, adminId);
     router.push(`/admin/meetings/${m.id}?created=1`);
   };
 
@@ -83,11 +86,7 @@ export function MeetingForm() {
             / নতুন
           </>
         }
-        title={
-          <>
-            New meeting · <span className="font-bn">নতুন মিটিং</span>
-          </>
-        }
+        title={<span className="font-bn">নতুন মিটিং</span>}
       />
       <form
         noValidate
@@ -104,13 +103,13 @@ export function MeetingForm() {
             </p>
           )}
 
-          <Card num="1" title="মিটিংয়ের তথ্য" sub="Details">
+          <Card num="১" title="মিটিংয়ের তথ্য" sub="শিরোনাম, আলোচনার বিষয় ও সময়">
             <div className="flex flex-col gap-4">
               <Field id="mt-title" label="শিরোনাম" required hint={show("title") || undefined} hintClassName="text-danger">
-                <input id="mt-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="যেমন: অক্টোবরের মাঠ পর্যালোচনা সভা" className={`${inputClass} font-bn ${show("title") ? "border-danger!" : ""}`} />
+                <input id="mt-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="যেমন: অক্টোবরের মাঠের কাজ নিয়ে মিটিং" className={`${inputClass} font-bn ${show("title") ? "border-danger!" : ""}`} />
               </Field>
-              <Field id="mt-agenda" label="আলোচ্যসূচি" hint="প্রতিটি বিষয় আলাদা লাইনে লিখতে পারেন।">
-                <textarea id="mt-agenda" value={agenda} onChange={(e) => setAgenda(e.target.value)} rows={4} maxLength={1000} placeholder={"১. …\n২. …"} className={`${inputClass} h-auto resize-y py-2.5 font-bn leading-[1.7]`} />
+              <Field id="mt-agenda" label="আলোচনার বিষয়" hint={show("agenda") || "প্রতিটি বিষয় আলাদা লাইনে লিখতে পারেন।"} hintClassName={show("agenda") ? "text-danger" : undefined}>
+                <RichTextEditor id="mt-agenda" value={agenda} onChange={setAgenda} minHeight={130} placeholder="১. … ২. …" invalid={!!show("agenda")} describedBy="mt-agenda-msg" />
               </Field>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field id="mt-date" label="তারিখ" required hint={show("when") || undefined} hintClassName="text-danger">
@@ -123,11 +122,11 @@ export function MeetingForm() {
             </div>
           </Card>
 
-          <Card num="2" title="মিটিংয়ের এলাকা" sub="Who can join directly">
+          <Card num="২" title="মিটিংয়ের এলাকা" sub="কারা সরাসরি যোগ দিতে পারবেন">
             <AreaPicker geo={geo} members={members} />
           </Card>
 
-          <Card num="3" title="অতিরিক্ত আমন্ত্রণ" sub="Optional · outside the area">
+          <Card num="৩" title="আরও যাদের ডাকবেন" sub="না দিলেও চলবে · এলাকার বাইরের কেউ">
             <p className="mb-3 font-bn text-[12px] leading-[1.65] text-muted">
               এলাকার বাইরের নির্দিষ্ট কাউকে যোগ দেওয়ার সুযোগ দিতে চাইলে এখানে বেছে নিন — তাঁরা অনুরোধ ছাড়াই যোগ দিতে পারবেন।
             </p>

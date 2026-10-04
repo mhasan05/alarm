@@ -1,5 +1,6 @@
 "use client";
 
+import { allPhones } from "@/lib/db/store";
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
@@ -15,7 +16,9 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
   if (edit && !editing) return <RecordMissing title="নির্বাহী সম্পাদক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="নির্বাহী সম্পাদক তালিকায় ফিরুন" />;
   // The ALARM ID (KAR- + 6 random digits) is issued when the account is saved.
   const nextId = "KAR-••••••";
-  const takenPhones = db.users.filter((u) => u.id !== editing?.id).map((u) => u.phone);
+  // Phones are unique across every organisation (the editing account's own phone excepted).
+  const own = editing ? db.users.find((u) => u.id === editing.id)?.phone : undefined;
+  const takenPhones = allPhones().filter((p) => p !== own);
 
   return (
     <>
@@ -32,7 +35,7 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
                 <Link href={`/admin/reviewers/${editing.id}`} className="text-primary hover:text-primary-hover">
                   {editing.id}
                 </Link>{" "}
-                / Edit
+                / এডিট
               </>
             ) : (
               "নতুন নির্বাহী সম্পাদক"
@@ -43,15 +46,15 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
           <>
             {editing ? (
               <>
-                Edit profile · <span className="font-bn">প্রোফাইল সম্পাদনা</span>
+                প্রোফাইল এডিট
               </>
             ) : (
               <>
-                Add Executive Editor · <span className="font-bn">নতুন নির্বাহী সম্পাদক</span>
+                নতুন নির্বাহী সম্পাদক
               </>
             )}
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {editing ? `${editing.name} · ${editing.id}` : "Creates an executive editor account. The chosen area becomes their first coverage area."}
+              {editing ? `${editing.nameBn || editing.name} · ${editing.id}` : "নির্বাহী সম্পাদকের অ্যাকাউন্ট তৈরি হবে। বেছে নেওয়া এলাকাটি হবে তাঁর প্রথম দায়িত্বের এলাকা।"}
             </span>
           </>
         }
@@ -60,14 +63,14 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
         <StaffForm
           key={editing?.id ?? "new"}
           nextId={nextId}
-          admin={admin?.name ?? "Chief Executive Editor"}
+          admin={admin?.nameBn ?? admin?.name ?? "প্রধান নির্বাহী সম্পাদক"}
           adminId={adminId}
           takenPhones={takenPhones}
           roster={staffRows(db)}
           editing={editing && { id: editing.id, name: editing.name, phone: editing.phone, joined: editing.joined }}
           initialRole="reviewer"
           basePath="/admin/reviewers"
-          listLabel="Executive Editors"
+          listLabel="নির্বাহী সম্পাদক তালিকায়"
         />
       </div>
     </>

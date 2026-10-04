@@ -6,7 +6,7 @@ import { bnDate, bnTime } from "@/lib/db/format";
 import type { Meeting, MeetingStatus } from "@/lib/db/types";
 
 const STATUS: Record<MeetingStatus, { label: string; cls: string; dot: string }> = {
-  scheduled: { label: "নির্ধারিত", cls: "bg-role-reviewer/10 text-role-reviewer", dot: "bg-role-reviewer" },
+  scheduled: { label: "সামনে হবে", cls: "bg-role-reviewer/10 text-role-reviewer", dot: "bg-role-reviewer" },
   live: { label: "চলছে", cls: "bg-danger/10 text-danger", dot: "bg-danger animate-pulse" },
   ended: { label: "শেষ হয়েছে", cls: "bg-surface text-muted", dot: "bg-muted" },
   cancelled: { label: "বাতিল", cls: "bg-surface text-muted", dot: "bg-placeholder" },

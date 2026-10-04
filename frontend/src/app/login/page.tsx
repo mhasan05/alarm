@@ -8,41 +8,41 @@ export const metadata: Metadata = { title: "লগইন · ALARM" };
 
 const DEMO: DemoAccount[] = [
   {
-    phone: "01711448290",
-    initials: "র",
+    phone: "01711000000",
+    initials: "সু",
     bnInitials: true,
-    name: "আব্দুল করিম শেখ · রাজনৈতিক কর্মী",
-    description: "নিজের প্রোফাইল দেখেন, কার্যক্রম যোগ করেন, অভিযোগ জানান",
+    name: "আরিফুর রহমান · সুপার অ্যাডমিন",
+    description: "প্রধান নির্বাহী সম্পাদক তৈরি, বন্ধ করা ও এক ক্লিকে তাঁদের অ্যাকাউন্টে প্রবেশ",
     bnDescription: true,
-    fg: "text-role-politician",
-    tint: "bg-role-politician/12",
-    hover: "hover:border-role-politician hover:bg-role-politician-tint",
+    fg: "text-[#3B2A6B]",
+    tint: "bg-[#3B2A6B]/12",
+    hover: "hover:border-[#3B2A6B] hover:bg-[#3B2A6B]/5",
   },
   {
     phone: "01711000001",
-    initials: "অ",
+    initials: "রা",
     bnInitials: true,
     name: "রাজিব খান · প্রধান নির্বাহী সম্পাদক",
-    description: "অ্যাকাউন্ট অনুমোদন, অভিযোগ নিষ্পত্তি, বিশ্লেষণ ও প্রতিবেদন",
+    description: "অ্যাকাউন্ট তৈরি, জমা এডিট, অভিযোগের সমাধান, বিশ্লেষণ ও প্রতিবেদন",
     bnDescription: true,
     fg: "text-role-admin",
     tint: "bg-role-admin/12",
     hover: "hover:border-primary hover:bg-surface",
   },
   {
-    phone: "01755432198",
-    initials: "প",
+    phone: "01711000002",
+    initials: "ফা",
     bnInitials: true,
     name: "ফারহানা ইয়াসমিন · নির্বাহী সম্পাদক",
-    description: "জমা গ্রহণ বা বাতিল করেন, চূড়ান্ত প্রতিবেদনে স্বাক্ষর দেন",
+    description: "জমা গ্রহণ বা বাতিল করেন, চূড়ান্ত প্রতিবেদনে সই করেন",
     bnDescription: true,
     fg: "text-role-reviewer",
     tint: "bg-role-reviewer/12",
     hover: "hover:border-primary hover:bg-surface",
   },
   {
-    phone: "01712440918",
-    initials: "ম",
+    phone: "01711000003",
+    initials: "জা",
     bnInitials: true,
     name: "জাহিদুল হক · তদন্ত সম্পাদক",
     description: "মাঠ থেকে তথ্য সংগ্রহ করে জমা দেন",
@@ -51,12 +51,23 @@ const DEMO: DemoAccount[] = [
     tint: "bg-role-staff/12",
     hover: "hover:border-primary hover:bg-surface",
   },
+  {
+    phone: "01711000004",
+    initials: "র",
+    bnInitials: true,
+    name: "মোঃ রফিকুল ইসলাম · রাজনৈতিক কর্মী",
+    description: "নিজের প্রোফাইল দেখেন, নিজের কাজ যোগ করেন, অভিযোগ জানান",
+    bnDescription: true,
+    fg: "text-role-politician",
+    tint: "bg-role-politician/12",
+    hover: "hover:border-role-politician hover:bg-role-politician-tint",
+  },
 ];
 
 /** `?next=` returns to the page that required sign-in. */
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { next, signedOut, reset } = await searchParams;
-  const notice = reset ? "পাসওয়ার্ড পরিবর্তন হয়েছে। নতুন পাসওয়ার্ড দিয়ে লগইন করুন।" : signedOut ? "আপনি লগআউট করেছেন।" : undefined;
+  const notice = reset ? "পাসওয়ার্ড বদলানো হয়েছে। নতুন পাসওয়ার্ড দিয়ে লগইন করুন।" : signedOut ? "আপনি লগআউট করেছেন।" : undefined;
   return (
     <main lang="bn" className="flex min-h-screen font-bn flex-col items-center justify-center gap-6 bg-[radial-gradient(120%_90%_at_50%_0%,#F4F9F7_0%,#FFFFFF_62%)] px-6 py-10">
       <div className="w-full max-w-[434px] overflow-hidden rounded-card border border-line bg-white shadow-card">

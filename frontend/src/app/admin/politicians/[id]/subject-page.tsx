@@ -19,7 +19,7 @@ export function SubjectPage({ id, adding }: { id: string; adding: boolean }) {
         }
         title={
           <>
-            Subject Profile · <span className="font-bn">ব্যক্তির প্রোফাইল</span>
+            রাজনৈতিক কর্মীর প্রোফাইল
           </>
         }
         action={
@@ -28,14 +28,14 @@ export function SubjectPage({ id, adding }: { id: string; adding: boolean }) {
               href={`/admin/ai-review?profile=${id}`}
               className="inline-flex h-9 items-center rounded-button border border-line bg-white px-3.5 text-[13px] font-semibold text-primary hover:border-primary hover:bg-surface"
             >
-              Open audit
+              অডিট খুলুন
             </Link>
             <Link
               href={`/admin/politicians/${id}?add=1`}
               scroll={false}
               className="inline-flex h-9 items-center rounded-button bg-primary px-4 text-[13px] font-semibold text-white hover:bg-primary-hover"
             >
-              + Add Report
+              + জমা যোগ করুন
             </Link>
           </div>
         }

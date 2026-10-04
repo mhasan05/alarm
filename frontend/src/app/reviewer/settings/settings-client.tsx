@@ -17,12 +17,12 @@ export function ReviewerSettings() {
       <SettingsView
         name={r.nameBn}
         role={`নির্বাহী সম্পাদক · ${r.id}`}
-        status={r.status === "On leave" ? "ছুটিতে" : "সক্রিয় অ্যাকাউন্ট"}
+        status={r.status === "On leave" ? "ছুটিতে" : "চালু আছে"}
         statusTone={r.status === "On leave" ? "warning" : "success"}
         facts={[
           ["ALARM আইডি", alarmIdOf(db, r.id)],
           ["মোবাইল", phoneBn(r.phone)],
-          ["যোগদান", bnDate(r.joined)],
+          ["যোগ দিয়েছেন", bnDate(r.joined)],
         ]}
         groups={[
           {
@@ -37,14 +37,14 @@ export function ReviewerSettings() {
           {
             title: "দায়িত্বের এলাকা",
             icon: "area",
-            rows: r.areas.length ? r.areas.map((a, i) => [`এলাকা ${new Intl.NumberFormat("bn-BD").format(i + 1)}`, a] as [string, string]) : [["এলাকা", "নির্ধারিত হয়নি"]],
+            rows: r.areas.length ? r.areas.map((a, i) => [`এলাকা ${new Intl.NumberFormat("bn-BD").format(i + 1)}`, a] as [string, string]) : [["এলাকা", "দেওয়া হয়নি"]],
           },
           {
             title: "অ্যাকাউন্ট",
             icon: "account",
             rows: [
-              ["ভূমিকা", "নির্বাহী সম্পাদক"],
-              ["যোগদানের তারিখ", bnDate(r.joined)],
+              ["পদ", "নির্বাহী সম্পাদক"],
+              ["যোগ দেওয়ার তারিখ", bnDate(r.joined)],
             ],
           },
         ]}

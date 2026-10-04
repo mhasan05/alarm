@@ -5,11 +5,10 @@ import type { Dispute, Submission } from "@/lib/db/types";
 
 /** One-line status under a report; empty for a normally published one. */
 export function reportFootNote(r: Submission, dispute?: Dispute) {
-  if (r.state === "Rejected" || r.state === "Held") return "নির্বাহী সম্পাদক বাতিল করেছেন — এটি প্রোফাইলে দেখা যায় না, তবে রেকর্ডে সংরক্ষিত।";
-  if (r.state === "Withdrawn") return "অভিযোগের পর প্রধান নির্বাহী সম্পাদক রিপোর্টটি প্রত্যাহার করেছেন — প্রোফাইল ও স্কোর থেকে সরানো হয়েছে।";
+  if (r.state === "Rejected" && dispute?.state === "Removed") return "আপনার অভিযোগ গ্রহণ হয়েছে — রিপোর্টটি বাতিল করে প্রোফাইল ও স্কোর থেকে সরানো হয়েছে।";
+  if (r.state === "Rejected") return "নির্বাহী সম্পাদক বাতিল করেছেন — এটি প্রোফাইলে দেখা যায় না, তবে রেকর্ডে রাখা আছে।";
   if (r.state === "Pending") return "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায় · স্কোরে যোগ হয়নি";
-  if (dispute?.state === "Open") return "আপনি এই তথ্যের বিরুদ্ধে অভিযোগ জানিয়েছেন — প্রধান নির্বাহী সম্পাদক যাচাই করছেন।";
-  if (dispute?.state === "Response") return "প্রধান নির্বাহী সম্পাদক রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন।";
+  if (dispute?.state === "Open") return "আপনি এই তথ্যের বিরুদ্ধে অভিযোগ জানিয়েছেন — সম্পাদক যাচাই করছেন।";
   return "";
 }
 
@@ -30,7 +29,7 @@ export function ReportCard({
 }) {
   const cat = CATEGORY_STYLE[r.category];
   const st = STATE_BN[r.state];
-  const rejected = r.state !== "Accepted" && r.state !== "Pending";
+  const rejected = r.state === "Rejected";
   const origin = ORIGIN_STYLE[r.origin];
   const disputed = dispute?.state === "Open";
   const href = `/politician/reports/${r.code}?from=${from}`;

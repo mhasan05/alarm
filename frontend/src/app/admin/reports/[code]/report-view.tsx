@@ -61,8 +61,8 @@ export function ReportView({ code, v }: { code: string; v?: string }) {
 
         {!approved && (
           <p role="status" className="rounded-card border border-l-[3px] border-line border-l-warning bg-white px-5 py-3 text-[13px] text-ink shadow-card print:hidden">
-            Waiting for {reviewer?.name ?? "the executive editor"} (Executive Editor) to add a remark and sign. Sharing and PDF unlock after sign-off.
-            {report.adminNote && <span className="mt-1 block text-[12px] text-muted">Your note on the selection: {report.adminNote}</span>}
+            {reviewer?.nameBn ?? "নির্বাহী সম্পাদক"} (নির্বাহী সম্পাদক)-এর মন্তব্য ও সইয়ের অপেক্ষায়। অনুমোদন ও সইয়ের পর শেয়ার ও PDF চালু হবে।
+            {report.adminNote && <span className="mt-1 block text-[12px] text-muted">বাছাই নিয়ে আপনার নোট: {report.adminNote}</span>}
           </p>
         )}
 

@@ -30,17 +30,17 @@ export function ReviewerProfilesView() {
             <svg width="17" height="17" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="flex-none">
               <path d="M2.4 3.2 6 2l4 1.4 3.6-1.2v10.6L10 14l-4-1.4-3.6 1.2zM6 2v10.6M10 3.4V14" stroke="#006A4E" strokeWidth="1.4" strokeLinejoin="round" />
             </svg>
-            <h2 className="text-[14px] font-semibold leading-[1.6]">আমার নির্ধারিত এলাকা</h2>
+            <h2 className="text-[14px] font-semibold leading-[1.6]">আমার এলাকা</h2>
             <span className="inline-flex flex-none items-center gap-[7px] whitespace-nowrap text-[11px] font-semibold text-muted">
               <svg width="12" height="13" viewBox="0 0 13 15" fill="none" aria-hidden="true">
                 <rect x="1.4" y="6.1" width="10.2" height="7.6" rx="1.6" stroke="currentColor" strokeWidth="1.3" />
                 <path d="M4 6.1V4.2a2.5 2.5 0 0 1 5 0v1.9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
-              প্রধান নির্বাহী সম্পাদক নির্ধারিত
+              প্রধান নির্বাহী সম্পাদক ঠিক করেছেন
             </span>
           </div>
           <dl className="mt-3.5 grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-x-[22px] gap-y-3.5">
-            {JURISDICTION.length === 0 && <p className="text-[12.5px] text-muted">কোনো এলাকা নির্ধারিত হয়নি — প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।</p>}
+            {JURISDICTION.length === 0 && <p className="text-[12.5px] text-muted">কোনো এলাকা দেওয়া হয়নি — প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।</p>}
             {JURISDICTION.map(([label, value]) => (
               <div key={label} className="min-w-0">
                 <dt className="text-[10px] font-semibold tracking-[0.05em] text-muted">{label}</dt>
@@ -49,7 +49,7 @@ export function ReviewerProfilesView() {
             ))}
           </dl>
           <p className="mt-3.5 border-t border-[#E3EEEA] pt-[13px] text-[11.5px] leading-[1.7] text-muted text-pretty">
-            এই এলাকার সব রাজনৈতিক কর্মীর জমা আপনার সারিতে আসে। এলাকা পরিবর্তন করতে পারেন কেবল প্রধান নির্বাহী সম্পাদক।
+            এই এলাকার সব রাজনৈতিক কর্মীর জমা আপনার তালিকায় আসে। এলাকা বদলাতে পারেন শুধু প্রধান নির্বাহী সম্পাদক।
           </p>
         </section>
 
@@ -99,7 +99,7 @@ export function ReviewerProfilesView() {
                           }`}
                         >
                           <span className={`size-[5px] rounded-full ${busy ? "bg-warning" : "bg-success"}`} />
-                          {busy ? "সারি বাকি" : "সারি খালি"}
+                          {busy ? "জমা বাকি" : "তালিকা খালি"}
                         </span>
                       </td>
                     </tr>
@@ -109,7 +109,7 @@ export function ReviewerProfilesView() {
             </table>
           </div>
           <p className="px-5 py-[13px] text-[11.5px] leading-[1.7] text-muted text-pretty">
-            সারি খালি না হওয়া পর্যন্ত প্রধান নির্বাহী সম্পাদক ওই প্রোফাইলে এআই বিশ্লেষণ শুরু করতে পারেন না।
+            তালিকা খালি না হলে প্রধান নির্বাহী সম্পাদক ওই প্রোফাইলে এআই বিশ্লেষণ শুরু করতে পারেন না।
           </p>
         </section>
       </div>

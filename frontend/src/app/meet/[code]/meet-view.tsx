@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Logo } from "@/components/brand";
 import { HandIcon, MeetingStatusChip, MicIcon, ShareLink, meetingWhen } from "@/components/meetings/meeting-bits";
+import { RichText } from "@/components/rich-text";
 import { audioTransport } from "@/lib/audio-room";
 import { useMe } from "@/lib/auth-client";
 import { bn, bnDate, bnTime } from "@/lib/db/format";
@@ -31,8 +32,9 @@ import {
   type MeetingIdentity,
 } from "@/lib/db/meetings";
 import { alarmIdOf, roleOfId } from "@/lib/db/selectors";
-import { useDb } from "@/lib/db/store";
+import { setScopeOrg, useDb, useMeetingOrgId, useOrg } from "@/lib/db/store";
 import type { Database, Meeting } from "@/lib/db/types";
+import { plainText } from "@/lib/rich-text";
 import { HOME } from "@/lib/session";
 import { useMounted, useNow } from "@/lib/use-client";
 import { useMicrophone, type MicState } from "@/lib/use-microphone";
@@ -75,7 +77,7 @@ function clock(totalSec: number) {
 
 function untilText(ms: number) {
   const min = Math.ceil(ms / 60_000);
-  if (min <= 0) return "নির্ধারিত সময় হয়েছে";
+  if (min <= 0) return "শুরুর সময় হয়ে গেছে";
   if (min < 60) return `${bn(min)} মিনিট পর`;
   const h = Math.floor(min / 60);
   if (h < 48) return `${bn(h)} ঘণ্টা পর`;
@@ -85,7 +87,11 @@ function untilText(ms: number) {
 const idKey = (code: string) => `alarm-meet-id:${code}`;
 
 export function MeetView({ code }: { code: string }) {
+  // A signed-out visitor works inside the meeting's own organisation; a signed-in user only ever sees
+  // their own organisation, so another organisation's link simply isn't found.
+  setScopeOrg(useMeetingOrgId(code));
   const db = useDb();
+  const org = useOrg();
   const session = useMe();
   const m = meetingByCode(db, code);
   // Without a sign-in, people join with their ALARM ID; it's remembered for this tab only.
@@ -94,7 +100,8 @@ export function MeetView({ code }: { code: string }) {
   // Re-checked on every render, so a suspension takes effect straight away.
   const remembered = saved ? identifyForMeeting(db, saved) : null;
   const guest = remembered?.ok ? remembered.identity : null;
-  const me: MeetingIdentity | null = session ? { userId: session.userId, role: session.role } : guest;
+  // The সুপার অ্যাডমিন belongs to no organisation, so meetings are not theirs to join.
+  const me: MeetingIdentity | null = session && session.role !== "superadmin" ? { userId: session.userId, role: session.role } : guest;
   const identify = (id: MeetingIdentity | null) => saveId(code, id ? alarmIdOf(db, id.userId) : null);
   // Time-dependent values start at 0 so the server and first client render match.
   const now = useNow(1000);
@@ -117,7 +124,7 @@ export function MeetView({ code }: { code: string }) {
         )}
         {guest && !session ? (
           <button type="button" onClick={() => identify(null)} className="ml-auto inline-flex h-8 cursor-pointer items-center rounded-button border border-line px-3 text-[12.5px] font-semibold text-primary hover:border-primary sm:ml-0">
-            আইডি পরিবর্তন
+            আইডি বদলান
           </button>
         ) : (
           <Link href={home} className="ml-auto inline-flex h-8 items-center rounded-button border border-line px-3 text-[12.5px] font-semibold text-primary hover:border-primary">
@@ -126,7 +133,9 @@ export function MeetView({ code }: { code: string }) {
         )}
       </header>
       <main className="flex flex-1 flex-col">
-        {!m ? (
+        {m && org?.status === "Suspended" ? (
+          <Notice tone="neutral" title="মিটিংটি এখন খোলা যাবে না" body="এই প্রতিষ্ঠানের সিস্টেম বন্ধ করা হয়েছে। বিস্তারিত জানতে আপনার প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />
+        ) : !m ? (
           <Notice tone="neutral" title="মিটিং পাওয়া যায়নি" body="লিংকটি সঠিক নয় অথবা মিটিংটি মুছে ফেলা হয়েছে। যিনি লিংক পাঠিয়েছেন তাঁর কাছ থেকে নতুন লিংক নিন।" home={home} />
         ) : !me ? (
           ready ? <IdForm db={db} m={m} onIdentify={identify} /> : null
@@ -177,7 +186,7 @@ function IdForm({ db, m, onIdentify }: { db: Database; m: Meeting; onIdentify: (
             <label htmlFor="alarm-id" className="block text-[13.5px] font-semibold">
               আপনার ALARM আইডি
             </label>
-            <p className="mt-0.5 text-[12px] leading-[1.6] text-muted">লগইন লাগবে না — শুধু আইডি দিন। আপনার এলাকা মিটিংয়ের অন্তর্ভুক্ত হলে সরাসরি যোগ দিতে পারবেন, না হলে প্রধান নির্বাহী সম্পাদকের কাছে অনুরোধ পাঠাতে পারবেন।</p>
+            <p className="mt-0.5 text-[12px] leading-[1.6] text-muted">লগইন লাগবে না — শুধু আইডি দিন। আপনার এলাকা মিটিংয়ে থাকলে সরাসরি যোগ দিতে পারবেন, না হলে প্রধান নির্বাহী সম্পাদকের কাছে অনুরোধ পাঠাতে পারবেন।</p>
             <input
               id="alarm-id"
               value={value}
@@ -244,8 +253,8 @@ function MeetingFlow({ db, m, me, now, home }: { db: Database; m: Meeting; me: M
       />
     );
   }
-  if (access === "removed") return <Notice tone="danger" title="আপনাকে মিটিং থেকে সরানো হয়েছে" body="প্রধান নির্বাহী সম্পাদক আপনাকে এই মিটিং থেকে সরিয়ে দিয়েছেন। প্রয়োজনে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
-  if (access === "declined") return <Notice tone="danger" title="যোগ দেওয়ার অনুরোধ গৃহীত হয়নি" body="প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেননি। প্রয়োজনে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
+  if (access === "removed") return <Notice tone="danger" title="আপনাকে মিটিং থেকে সরানো হয়েছে" body="প্রধান নির্বাহী সম্পাদক আপনাকে এই মিটিং থেকে সরিয়ে দিয়েছেন। দরকার হলে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
+  if (access === "declined") return <Notice tone="danger" title="যোগ দেওয়ার অনুরোধ গ্রহণ হয়নি" body="প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেননি। দরকার হলে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
   if (access === "outside" || access === "pending") return <RequestCard m={m} me={me} pending={access === "pending"} />;
 
   if (inRoom && !kicked && mine && canEnter(access)) return <Room db={db} m={m} me={me} now={now} mic={mic} onLeave={() => setInRoom(false)} />;
@@ -329,7 +338,7 @@ function RequestCard({ m, me, pending }: { m: Meeting; me: Me; pending: boolean 
             </span>
           </p>
           <label htmlFor="join-note" className="mt-4 block text-[12.5px] font-semibold">
-            প্রধান নির্বাহী সম্পাদকের জন্য বার্তা <span className="font-normal text-muted">(ঐচ্ছিক)</span>
+            প্রধান নির্বাহী সম্পাদকের জন্য বার্তা <span className="font-normal text-muted">(না দিলেও চলবে)</span>
           </label>
           <textarea
             id="join-note"
@@ -406,8 +415,12 @@ function Lobby({ m, me, now, access, mic, onEnter }: { db: Database; m: Meeting;
           ))}
         </dl>
         <div className="border-t border-line px-6 py-5">
-          <h2 className="text-[13.5px] font-semibold">আলোচ্যসূচি</h2>
-          <p className="mt-1.5 whitespace-pre-line text-[13px] leading-[1.85] text-muted">{m.agenda || "আলোচ্যসূচি দেওয়া হয়নি।"}</p>
+          <h2 className="text-[13.5px] font-semibold">আলোচনার বিষয়</h2>
+          {plainText(m.agenda).trim() ? (
+            <RichText value={m.agenda} className="mt-1.5 text-[13px] leading-[1.85] text-muted" />
+          ) : (
+            <p className="mt-1.5 text-[13px] leading-[1.85] text-muted">আলোচনার বিষয় দেওয়া হয়নি।</p>
+          )}
         </div>
         {host && (
           <div className="border-t border-line px-6 py-5">
@@ -420,7 +433,7 @@ function Lobby({ m, me, now, access, mic, onEnter }: { db: Database; m: Meeting;
       <section className="self-start rounded-card border border-line bg-white px-5 py-5 shadow-card">
         <h2 className="text-[15px] font-semibold">যোগ দেওয়ার আগে</h2>
         <p className="mt-0.5 text-[12px] text-muted">
-          {access === "approved" ? "প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেছেন।" : access === "invited" ? "আপনি এই মিটিংয়ে আমন্ত্রিত।" : access === "area" ? "আপনার এলাকা এই মিটিংয়ের অন্তর্ভুক্ত।" : "আপনি এই মিটিংয়ের আয়োজক।"}
+          {access === "approved" ? "প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেছেন।" : access === "invited" ? "আপনি এই মিটিংয়ে আমন্ত্রণ পেয়েছেন।" : access === "area" ? "আপনার এলাকা এই মিটিংয়ে আছে।" : "আপনি এই মিটিংয়ের আয়োজক।"}
         </p>
 
         <div className="mt-4 rounded-card border border-line bg-surface/60 px-4 py-4">
@@ -546,7 +559,7 @@ function Room({ db, m, me, now, mic, onLeave }: { db: Database; m: Meeting; me: 
 
           {!audioTransport.relays && (
             <p className="rounded-card border border-l-[3px] border-line border-l-role-reviewer bg-white px-4 py-3 text-[12px] leading-[1.7] text-muted shadow-card">
-              অংশগ্রহণকারীদের মধ্যে কণ্ঠস্বর আদান-প্রদান সার্ভার যুক্ত হলে চালু হবে। এখন মাইক্রোফোন শুধু আপনার ডিভাইসে কাজ করছে; কে যুক্ত, কে কথা বলতে চান ও মিউট — সবই সবার কাছে হালনাগাদ থাকে।
+              সার্ভার যুক্ত হলে সবাই একে অন্যের কথা শুনতে পাবেন। এখন মাইক্রোফোন শুধু আপনার ডিভাইসে কাজ করছে; কে যুক্ত আছেন, কে কথা বলতে চান আর কে মিউট — এসব সবাই সঙ্গে সঙ্গে দেখতে পান।
             </p>
           )}
 
@@ -619,10 +632,10 @@ function Room({ db, m, me, now, mic, onLeave }: { db: Database; m: Meeting; me: 
                   {r.note && <p className="mt-1.5 rounded-input bg-surface px-2.5 py-1.5 text-[12px] leading-[1.6]">{r.note}</p>}
                   <div className="mt-2.5 flex gap-2">
                     <button type="button" onClick={() => decideJoin(m.id, r.userId, true, me.userId)} className="h-8 cursor-pointer rounded-button bg-primary px-3 text-[12px] font-semibold text-white hover:bg-primary-hover">
-                      অনুমোদন
+                      অনুমতি দিন
                     </button>
                     <button type="button" onClick={() => decideJoin(m.id, r.userId, false, me.userId)} className="h-8 cursor-pointer rounded-button border border-danger/50 px-3 text-[12px] font-semibold text-danger hover:bg-danger/5">
-                      প্রত্যাখ্যান
+                      ফিরিয়ে দিন
                     </button>
                   </div>
                 </li>
@@ -636,8 +649,8 @@ function Room({ db, m, me, now, mic, onLeave }: { db: Database; m: Meeting; me: 
                 <div className="text-[13px] font-semibold">{meetingWhen(m)}</div>
               </div>
               <div>
-                <div className="text-[11.5px] text-muted">আলোচ্যসূচি</div>
-                <p className="mt-0.5 whitespace-pre-line text-[12.5px] leading-[1.8]">{m.agenda || "—"}</p>
+                <div className="text-[11.5px] text-muted">আলোচনার বিষয়</div>
+                {plainText(m.agenda).trim() ? <RichText value={m.agenda} className="mt-0.5 text-[12.5px] leading-[1.8]" /> : <p className="mt-0.5 text-[12.5px] leading-[1.8]">—</p>}
               </div>
               {host && (
                 <div>

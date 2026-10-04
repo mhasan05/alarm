@@ -5,26 +5,27 @@ import type { ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
 import { bn } from "@/lib/db/format";
+import { plainText } from "@/lib/rich-text";
 import { NewSubmissionButton } from "../new-submission-button";
 import { URGENCY_STYLE, useStaff } from "../use-staff";
 
 const DO = [
-  "প্রতিটি তথ্যের সাথে ছবি, নথি বা প্রত্যক্ষদর্শীর বক্তব্য সংযুক্ত করুন — প্রমাণ ছাড়া তথ্য বাতিল হয়।",
-  "জমা দেওয়ার আগে শ্রেণি — ইতিবাচক না নেতিবাচক — ঠিকভাবে বেছে নিন।",
-  "উৎসের নাম, তারিখ ও নথির নম্বর স্পষ্ট করে লিখুন, যাতে নির্বাহী সম্পাদক মিলিয়ে দেখতে পারেন।",
+  "প্রতিটি তথ্যের সাথে ছবি, কাগজ বা সাক্ষীর কথা যোগ করুন — প্রমাণ ছাড়া তথ্য বাতিল হয়।",
+  "জমা দেওয়ার আগে ধরন — ইতিবাচক না নেতিবাচক — ঠিক করে বেছে নিন।",
+  "উৎসের নাম, তারিখ ও কাগজের নম্বর পরিষ্কার করে লিখুন, যাতে নির্বাহী সম্পাদক মিলিয়ে দেখতে পারেন।",
 ];
 
 const DONT = [
   "নিজের এলাকার বাইরের প্রোফাইল নিয়ে তথ্য জমা দেবেন না।",
   "বেনামি পোস্ট বা শোনা কথা জমা দেবেন না — নির্বাহী সম্পাদক এগুলো বাতিল করবেন।",
-  "জমা দেওয়ার পর তথ্য সম্পাদনা করা যায় না — ভুল হলে নতুন করে জমা দিন।",
+  "জমা দেওয়ার পর তথ্য এডিট করা যায় না — ভুল হলে নতুন করে জমা দিন।",
 ];
 
 // Staff see what happens to a submission, never who reviews it.
 const AFTER = [
-  { title: "আপনি জমা দেন", body: "তথ্য ও প্রমাণ পর্যালোচনার সারিতে যায়।" },
-  { title: "পর্যালোচনা", body: "এলাকার নির্বাহী সম্পাদক প্রমাণ মিলিয়ে দেখেন।" },
-  { title: "সিদ্ধান্ত", body: "গৃহীত হলে প্রোফাইলে প্রকাশিত হয়; বাতিল হলে কারণ জানানো হয়।" },
+  { title: "আপনি জমা দেন", body: "তথ্য ও প্রমাণ যাচাইয়ের তালিকায় যায়।" },
+  { title: "যাচাই", body: "এলাকার নির্বাহী সম্পাদক প্রমাণ মিলিয়ে দেখেন।" },
+  { title: "সিদ্ধান্ত", body: "গ্রহণ হলে প্রোফাইলে দেখা যায়; বাতিল হলে কারণ জানানো হয়।" },
 ];
 
 const ICON: Record<string, ReactNode> = {
@@ -113,7 +114,7 @@ export function StaffAreaView() {
 
   return (
     <>
-      <PageHeader crumb="তদন্ত সম্পাদক পোর্টাল / কর্মএলাকা" title="কর্মএলাকা ও কাজের নিয়ম" action={<NewSubmissionButton />} />
+      <PageHeader crumb="তদন্ত সম্পাদক পোর্টাল / কাজের এলাকা" title="কাজের এলাকা ও নিয়ম" action={<NewSubmissionButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -126,7 +127,7 @@ export function StaffAreaView() {
                   <Svg size={22}>{ICON.pin}</Svg>
                 </span>
                 <div className="min-w-[200px] flex-1">
-                  <div className="text-[12px] font-semibold text-primary-soft">আমার কর্মএলাকা</div>
+                  <div className="text-[12px] font-semibold text-primary-soft">আমার কাজের এলাকা</div>
                   <div className="mt-0.5 text-[22px] font-bold leading-[1.45]">
                     {staff.thana}, {staff.district}
                   </div>
@@ -139,7 +140,7 @@ export function StaffAreaView() {
                     <rect x="4.5" y="9" width="11" height="8" rx="1.6" />
                     <path d="M7 9V6.8a3 3 0 0 1 6 0V9" strokeLinecap="round" />
                   </Svg>
-                  প্রধান নির্বাহী সম্পাদক নির্ধারিত
+                  প্রধান নির্বাহী সম্পাদক ঠিক করেছেন
                 </span>
               </div>
             </div>
@@ -157,7 +158,7 @@ export function StaffAreaView() {
               ))}
             </dl>
             <p className="border-t border-line bg-surface/60 px-5 py-3 text-[12px] leading-[1.7] text-muted text-pretty">
-              শুধু এই এলাকার প্রোফাইল নিয়ে তথ্য জমা দিন। এলাকা পরিবর্তনের প্রয়োজন হলে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।
+              শুধু এই এলাকার প্রোফাইল নিয়ে তথ্য জমা দিন। এলাকা বদলাতে হলে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।
             </p>
           </section>
 
@@ -165,7 +166,7 @@ export function StaffAreaView() {
           <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
             <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
               <div>
-                <h2 className="text-[15px] font-semibold leading-[1.5]">দায়িত্বপ্রাপ্ত প্রোফাইল</h2>
+                <h2 className="text-[15px] font-semibold leading-[1.5]">দায়িত্বে থাকা প্রোফাইল</h2>
                 <p className="text-[12px] leading-[1.6] text-muted">
                   {bn(tasks.length)}টি প্রোফাইল · {bn(open)}টিতে সংগ্রহ চলছে
                 </p>
@@ -178,7 +179,7 @@ export function StaffAreaView() {
                 {tasks.map((t) => {
                   const u = URGENCY_STYLE[t.due.urgency];
                   return (
-                    <li key={t.id} className="flex items-center gap-3 border-b border-line/70 px-5 py-3.5 last:border-b-0">
+                    <li key={t.id} className={`flex items-center gap-3 border-b border-line/70 px-5 py-3.5 last:border-b-0 ${t.open ? "relative cursor-pointer hover:bg-surface/60" : ""}`}>
                       <span className="flex size-9 flex-none items-center justify-center rounded-full bg-surface text-[14px] font-semibold text-primary">
                         {t.profile?.name.replace(/^মোঃ\s*/, "").slice(0, 1)}
                       </span>
@@ -195,7 +196,7 @@ export function StaffAreaView() {
                       {t.open && (
                         <Link
                           href={`/staff/submissions/new?profile=${t.profileId}`}
-                          className="inline-flex h-8 flex-none items-center rounded-button border border-line px-2.5 text-[12px] font-semibold text-primary hover:border-primary hover:bg-surface"
+                          className="inline-flex h-8 flex-none items-center rounded-button border border-line px-2.5 text-[12px] font-semibold text-primary after:absolute after:inset-0 after:content-[''] hover:border-primary hover:bg-surface"
                         >
                           জমা দিন
                         </Link>
@@ -210,8 +211,8 @@ export function StaffAreaView() {
 
         {/* Rules */}
         <div className="grid gap-5 lg:grid-cols-2">
-          <RuleCard tone="do" title="করণীয়" rules={DO} />
-          <RuleCard tone="dont" title="বর্জনীয়" rules={DONT} />
+          <RuleCard tone="do" title="যা করবেন" rules={DO} />
+          <RuleCard tone="dont" title="যা করবেন না" rules={DONT} />
         </div>
 
         {/* After submitting */}
@@ -224,7 +225,7 @@ export function StaffAreaView() {
                 <span className="flex size-8 flex-none items-center justify-center rounded-full border-2 border-primary bg-white text-[13px] font-bold text-primary">{bn(i + 1)}</span>
                 <div className="min-w-0">
                   <div className="text-[14px] font-semibold leading-[1.5]">{s.title}</div>
-                  <p className="mt-0.5 text-[12.5px] leading-[1.7] text-muted text-pretty">{s.body}</p>
+                  <p className="mt-0.5 text-[12.5px] leading-[1.7] text-muted text-pretty">{plainText(s.body)}</p>
                 </div>
               </li>
             ))}

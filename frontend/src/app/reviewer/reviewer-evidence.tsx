@@ -1,5 +1,6 @@
 "use client";
 
+import { EVIDENCE_ACCEPT, isEvidenceFile, wrongTypeMessage } from "@/lib/evidence-files";
 import { useEffect, useState, type DragEvent } from "react";
 import { bnOf } from "@/lib/geo";
 
@@ -8,7 +9,7 @@ export type EvidenceItem = {
   id: string;
   title: string;
   meta: string;
-  /** Short type label for submitted items without a file (e.g. "নথি · PDF"). */
+  /** Short type label for submitted items without a file (e.g. "কাগজ · PDF"). */
   thumb: string;
   file?: File;
   url?: string;
@@ -60,9 +61,10 @@ export function EvidenceManager({
 
   const addFiles = (list: FileList | null) => {
     if (!list?.length) return;
-    const files = Array.from(list);
+    const all = Array.from(list);
+    const files = all.filter(isEvidenceFile);
     const ok = files.filter((f) => f.size <= MAX_MB * 1024 * 1024);
-    setError(ok.length < files.length ? `${bnOf(files.length - ok.length)}টি ফাইল ${bnOf(MAX_MB)} MB-এর বেশি — বাদ দেওয়া হয়েছে।` : "");
+    setError(files.length < all.length ? wrongTypeMessage(all.length - files.length) : ok.length < files.length ? `${bnOf(files.length - ok.length)}টি ফাইল ${bnOf(MAX_MB)} MB-এর বেশি — বাদ দেওয়া হয়েছে।` : "");
     onChange([
       ...items,
       ...ok.map((file, i) => ({
@@ -91,7 +93,7 @@ export function EvidenceManager({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <div className="flex-1 text-[10.5px] font-semibold tracking-[0.05em] text-muted">সংযুক্ত প্রমাণ · EVIDENCE</div>
+        <div className="flex-1 text-[10.5px] font-semibold tracking-[0.05em] text-muted">দেওয়া প্রমাণ</div>
         <span className="text-[11px] text-muted">প্রিভিউ দেখতে ক্লিক করুন</span>
       </div>
 
@@ -160,7 +162,7 @@ export function EvidenceManager({
               <input
                 type="file"
                 multiple
-                accept="image/*,video/*,audio/*,application/pdf,.docx"
+                accept={EVIDENCE_ACCEPT}
                 className="sr-only"
                 onChange={(ev) => {
                   addFiles(ev.target.files);
@@ -266,7 +268,7 @@ function PreviewModal({
               </span>
               <div className="text-[15px] font-semibold">{e.thumb}</div>
               <p className="max-w-[420px] text-[12.5px] leading-[1.7] text-muted text-pretty">
-                নমুনা তথ্য — আসল ফাইল সংযুক্ত হলে এখানেই ছবি, নথি, ভিডিও বা অডিও দেখা যাবে।
+                নমুনা তথ্য — আসল ফাইল দেওয়া হলে এখানেই ছবি, কাগজ, ভিডিও বা অডিও দেখা যাবে।
               </p>
             </div>
           )}

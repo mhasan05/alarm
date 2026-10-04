@@ -110,7 +110,7 @@ export function UploadBox({
         <img src={previewUrl} alt={selected ? `Preview of ${selected}` : "Preview"} className="size-full object-cover" />
         <label className="absolute inset-x-0 bottom-0 flex cursor-pointer items-center gap-2 bg-ink/65 px-3 py-2 text-white hover:bg-ink/80">
           <span className="min-w-0 flex-1 truncate text-left text-[11.5px] font-semibold">{selected}</span>
-          <span className="flex-none font-bn text-[11.5px] font-semibold underline underline-offset-2">পরিবর্তন করুন</span>
+          <span className="flex-none font-bn text-[11.5px] font-semibold underline underline-offset-2">বদলান</span>
           {input}
         </label>
         {onRemove && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { CREATED_ACTIVIST } from "@/lib/db/actions";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
 import { SettingsView } from "@/components/settings-view";
@@ -12,7 +13,7 @@ export function PoliticianSettings() {
   if (!P) return <RecordMissing title="প্রোফাইল পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
 
   // Who opened the account — shown by role only, never by name.
-  const creator = db.audit.find((e) => e.action === "Created political activist account" && e.target === P.id)?.actor;
+  const creator = db.audit.find((e) => e.action === CREATED_ACTIVIST && e.target === P.id)?.actor;
   const createdBy = creator && roleOfId(db, creator) === "reviewer" ? "এলাকার নির্বাহী সম্পাদক" : "প্রধান নির্বাহী সম্পাদক";
 
   return (
@@ -21,7 +22,7 @@ export function PoliticianSettings() {
       <SettingsView
         name={P.name}
         role={`${P.post} · ${P.seat}, ${P.thana}`}
-        status={P.account === "Active" ? "সক্রিয় অ্যাকাউন্ট" : "স্থগিত অ্যাকাউন্ট"}
+        status={P.account === "Active" ? "চালু আছে" : "বন্ধ"}
         statusTone={P.account === "Active" ? "success" : "danger"}
         facts={[
           ["ALARM আইডি", alarmIdOf(db, P.id)],
@@ -45,13 +46,13 @@ export function PoliticianSettings() {
             title: "পদ ও এলাকা",
             icon: "office",
             rows: [
-              ["বর্তমান পদ", P.post],
+              ["এখনকার পদ", P.post],
               ["দল / সংগঠন", P.party],
               ["সংসদীয় আসন", P.seat],
               ["বিভাগ · জেলা", `${P.division} · ${P.district}`],
               ["উপজেলা / সিটি কর্পোরেশন", P.upazila],
               ["থানা · ওয়ার্ড", `${P.thana} · ${P.wards}`],
-              ["দায়িত্ব গ্রহণের বছর", P.since],
+              ["দায়িত্ব নেওয়ার বছর", P.since],
             ],
           },
           {
@@ -60,7 +61,7 @@ export function PoliticianSettings() {
             rows: [
               ["ইমেইল", P.email],
               ["ফেসবুক প্রোফাইল", P.facebook],
-              ["কার্যালয়ের ঠিকানা", P.office],
+              ["অফিসের ঠিকানা", P.office],
             ],
           },
           {

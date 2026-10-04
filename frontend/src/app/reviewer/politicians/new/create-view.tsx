@@ -1,5 +1,6 @@
 "use client";
 
+import { allPhones } from "@/lib/db/store";
 import { useState } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
@@ -17,7 +18,7 @@ export function ReviewerCreatePolitician() {
       <div className="flex flex-1 flex-col px-4 pt-[22px] pb-9 sm:px-7">
         {reviewer.areas.length === 0 ? (
           <p className="rounded-card border border-l-[3px] border-line border-l-warning bg-white px-5 py-4 text-[13px] shadow-card">
-            আপনার কোনো দায়িত্বপ্রাপ্ত এলাকা নেই, তাই অ্যাকাউন্ট তৈরি করা যাবে না। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।
+            আপনার দায়িত্বে কোনো এলাকা নেই, তাই অ্যাকাউন্ট তৈরি করা যাবে না। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।
           </p>
         ) : (
           <PoliticianForm
@@ -26,7 +27,7 @@ export function ReviewerCreatePolitician() {
             nextId="KAR-••••••"
             admin={`${reviewer.nameBn} (নির্বাহী সম্পাদক)`}
             adminId={reviewer.id}
-            takenPhones={db.users.map((u) => u.phone)}
+            takenPhones={allPhones()}
             parties={db.parties.map((p) => p.name)}
             allowedAreas={reviewer.areas}
             listHref="/reviewer/profiles"

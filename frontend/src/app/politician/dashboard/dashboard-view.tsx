@@ -13,7 +13,7 @@ export function DashboardView() {
   if (!profile) return <RecordMissing title="প্রোফাইল পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
 
   const stats = [
-    { label: "প্রকাশিত কার্যক্রম", value: summary.accepted, color: "#1A7A4A", note: "নির্বাহী সম্পাদক গ্রহণ করেছেন" },
+    { label: "প্রকাশিত কাজ", value: summary.accepted, color: "#1A7A4A", note: "নির্বাহী সম্পাদক গ্রহণ করেছেন" },
     { label: "ইতিবাচক", value: summary.positive, color: "#1A7A4A", note: "প্রোফাইলে প্রকাশিত" },
     { label: "নেতিবাচক", value: summary.negative, color: "#F42A41", note: "প্রোফাইলে প্রকাশিত" },
   ];
@@ -40,8 +40,8 @@ export function DashboardView() {
 
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-[14.5px] font-semibold leading-[1.6]">প্রোফাইলে প্রকাশিত কার্যক্রম</h2>
-            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">নির্বাহী সম্পাদক গ্রহণ করেছেন এমন তথ্য · প্রধান নির্বাহী সম্পাদক, নির্বাহী সম্পাদক ও দায়িত্বপ্রাপ্ত তদন্ত সম্পাদক দেখতে পান</p>
+            <h2 className="text-[14.5px] font-semibold leading-[1.6]">প্রোফাইলে প্রকাশিত কাজ</h2>
+            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">নির্বাহী সম্পাদক গ্রহণ করেছেন এমন তথ্য · প্রধান নির্বাহী সম্পাদক, নির্বাহী সম্পাদক ও দায়িত্বে থাকা তদন্ত সম্পাদক দেখতে পান</p>
           </div>
 
           {published.length === 0 ? (
@@ -53,9 +53,9 @@ export function DashboardView() {
                 </svg>
               </div>
               <div>
-                <div className="text-[16px] font-semibold leading-[1.6]">এখনও কোনো কার্যক্রম প্রকাশিত হয়নি</div>
+                <div className="text-[16px] font-semibold leading-[1.6]">এখনও কোনো কাজ প্রকাশিত হয়নি</div>
                 <p className="mt-2 max-w-[440px] text-[12.5px] leading-[1.85] text-muted text-pretty">
-                  আপনার প্রোফাইল তৈরি হয়েছে। আপনি নিজের কার্যক্রম যোগ করতে পারেন — নির্বাহী সম্পাদক গ্রহণ করলে এখানে দেখা যাবে।
+                  আপনার প্রোফাইল তৈরি হয়েছে। আপনি নিজের কাজ যোগ করতে পারেন — নির্বাহী সম্পাদক গ্রহণ করলে এখানে দেখা যাবে।
                 </p>
               </div>
               <AddActivityButton className="h-[42px] px-[18px]" />

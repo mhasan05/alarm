@@ -6,6 +6,7 @@
 // every open tab sees who is in the room.
 
 import { locateArea } from "../geo";
+import { toSafeHtml } from "../rich-text";
 import { bn, nowIso } from "./format";
 import { nameBnOf, nextCode, roleOfId, type AccountRole } from "./selectors";
 import { update } from "./store";
@@ -172,14 +173,14 @@ export function identifyForMeeting(db: Database, input: string): IdentifyResult 
   if (!id) return { ok: false, error: "আপনার ALARM আইডি লিখুন — যেমন KAR-123456।" };
   const user = db.users.find((u) => squash(u.id) === id);
   if (!user) return { ok: false, error: "এই আইডি পাওয়া যায়নি। আইডিটি আবার দেখে লিখুন।" };
-  if (user.role === "admin") return { ok: false, needsLogin: true, error: "প্রধান নির্বাহী সম্পাদক হিসেবে মিটিং পরিচালনা করতে লগইন করুন।" };
+  if (user.role === "admin") return { ok: false, needsLogin: true, error: "প্রধান নির্বাহী সম্পাদক হিসেবে মিটিং চালাতে লগইন করুন।" };
   const status =
     user.role === "politician"
       ? db.profiles.find((p) => p.id === user.subjectId)?.account
       : user.role === "staff"
         ? db.staff.find((x) => x.id === user.subjectId)?.status
         : db.reviewers.find((x) => x.id === user.subjectId)?.status;
-  if (status === "Suspended" || status === "Deactivated" || status === undefined) return { ok: false, error: "এই অ্যাকাউন্টটি সক্রিয় নেই। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" };
+  if (status === "Suspended" || status === "Deactivated" || status === undefined) return { ok: false, error: "এই অ্যাকাউন্টটি চালু নেই। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" };
   return { ok: true, identity: { userId: user.id, role: user.role } };
 }
 
@@ -195,6 +196,7 @@ export function createMeeting(input: MeetingInput, actorId: string): Meeting {
     while (codes.has(code)) code = newCode();
     created = {
       ...input,
+      agenda: toSafeHtml(input.agenda),
       id: nextCode(db.meetings.map((m) => m.id), "MTG", 3),
       code,
       createdBy: actorId,
@@ -206,7 +208,7 @@ export function createMeeting(input: MeetingInput, actorId: string): Meeting {
       removed: [],
     };
     db.meetings.unshift(created);
-    log(db, actorId, "Created meeting", created.id);
+    log(db, actorId, "মিটিং তৈরি করেছেন", created.id);
   });
   return created;
 }
@@ -215,8 +217,8 @@ export function updateMeeting(id: string, patch: Partial<MeetingInput>, actorId:
   update((db) => {
     const m = find(db, id);
     if (!m) return;
-    Object.assign(m, patch);
-    log(db, actorId, "Updated meeting", id);
+    Object.assign(m, patch.agenda === undefined ? patch : { ...patch, agenda: toSafeHtml(patch.agenda) });
+    log(db, actorId, "মিটিং আপডেট করেছেন", id);
   });
 }
 
@@ -228,7 +230,7 @@ export function setInvitees(id: string, invitees: string[], actorId: string) {
     // An invitation clears a removal and settles any open request.
     m.removed = m.removed.filter((u) => !invitees.includes(u));
     for (const r of m.requests) if (invitees.includes(r.userId) && r.state === "pending") Object.assign(r, { state: "approved", decidedAt: nowIso(), decidedBy: actorId });
-    log(db, actorId, "Updated meeting invitations", id);
+    log(db, actorId, "মিটিংয়ের আমন্ত্রণ আপডেট করেছেন", id);
   });
 }
 
@@ -238,7 +240,7 @@ export function startMeeting(id: string, actorId: string) {
     if (!m || m.status !== "scheduled") return;
     m.status = "live";
     m.startedAt = nowIso();
-    log(db, actorId, "Started meeting", id);
+    log(db, actorId, "মিটিং শুরু করেছেন", id);
   });
 }
 
@@ -249,7 +251,7 @@ export function endMeeting(id: string, actorId: string) {
     m.status = "ended";
     m.endedAt = nowIso();
     m.presence = [];
-    log(db, actorId, "Ended meeting", id);
+    log(db, actorId, "মিটিং শেষ করেছেন", id);
   });
 }
 
@@ -258,7 +260,7 @@ export function cancelMeeting(id: string, actorId: string) {
     const m = find(db, id);
     if (!m || m.status !== "scheduled") return;
     m.status = "cancelled";
-    log(db, actorId, "Cancelled meeting", id);
+    log(db, actorId, "মিটিং বাতিল করেছেন", id);
   });
 }
 
@@ -269,7 +271,7 @@ export function decideJoin(id: string, userId: string, approve: boolean, actorId
     if (!m || !r) return;
     Object.assign(r, { state: approve ? "approved" : "declined", decidedAt: nowIso(), decidedBy: actorId });
     if (approve) m.removed = m.removed.filter((u) => u !== userId);
-    log(db, actorId, approve ? "Approved meeting join request" : "Declined meeting join request", `${id} · ${userId}`);
+    log(db, actorId, approve ? "মিটিংয়ে যোগ দেওয়ার অনুরোধ মেনে নিয়েছেন" : "মিটিংয়ে যোগ দেওয়ার অনুরোধ ফিরিয়ে দিয়েছেন", `${id} · ${userId}`);
   });
 }
 
@@ -280,7 +282,7 @@ export function removeFromMeeting(id: string, userId: string, actorId: string) {
     if (!m) return;
     m.presence = m.presence.filter((p) => p.userId !== userId);
     if (!m.removed.includes(userId)) m.removed.push(userId);
-    log(db, actorId, "Removed from meeting", `${id} · ${userId}`);
+    log(db, actorId, "মিটিং থেকে সরিয়ে দিয়েছেন", `${id} · ${userId}`);
   });
 }
 
@@ -293,7 +295,7 @@ export function requestJoin(id: string, userId: string, note: string) {
     const existing = m.requests.find((r) => r.userId === userId);
     if (existing) Object.assign(existing, { state: "pending", at: nowIso(), note, decidedAt: undefined, decidedBy: undefined });
     else m.requests.push({ userId, at: nowIso(), note, state: "pending" });
-    log(db, userId, "Asked to join meeting", id);
+    log(db, userId, "মিটিংয়ে যোগ দেওয়ার অনুরোধ করেছেন", id);
   });
 }
 

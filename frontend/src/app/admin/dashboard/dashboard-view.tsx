@@ -1,280 +1,330 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
-import { ChartCard, Meter, StackedDayChart, StatTiles } from "@/components/charts";
-import { bn, daysSince, enRelative } from "@/lib/db/format";
-import { activeReviewersFor, analysisStatus, nameOf, openDisputes, profileOf, roleOfId } from "@/lib/db/selectors";
+import { meetingWhen } from "@/components/meetings/meeting-bits";
+import { bn, bnRelative, daysSince } from "@/lib/db/format";
+import { pendingRequests } from "@/lib/db/meetings";
+import { activeReviewersFor, analysisStatus, nameOf, openDisputes, profileOf, roleOfId, STATE_CHIP } from "@/lib/db/selectors";
+import { plainText } from "@/lib/rich-text";
+import { auditHref } from "@/lib/settings-data";
+import { useNow } from "@/lib/use-client";
 import { useAdmin } from "../use-admin";
 
-type Role = "রাজনৈতিক কর্মী" | "তদন্ত সম্পাদক" | "নির্বাহী সম্পাদক" | "প্রধান নির্বাহী সম্পাদক";
-const ROLE_STYLE: Record<Role, { fg: string; bg: string }> = {
-  "রাজনৈতিক কর্মী": { fg: "#7A3FA8", bg: "rgba(122,63,168,0.12)" },
-  "তদন্ত সম্পাদক": { fg: "#D97706", bg: "rgba(217,119,6,0.12)" },
-  "নির্বাহী সম্পাদক": { fg: "#1D6FC0", bg: "rgba(29,111,192,0.12)" },
-  "প্রধান নির্বাহী সম্পাদক": { fg: "#006A4E", bg: "rgba(0,106,78,0.12)" },
+const ROLE = {
+  admin: { label: "প্রধান নির্বাহী সম্পাদক", color: "#006A4E" },
+  reviewer: { label: "নির্বাহী সম্পাদক", color: "#1D6FC0" },
+  staff: { label: "তদন্ত সম্পাদক", color: "#D97706" },
+  politician: { label: "রাজনৈতিক কর্মী", color: "#7A3FA8" },
+  system: { label: "সিস্টেম", color: "#4A7060" },
+} as const;
+
+const ICON = {
+  inbox: "M2.4 9.6h3.2l1.2 2h2.4l1.2-2h3.2M2.4 9.6 4 3.2h8l1.6 6.4v3.6H2.4z",
+  alert: "M8 1.8 15 14H1zM8 6.2v3.4M8 11.6v.2",
+  spark: "M8 1.6v3M8 11.4v3M1.6 8h3M11.4 8h3M3.5 3.5l2 2M10.5 10.5l2 2M3.5 12.5l2-2M10.5 5.5l2-2",
+  sign: "M3.6 2.4h5.6l3.2 3.2v8H3.6zM9.2 2.6v3.2h3.2M5.6 10.6c1-.9 1.8-.9 2.4 0s1.4.9 2.4 0",
+  person: "M8 7.4a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM3 14c0-2.8 2.2-4.6 5-4.6s5 1.8 5 4.6",
+  plus: "M8 3v10M3 8h10",
+  meeting: "M2.4 4.4h7.2v7.2H2.4zM9.6 7l4-2.4v6.8l-4-2.4",
 };
-const ROLE_BN = { admin: "প্রধান নির্বাহী সম্পাদক", reviewer: "নির্বাহী সম্পাদক", staff: "তদন্ত সম্পাদক", politician: "রাজনৈতিক কর্মী", system: "প্রধান নির্বাহী সম্পাদক" } as const;
 
-const dayKey = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date(iso));
+function Icon({ d, className = "" }: { d: string; className?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+      <path d={d} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
+function Card({ title, sub, action, children, className = "" }: { title: string; sub?: string; action?: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <section className={`overflow-hidden rounded-card border border-line bg-white shadow-card ${className}`}>
+      <div className="flex flex-wrap items-start justify-between gap-2 border-b border-line px-5 py-4">
+        <div>
+          <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
+          {sub && <p className="mt-0.5 text-[12px] leading-[1.6] text-muted">{sub}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** The প্রধান নির্বাহী সম্পাদক's home: what needs doing now, with one tap to each task. */
 export function AdminDashboardView() {
-  const { db } = useAdmin();
-  const today = new Intl.DateTimeFormat("bn-BD", { day: "2-digit", month: "long", year: "numeric", weekday: "long", timeZone: "Asia/Dhaka" })
-    .formatToParts(new Date())
-    .reduce<Record<string, string>>((acc, p) => ({ ...acc, [p.type]: p.value }), {});
-  const dateLine = `${today.day} ${today.month} ${today.year} · ${today.weekday}`;
+  const { db, admin } = useAdmin();
+  const now = useNow(60_000);
 
-  // Everything below is derived from the live records.
   const pendingSubs = db.submissions.filter((s) => s.state === "Pending");
-  const overdueSubs = pendingSubs.filter((s) => daysSince(s.submittedAt) >= 2).length;
+  const overdue = pendingSubs.filter((s) => daysSince(s.submittedAt) >= 2).length;
   const disputes = openDisputes(db).sort((a, b) => a.filedAt.localeCompare(b.filedAt));
   const ready = db.profiles.filter((p) => analysisStatus(db, p.id).ready);
   const awaitingSignOff = db.reports.filter((r) => r.state === "pending");
   const stranded = pendingSubs.filter((s) => activeReviewersFor(db, s.profileId).length === 0);
+  const joinRequests = db.meetings.filter((m) => m.status === "scheduled" || m.status === "live").reduce((n, m) => n + pendingRequests(m).length, 0);
 
-  const DISTRICTS = [...db.profiles.reduce((m, p) => m.set(p.district, (m.get(p.district) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1]);
-  const totalProfiles = db.profiles.length;
-  const maxDistrict = Math.max(1, ...DISTRICTS.map(([, c]) => c));
-  const thinDistricts = DISTRICTS.filter(([, n]) => n === 1).map(([d]) => d);
+  const TODO = [
+    { key: "pending", label: "যাচাই চলছে এমন জমা", count: pendingSubs.length, note: overdue ? `${bn(overdue)}টি ৪৮ ঘণ্টার বেশি পুরনো` : "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়", href: "/admin/submissions?tab=pending", button: "জমাগুলো দেখুন", icon: ICON.inbox, tone: "text-role-reviewer bg-role-reviewer/10" },
+    { key: "disputes", label: "খোলা অভিযোগ", count: disputes.length, note: "আপনার সিদ্ধান্তের অপেক্ষায়", href: "/admin/disputes", button: "অভিযোগের সমাধান করুন", icon: ICON.alert, tone: "text-danger bg-danger/10" },
+    { key: "ready", label: "বিশ্লেষণের জন্য তৈরি", count: ready.length, note: "যাচাইয়ের তালিকা খালি, নতুন গ্রহণ করা তথ্য আছে", href: "/admin/ai-review", button: "বিশ্লেষণ শুরু করুন", icon: ICON.spark, tone: "text-primary bg-primary/10" },
+    { key: "sign", label: "সইয়ের অপেক্ষায় প্রতিবেদন", count: awaitingSignOff.length, note: "নির্বাহী সম্পাদকের অনুমোদন বাকি", href: "/admin/reports?tab=draft", button: "প্রতিবেদন দেখুন", icon: ICON.sign, tone: "text-warning bg-warning/10" },
+  ];
 
-  const now = new Date();
-  const WEEK_SUBMISSIONS: [string, number, number][] = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now.getTime() - (6 - i) * 86_400_000);
-    const key = dayKey(d.toISOString());
-    const onDay = db.submissions.filter((s) => dayKey(s.submittedAt) === key);
-    const label = i === 6 ? "আজ" : new Intl.DateTimeFormat("bn-BD", { weekday: "short", timeZone: "Asia/Dhaka" }).format(d);
-    return [label, onDay.filter((s) => s.category === "ইতিবাচক").length, onDay.filter((s) => s.category === "নেতিবাচক").length];
-  });
-  const wPos = WEEK_SUBMISSIONS.reduce((n, d) => n + d[1], 0);
-  const wNeg = WEEK_SUBMISSIONS.reduce((n, d) => n + d[2], 0);
-
-  const PIPELINE: { title: string; role: Role; count: number; unit: string; href: string | null }[] = [
-    { title: "মাঠে সংগ্রহ", role: "তদন্ত সম্পাদক", count: db.assignments.filter((a) => a.open).length, unit: "চলমান কাজ", href: "/admin/field-staff" },
-    { title: "পর্যালোচনা", role: "নির্বাহী সম্পাদক", count: pendingSubs.length, unit: "অপেক্ষমাণ", href: "/admin/reviewers" },
-    { title: "অভিযোগ নিষ্পত্তি", role: "প্রধান নির্বাহী সম্পাদক", count: disputes.length, unit: "খোলা", href: "/admin/disputes" },
-    { title: "এআই বিশ্লেষণ", role: "প্রধান নির্বাহী সম্পাদক", count: ready.length, unit: "প্রস্তুত", href: "/admin/ai-review" },
-    { title: "প্রতিবেদন অনুমোদন", role: "নির্বাহী সম্পাদক", count: awaitingSignOff.length, unit: "অপেক্ষমাণ", href: "/admin/reports?tab=draft" },
+  const QUICK = [
+    { label: "নতুন রাজনৈতিক কর্মী", href: "/admin/politicians/new", icon: ICON.person },
+    { label: "নতুন তদন্ত সম্পাদক", href: "/admin/field-staff/new", icon: ICON.person },
+    { label: "নতুন নির্বাহী সম্পাদক", href: "/admin/reviewers/new", icon: ICON.person },
+    { label: "নতুন মিটিং", href: "/admin/meetings/new", icon: ICON.meeting },
   ];
 
   const ACTIONS: { stage: string; title: string; detail: string; urgency: string; urgent: boolean; href: string }[] = [
     ...stranded.slice(0, 1).map((s) => ({
-      stage: "পর্যালোচনা",
-      title: `${bn(stranded.length)}টি জমার কোনো সক্রিয় নির্বাহী সম্পাদক নেই`,
-      detail: `${profileOf(db, s.profileId)?.district ?? ""} এলাকার নির্বাহী সম্পাদক অনুপস্থিত — কাউকে এলাকাটির দায়িত্ব দিন।`,
+      stage: "যাচাই",
+      title: `${bn(stranded.length)}টি জমার জন্য কোনো চালু নির্বাহী সম্পাদক নেই`,
+      detail: `${profileOf(db, s.profileId)?.district ?? ""} এলাকায় কোনো নির্বাহী সম্পাদক নেই — কাউকে এই এলাকার দায়িত্ব দিন।`,
       urgency: "জরুরি",
       urgent: true,
       href: "/admin/settings?tab=coverage",
     })),
     ...disputes.map((d) => ({
-      stage: "অভিযোগ নিষ্পত্তি",
+      stage: "অভিযোগ",
       title: `${d.code} · ${profileOf(db, d.profileId)?.name} — ${d.reason}`,
-      detail: d.claim,
-      urgency: `${bn(daysSince(d.filedAt))} দিন খোলা`,
+      detail: plainText(d.claim),
+      urgency: daysSince(d.filedAt) === 0 ? "আজ জমা" : `${bn(daysSince(d.filedAt))} দিন খোলা`,
       urgent: daysSince(d.filedAt) >= 2,
-      href: "/admin/disputes",
+      href: `/admin/disputes/${d.code}`,
     })),
     ...ready.map((p) => ({
       stage: "এআই বিশ্লেষণ",
-      title: `${p.name} — সারি খালি, বিশ্লেষণ শুরু করা যাবে`,
-      detail: `${bn(analysisStatus(db, p.id).accepted)}টি জমা গৃহীত হয়েছে এবং পর্যালোচনার সারিতে কিছু বাকি নেই।`,
-      urgency: "প্রস্তুত",
+      title: `${p.name} — বিশ্লেষণ শুরু করা যাবে`,
+      detail: `${bn(analysisStatus(db, p.id).accepted)}টি জমা গ্রহণ হয়েছে, যাচাইয়ের তালিকায় কিছু বাকি নেই।`,
+      urgency: "তৈরি",
       urgent: false,
       href: `/admin/ai-review?profile=${p.id}`,
     })),
     ...awaitingSignOff.map((r) => ({
       stage: "প্রতিবেদন",
-      title: `${r.code} · ${r.subject.name} — নির্বাহী সম্পাদকের স্বাক্ষরের অপেক্ষায়`,
+      title: `${r.code} · ${r.subject.name} — নির্বাহী সম্পাদকের সইয়ের অপেক্ষায়`,
       detail: `${nameOf(db, r.reviewerId)} অনুমোদন দিলে প্রতিবেদনটি শেয়ার ও ডাউনলোড করা যাবে।`,
-      urgency: "অপেক্ষমাণ",
+      urgency: "অপেক্ষায়",
       urgent: false,
       href: `/admin/reports/${r.code}`,
     })),
+    ...(joinRequests
+      ? [{ stage: "মিটিং", title: `${bn(joinRequests)}টি মিটিংয়ে যোগ দেওয়ার অনুরোধ`, detail: "এলাকার বাইরের কেউ যোগ দিতে চেয়েছেন — অনুমতি দিন বা না করুন।", urgency: "অপেক্ষায়", urgent: false, href: "/admin/meetings" }]
+      : []),
   ];
-  const urgent = ACTIONS.filter((a) => a.urgent).length;
 
-  const ACTIVITY = db.audit.slice(0, 6).map((a) => {
-    const role = ROLE_BN[roleOfId(db, a.actor)] as Role;
-    return { role, text: `${nameOf(db, a.actor)} — ${a.action} · ${a.target}`, time: enRelative(a.at) };
-  });
+  const recent = [...db.submissions].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)).slice(0, 5);
+  const upcoming = db.meetings
+    .filter((m) => m.status === "live" || (m.status === "scheduled" && (!now || new Date(m.scheduledAt).getTime() >= now - 3_600_000)))
+    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
+    .slice(0, 3);
+  const activity = db.audit.slice(0, 6);
 
-  const ADMIN_STATS = {
-    openAssignments: db.assignments.filter((a) => a.open).length,
-    underReview: pendingSubs.length,
-    overdueReview: overdueSubs,
-    openDisputes: disputes.length,
-  };
-
-  const stats = [
-    { label: "নিবন্ধিত প্রোফাইল", value: totalProfiles, color: "#0D1F17", note: `সক্রিয় অ্যাকাউন্ট · ${bn(DISTRICTS.length)}টি জেলায়`, href: "/admin/politicians" },
-    { label: "চলমান মাঠ কাজ", value: ADMIN_STATS.openAssignments, color: "#D97706", note: "তদন্ত সম্পাদকদের চলমান সংগ্রহ", href: "/admin/field-staff" },
-    { label: "পর্যালোচনাধীন জমা", value: ADMIN_STATS.underReview, color: "#1D6FC0", note: `${bn(ADMIN_STATS.overdueReview)}টি ৪৮ ঘণ্টার বেশি`, href: "/admin/reviewers" },
-    { label: "খোলা অভিযোগ", value: ADMIN_STATS.openDisputes, color: "#F42A41", note: "আপনার সিদ্ধান্তের অপেক্ষায়", href: "/admin/disputes" },
+  const accounts = [
+    { label: "রাজনৈতিক কর্মী", value: db.profiles.filter((p) => p.account === "Active").length, href: "/admin/politicians" },
+    { label: "তদন্ত সম্পাদক", value: db.staff.filter((x) => x.status !== "Deactivated" && x.status !== "Suspended").length, href: "/admin/field-staff" },
+    { label: "নির্বাহী সম্পাদক", value: db.reviewers.filter((r) => r.status === "Active").length, href: "/admin/reviewers" },
+    { label: "চলতি মাঠের কাজ", value: db.assignments.filter((a) => a.open).length, href: "/admin/field-staff" },
   ];
+
+  const hour = now ? Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: "Asia/Dhaka" }).format(new Date(now))) : 10;
+  const greeting = hour < 12 ? "শুভ সকাল" : hour < 17 ? "শুভ বিকাল" : "শুভ সন্ধ্যা";
+  const dateLine = now ? new Intl.DateTimeFormat("bn-BD", { day: "numeric", month: "long", year: "numeric", weekday: "long", timeZone: "Asia/Dhaka" }).format(new Date(now)) : "";
+  const total = TODO.reduce((n, t) => n + t.count, 0);
 
   return (
     <>
-      <PageHeader
-        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / ড্যাশবোর্ড"
-        title="সিস্টেম সারসংক্ষেপ"
-        action={
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-[12px] text-muted">{dateLine}</span>
-            <Link
-              href="/admin/politicians"
-              className="inline-flex h-[38px] items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover"
-            >
-              প্রোফাইল তালিকা
-            </Link>
-          </div>
-        }
-      />
+      <PageHeader crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / ড্যাশবোর্ড" title="ড্যাশবোর্ড" />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
-        <StatTiles stats={stats} linkAs={Link} />
-
-        {/* Workflow pipeline */}
-        <section className="rounded-card border border-line bg-white px-[22px] py-5 shadow-card">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h2 className="text-[14.5px] font-semibold leading-[1.6]">কাজের প্রবাহ</h2>
-            <p className="min-w-[180px] flex-1 text-[12px] leading-[1.65] text-muted text-pretty">প্রতিটি ধাপে এখন কতটি কাজ আছে এবং কে সেটির দায়িত্বে</p>
-          </div>
-          <ol className="mt-4 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap">
-            {PIPELINE.map((p, i) => {
-              const role = ROLE_STYLE[p.role];
-              const dot = p.role === "প্রধান নির্বাহী সম্পাদক" ? "#006A4E" : role.fg;
-              const body = (
-                <>
-                  <div className="flex items-center gap-[9px]">
-                    <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[11px] font-bold text-white" style={{ background: dot }}>
-                      {bn(i + 1)}
-                    </span>
-                    <span className="whitespace-nowrap rounded-input px-[7px] py-0.5 text-[9.5px] font-semibold tracking-[0.05em]" style={{ color: role.fg, background: role.bg }}>
-                      {p.role}
-                    </span>
-                  </div>
-                  <div className="mt-2.5 text-[12.5px] font-semibold leading-[1.55] text-pretty">{p.title}</div>
-                  <div className="mt-2 flex items-baseline gap-1.5">
-                    <span className="text-[20px] font-bold leading-none" style={{ color: dot }}>
-                      {bn(p.count)}
-                    </span>
-                    <span className="text-[11px] text-muted">{p.unit}</span>
-                  </div>
-                </>
-              );
-              return (
-                <li key={p.title} className="flex min-w-0 items-stretch gap-2.5 sm:flex-[1_1_190px]">
-                  {p.href ? (
-                    <Link href={p.href} className="block min-w-0 flex-1 rounded-card border border-line bg-white p-3.5 text-ink hover:border-primary">
-                      {body}
-                    </Link>
-                  ) : (
-                    <div className="min-w-0 flex-1 rounded-card border border-line bg-white p-3.5" title="নির্বাহী সম্পাদক পোর্টালে পরিচালিত হয়">
-                      {body}
-                    </div>
-                  )}
-                  {i < PIPELINE.length - 1 && (
-                    <span aria-hidden="true" className="hidden flex-none self-center text-[13px] text-line sm:inline">
-                      ›
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+        {/* Greeting */}
+        <section className="rounded-card border border-line bg-white px-5 py-5 shadow-card sm:px-6">
+          <p className="text-[12.5px] text-muted">{dateLine}</p>
+          <h2 className="mt-1 text-[20px] font-semibold leading-[1.5] text-ink">
+            {greeting}, {admin?.nameBn ?? admin?.name}
+          </h2>
+          <p className="mt-1 text-[13.5px] leading-[1.7] text-muted">
+            {total ? `আজ আপনার মোট ${bn(total)}টি কাজ বাকি আছে। নিচের যেকোনো কার্ডে চাপ দিয়ে কাজটি শুরু করুন।` : "এই মুহূর্তে কোনো কাজ বাকি নেই। নতুন কিছু এলে এখানে দেখাবে।"}
+          </p>
         </section>
 
-        <div className="flex flex-wrap items-stretch gap-5">
-          <ChartCard title="গত ৭ দিনে জমা" sub="তদন্ত সম্পাদক ও রাজনৈতিক কর্মীর জমা, শ্রেণি অনুযায়ী" className="flex-[2_1_420px]">
-            <StackedDayChart
-              caption="গত ৭ দিনে জমা"
-              days={WEEK_SUBMISSIONS}
-              height={130}
-              base={{ label: "ইতিবাচক", color: "#006A4E" }}
-              top={{ label: "নেতিবাচক", color: "#F42A41" }}
-              footnote={`মোট ${bn(wPos + wNeg)}টি জমা · ${bn(wPos)} ইতিবাচক, ${bn(wNeg)} নেতিবাচক`}
-            />
-          </ChartCard>
+        {/* What needs doing */}
+        <section aria-labelledby="todo-h">
+          <h2 id="todo-h" className="mb-3 text-[15px] font-semibold text-ink">
+            এখন যা করতে হবে
+          </h2>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {TODO.map((t) => (
+              <li key={t.key}>
+                <Link href={t.href} className="group flex h-full flex-col rounded-card border border-line bg-white p-4 shadow-card hover:border-primary">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`flex size-9 items-center justify-center rounded-lg ${t.tone}`}>
+                      <Icon d={t.icon} />
+                    </span>
+                    <span className={`text-[28px] font-bold leading-none ${t.count ? "text-ink" : "text-muted/60"}`}>{bn(t.count)}</span>
+                  </div>
+                  <div className="mt-3 text-[14px] font-semibold text-ink">{t.label}</div>
+                  <div className="mt-0.5 flex-1 text-[12px] leading-[1.6] text-muted">{t.count ? t.note : "কিছু বাকি নেই"}</div>
+                  <span className="mt-3 text-[12.5px] font-semibold text-primary group-hover:text-primary-hover">{t.button} →</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-          <ChartCard title="এলাকাভিত্তিক প্রোফাইল" sub="কোন জেলায় কতটি নিবন্ধিত প্রোফাইল" className="flex-[1_1_260px]">
-            <ul className="mt-[18px] flex flex-col gap-[13px]">
-              {DISTRICTS.map(([name, n]) => (
-                <Meter key={name} label={name} value={`${bn(n)}টি প্রোফাইল`} pct={(n / maxDistrict) * 100} color={n >= 5 ? "#006A4E" : n >= 3 ? "#1A7A4A" : "#D97706"} />
-              ))}
-            </ul>
-            <div className="flex-1" />
-            <p className="mt-4 border-t border-[#E3EEEA] pt-3.5 text-[11.5px] leading-[1.7] text-muted text-pretty">
-              {thinDistricts.length ? `${thinDistricts.join(", ")} — এই জেলাগুলোতে একজন করে রাজনৈতিক কর্মী নিবন্ধিত।` : "প্রতিটি জেলায় একাধিক রাজনৈতিক কর্মী নিবন্ধিত।"}
-            </p>
-          </ChartCard>
-        </div>
+        {/* Quick actions */}
+        <section aria-labelledby="quick-h" className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
+          <h2 id="quick-h" className="text-[15px] font-semibold text-ink">
+            দ্রুত কাজ
+          </h2>
+          <div className="mt-3 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+            {QUICK.map((q) => (
+              <Link key={q.href} href={q.href} className="flex min-h-[52px] items-center gap-2.5 rounded-button border border-line bg-surface/60 px-3 text-[13px] font-semibold text-ink hover:border-primary hover:bg-white hover:text-primary">
+                <span className="flex size-7 flex-none items-center justify-center rounded-full bg-primary text-white">
+                  <Icon d={ICON.plus} className="size-3.5" />
+                </span>
+                <span className="leading-[1.35]">{q.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        <div className="flex flex-wrap items-start gap-5">
-          <section className="min-w-0 flex-[3_1_480px] overflow-hidden rounded-card border border-line bg-white shadow-card">
-            <div className="border-b border-line px-5 py-4">
-              <h2 className="text-[14.5px] font-semibold leading-[1.6]">আপনার সিদ্ধান্তের অপেক্ষায়</h2>
-              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                {bn(urgent)}টি কাজ অগ্রাধিকার পাওয়ার যোগ্য · বাকিগুলো পরবর্তী ধাপে যাওয়ার জন্য প্রস্তুত
-              </p>
-            </div>
-            {ACTIONS.length === 0 ? (
-              <p className="px-5 py-10 text-center text-[13px] text-muted">এই মুহূর্তে আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই।</p>
-            ) : (
-              <ul className="grid gap-3 px-[18px] pt-4 pb-[18px] 2xl:grid-cols-2">
-                {ACTIONS.map((a) => (
-                  <li key={a.stage + a.title}>
-                    <Link
-                      href={a.href}
-                      className="block rounded-card border border-l-[3px] border-line p-[15px] text-ink hover:border-primary hover:bg-[#FAFDFC]"
-                      style={{ borderLeftColor: a.urgent ? "#F42A41" : "#1A7A4A" }}
-                    >
-                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
-                        <span className="whitespace-nowrap rounded-input bg-primary/12 px-2 py-0.5 text-[9.5px] font-semibold tracking-[0.05em] text-primary">
-                          {a.stage}
-                        </span>
-                        <span className="min-w-2.5 flex-1" />
-                        <span
-                          className={`inline-flex items-center gap-[5px] whitespace-nowrap rounded-input px-[9px] py-[3px] text-[11px] font-semibold ${
-                            a.urgent ? "bg-danger/10 text-danger" : "bg-success/10 text-success"
-                          }`}
-                        >
-                          <span className={`size-[5px] rounded-full ${a.urgent ? "bg-danger" : "bg-success"}`} />
-                          {a.urgency}
-                        </span>
-                      </div>
-                      <div className="mt-2.5 text-[13.5px] font-semibold leading-[1.65] text-pretty">{a.title}</div>
-                      <div className="mt-1.5 text-[12px] leading-[1.65] text-muted text-pretty">{a.detail}</div>
+        <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <Card title="আপনার সিদ্ধান্তের অপেক্ষায়" sub={ACTIONS.length ? "জরুরি কাজগুলোতে লাল দাগ দেওয়া" : undefined}>
+              {ACTIONS.length === 0 ? (
+                <p className="px-5 py-10 text-center text-[13px] text-muted">এই মুহূর্তে আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই।</p>
+              ) : (
+                <ul className="flex flex-col gap-3 p-4">
+                  {ACTIONS.map((a) => (
+                    <li key={a.stage + a.title}>
+                      <Link href={a.href} className="block rounded-card border border-l-[3px] border-line p-[15px] text-ink hover:border-primary hover:bg-[#FAFDFC]" style={{ borderLeftColor: a.urgent ? "#F42A41" : "#1A7A4A" }}>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-input bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{a.stage}</span>
+                          <span className="flex-1" />
+                          <span className={`rounded-input px-2 py-0.5 text-[11.5px] font-semibold ${a.urgent ? "bg-danger/10 text-danger" : "bg-success/10 text-success"}`}>{a.urgency}</span>
+                        </div>
+                        <div className="mt-2 text-[13.5px] font-semibold leading-[1.65] text-pretty">{a.title}</div>
+                        <div className="mt-1 line-clamp-2 text-[12px] leading-[1.65] text-muted">{a.detail}</div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card
+              title="নতুন জমা"
+              sub="তদন্ত সম্পাদক ও রাজনৈতিক কর্মীর সবশেষ জমা — যেকোনোটি এডিট করতে পারবেন"
+              action={
+                <Link href="/admin/submissions" className="text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+                  সব জমা →
+                </Link>
+              }
+            >
+              <ul>
+                {recent.map((s) => (
+                  <li key={s.code} className="relative flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-5 py-3.5 last:border-b-0 hover:bg-surface/60">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/admin/submissions/${s.code}`} className="block truncate text-[13.5px] font-semibold text-ink after:absolute after:inset-0 after:content-[''] hover:text-primary">
+                        {s.title}
+                      </Link>
+                      <p className="mt-0.5 text-[12px] text-muted">
+                        {s.code} · {s.origin === "self" ? "রাজনৈতিক কর্মী (নিজে)" : nameOf(db, s.staffId ?? "")} · {bnRelative(s.submittedAt)}
+                      </p>
+                    </div>
+                    <span className={`rounded-md px-1.5 py-0.5 text-[11.5px] font-medium ${STATE_CHIP[s.state].cls}`}>{STATE_CHIP[s.state].label}</span>
+                    <Link href={`/admin/submissions/${s.code}?edit=1`} className="relative z-10 inline-flex h-8 items-center rounded-button border border-line px-3 text-[12.5px] font-semibold text-primary hover:border-primary">
+                      এডিট
                     </Link>
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </Card>
+          </div>
 
-          <section className="min-w-0 flex-[2_1_300px] overflow-hidden rounded-card border border-line bg-white shadow-card">
-            <div className="px-[18px] pt-4 pb-3">
-              <h2 className="text-[14.5px] font-semibold leading-[1.6]">সাম্প্রতিক কার্যকলাপ</h2>
-              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted">সব ভূমিকার কাজ · অডিট লগ থেকে</p>
-            </div>
-            <ul className="flex flex-col px-[18px] pb-1.5">
-              {ACTIVITY.map((ev) => (
-                <li key={ev.text + ev.time} className="flex gap-[11px] border-t border-[#E3EEEA] py-[11px]">
-                  <span className="mt-1.5 size-2 flex-none rounded-full" style={{ background: ROLE_STYLE[ev.role].fg }} aria-hidden="true" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12.5px] leading-[1.7] text-pretty">{ev.text}</p>
-                    <p className="mt-[3px] text-[11px] text-muted">
-                      {ev.role} · {ev.time}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="border-t border-[#E3EEEA] px-[18px] pt-[11px] pb-[15px]">
-              <Link href="/admin/settings?tab=audit" className="text-[12.5px] font-semibold text-primary hover:text-primary-hover">
-                সম্পূর্ণ অডিট লগ দেখুন →
-              </Link>
-            </div>
-          </section>
+          <div className="flex min-w-0 flex-col gap-5">
+            <Card title="অ্যাকাউন্ট ও মাঠের কাজ">
+              <ul className="grid grid-cols-2">
+                {accounts.map((a, i) => (
+                  <li key={a.label} className={`${i % 2 === 0 ? "border-r" : ""} ${i < 2 ? "border-b" : ""} border-line`}>
+                    <Link href={a.href} className="block px-5 py-4 hover:bg-surface/60">
+                      <div className="text-[22px] font-bold leading-none text-ink">{bn(a.value)}</div>
+                      <div className="mt-1.5 text-[12.5px] text-muted">{a.label}</div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card
+              title="সামনের মিটিং"
+              action={
+                <Link href="/admin/meetings" className="text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+                  সব মিটিং →
+                </Link>
+              }
+            >
+              {upcoming.length === 0 ? (
+                <p className="px-5 py-8 text-center text-[13px] text-muted">সামনে কোনো মিটিং নেই।</p>
+              ) : (
+                <ul>
+                  {upcoming.map((m) => (
+                    <li key={m.id} className="border-b border-line last:border-b-0">
+                      <Link href={`/admin/meetings/${m.id}`} className="block px-5 py-3.5 hover:bg-surface/60">
+                        <div className="text-[13.5px] font-semibold text-ink">{m.title}</div>
+                        <div className="mt-0.5 text-[12px] text-muted">
+                          {m.status === "live" ? "এখন চলছে" : meetingWhen(m)}
+                          {pendingRequests(m).length > 0 && ` · ${bn(pendingRequests(m).length)}টি যোগ দেওয়ার অনুরোধ`}
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card
+              title="সবশেষ কাজ"
+              action={
+                <Link href="/admin/settings?tab=audit" className="text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+                  অডিট লগ →
+                </Link>
+              }
+            >
+              <ul className="px-5">
+                {activity.map((a, i) => {
+                  const role = ROLE[roleOfId(db, a.actor)];
+                  const href = auditHref(a.target, db);
+                  return (
+                    <li key={`${a.at}-${i}`} className={`flex gap-[11px] border-b border-line py-3 last:border-b-0 ${href ? "relative cursor-pointer hover:bg-surface/60" : ""}`}>
+                      <span className="mt-[7px] size-2 flex-none rounded-full" style={{ background: role.color }} aria-hidden="true" />
+                      <div className="min-w-0">
+                        <p className="text-[12.5px] leading-[1.7] text-ink">
+                          <span className="font-semibold">{nameOf(db, a.actor)}</span> {a.action} ·{" "}
+                          {href ? (
+                            <Link href={href} className="after:absolute after:inset-0 after:content-[''] hover:text-primary">
+                              {a.target}
+                            </Link>
+                          ) : (
+                            a.target
+                          )}
+                        </p>
+                        <p className="mt-0.5 text-[11.5px] text-muted">
+                          {role.label} · {bnRelative(a.at)}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          </div>
         </div>
       </div>
     </>

@@ -54,9 +54,9 @@ export function SignReportView({ code }: { code: string }) {
               if (ok) signReport(report.code, reviewer.id, remark);
             }}
           >
-            <h2 className="text-[14.5px] font-semibold">নির্বাহী সম্পাদকের মন্তব্য ও স্বাক্ষর</h2>
+            <h2 className="text-[14.5px] font-semibold">নির্বাহী সম্পাদকের মন্তব্য ও সই</h2>
             <p className="mt-0.5 text-[12px] leading-relaxed text-muted text-pretty">
-              প্রতিবেদনটি পড়ে দেখুন। আপনার মন্তব্য প্রতিবেদনের ০৫ নম্বর অনুচ্ছেদে ছাপা হবে; স্বাক্ষরের পর প্রধান নির্বাহী সম্পাদক এটি শেয়ার ও ডাউনলোড করতে পারবেন।
+              প্রতিবেদনটি পড়ে দেখুন। আপনার মন্তব্য প্রতিবেদনের ০৫ নম্বর অংশে ছাপা হবে; সই করার পর প্রধান নির্বাহী সম্পাদক এটি শেয়ার ও ডাউনলোড করতে পারবেন।
             </p>
             {report.adminNote && <p className="mt-2 rounded-button bg-surface px-3 py-2 text-[12px] text-ink">প্রধান নির্বাহী সম্পাদকের নোট: {report.adminNote}</p>}
             <label htmlFor="rv-remark" className="mt-3 block text-[12.5px] font-semibold">
@@ -68,24 +68,24 @@ export function SignReportView({ code }: { code: string }) {
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               aria-invalid={attempted && !ok}
-              placeholder="প্রমাণের মান, ব্যক্তিকে জবাবের সুযোগ দেওয়া হয়েছিল কি না, এবং কোনো সীমাবদ্ধতা থাকলে তা লিখুন।"
+              placeholder="প্রমাণ কতটা ভালো, ব্যক্তিকে জবাব দেওয়ার সুযোগ দেওয়া হয়েছিল কি না, আর কোনো ঘাটতি থাকলে তা লিখুন।"
               className={`${inputClass} mt-1.5 h-auto resize-y py-2.5 font-bn ${attempted && !ok ? "border-danger!" : ""}`}
             />
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <p className={`min-w-[200px] flex-1 text-[11.5px] ${attempted && !ok ? "text-danger" : "text-muted"}`}>
-                {attempted && !ok ? "মন্তব্য আরও বিস্তারিত লিখুন — কমপক্ষে কয়েকটি বাক্য।" : "স্বাক্ষরের পর প্রতিবেদনটি চূড়ান্ত হবে এবং অডিট লগে সংরক্ষিত থাকবে।"}
+                {attempted && !ok ? "মন্তব্য আরও বিস্তারিত লিখুন — অন্তত কয়েকটি বাক্য।" : "সই করার পর প্রতিবেদনটি চূড়ান্ত হবে এবং অডিট লগে লেখা থাকবে।"}
               </p>
               <Link href="/reviewer/reports" className="px-2 text-[13px] font-semibold text-muted hover:text-ink">
                 পরে করব
               </Link>
               <button type="submit" className="h-10 cursor-pointer rounded-button bg-primary px-5 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-                অনুমোদন ও স্বাক্ষর দিন
+                অনুমোদন দিয়ে সই করুন
               </button>
             </div>
           </form>
         ) : (
           <p role="status" className="rounded-card border border-l-[3px] border-line border-l-success bg-white px-5 py-3.5 text-[13px] text-ink shadow-card">
-            আপনি {report.approval ? bnDate(report.approval.at) : ""} তারিখে এই প্রতিবেদনে স্বাক্ষর দিয়েছেন · স্বাক্ষর আইডি {report.approval?.signature}
+            আপনি {report.approval ? bnDate(report.approval.at) : ""} তারিখে এই প্রতিবেদনে সই করেছেন · সই আইডি {report.approval?.signature}
           </p>
         )}
 

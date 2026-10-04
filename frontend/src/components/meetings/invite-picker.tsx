@@ -65,7 +65,7 @@ export function InvitePicker({ db, value, onChange, invalid }: { db: Database; v
           <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="নাম, আইডি বা এলাকা দিয়ে খুঁজুন" className="min-w-0 flex-1 bg-transparent font-bn text-[13px] outline-none" />
         </label>
         <button type="button" onClick={toggleAll} disabled={!shown.length} className="h-9 flex-none cursor-pointer rounded-button border border-line px-3 font-bn text-[12px] font-semibold text-primary hover:border-primary disabled:opacity-50">
-          {allOn ? "সব বাদ দিন" : "সবাইকে নির্বাচন"}
+          {allOn ? "সব বাদ দিন" : "সবাইকে বাছুন"}
         </button>
       </div>
       <ul className="max-h-[300px] overflow-y-auto">

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
+import { versionDate } from "@/components/report-document";
+import { bn } from "@/lib/db/format";
 import { profileOf } from "@/lib/db/selectors";
 import { useAdmin } from "../use-admin";
 import { ReportsView, type ReportRow, type Tab } from "./reports-view";
@@ -17,7 +19,7 @@ export function ReportsPage({ initialTab }: { initialTab: Tab }) {
         code: r.code,
         v: v.v,
         latest: i === 0,
-        date: v.date,
+        date: versionDate(v.date),
         name: r.subject.name,
         profileId: r.profileId,
         meta: p ? `${p.post} · ${p.seat}, ${p.thana}` : "",
@@ -36,15 +38,15 @@ export function ReportsPage({ initialTab }: { initialTab: Tab }) {
         crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / প্রতিবেদন"
         title={
           <>
-            Reports · <span className="font-bn">প্রতিবেদন</span>
+            <span className="font-bn">প্রতিবেদন</span>
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {db.reports.length} current reports · {rows.length} versions in total · {drafts} awaiting sign-off
+              এখন প্রতিবেদন {bn(db.reports.length)}টি · মোট ভার্সন {bn(rows.length)}টি · অনুমোদনের অপেক্ষায় {bn(drafts)}টি
             </span>
           </>
         }
         action={
           <Link href="/admin/ai-review" className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-            Run an analysis
+            বিশ্লেষণ চালান
           </Link>
         }
       />

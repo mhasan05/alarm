@@ -7,10 +7,12 @@ import { AreaPicker, areaFromGeo } from "@/components/meetings/area-picker";
 import { InvitePicker } from "@/components/meetings/invite-picker";
 import { MeetingStatusChip, ShareLink, meetingWhen } from "@/components/meetings/meeting-bits";
 import { RecordMissing } from "@/components/record-missing";
+import { RichText } from "@/components/rich-text";
 import { bn, bnDate, bnTime } from "@/lib/db/format";
 import { activePresence, areaLabel, areaMembers, cancelMeeting, decideJoin, endMeeting, meetingById, pendingRequests, roleLabel, setInvitees, updateMeeting } from "@/lib/db/meetings";
 import { alarmIdOf, nameBnOf } from "@/lib/db/selectors";
 import type { Database, Meeting } from "@/lib/db/types";
+import { plainText } from "@/lib/rich-text";
 import { useNow } from "@/lib/use-client";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
 import { useAdmin } from "../../use-admin";
@@ -103,12 +105,12 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
                               অনুমোদন
                             </button>
                             <button type="button" onClick={() => decideJoin(m.id, r.userId, false, adminId)} className="h-8 cursor-pointer rounded-button border border-danger/50 px-3 text-[12px] font-semibold text-danger hover:bg-danger/5">
-                              প্রত্যাখ্যান
+                              ফিরিয়ে দিন
                             </button>
                           </div>
                         ) : (
                           <span className={`flex-none rounded-input px-2.5 py-1 text-[11.5px] font-semibold ${r.state === "approved" ? "bg-success/10 text-success" : r.state === "declined" ? "bg-danger/10 text-danger" : "bg-surface text-muted"}`}>
-                            {r.state === "approved" ? "অনুমোদিত" : r.state === "declined" ? "প্রত্যাখ্যাত" : "অপেক্ষমাণ"}
+                            {r.state === "approved" ? "অনুমোদিত" : r.state === "declined" ? "ফিরিয়ে দেওয়া হয়েছে" : "অপেক্ষায়"}
                           </span>
                         )}
                       </li>
@@ -136,7 +138,7 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
                     }}
                     className="h-8 cursor-pointer rounded-button border border-line px-3 text-[12px] font-semibold text-primary hover:border-primary"
                   >
-                    আমন্ত্রণ সম্পাদনা
+                    আমন্ত্রণ এডিট
                   </button>
                 )}
               </div>
@@ -156,7 +158,7 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
                       }}
                       className="h-9 cursor-pointer rounded-button bg-primary px-4 text-[12.5px] font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      সংরক্ষণ করুন
+                      সেভ করুন
                     </button>
                   </div>
                 </div>
@@ -197,7 +199,7 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
                   ["আইডি", m.id],
                   ...(m.startedAt ? [["শুরু", `${bnDate(m.startedAt)} ${bnTime(m.startedAt)}`]] : []),
                   ...(m.endedAt ? [["শেষ", `${bnDate(m.endedAt)} ${bnTime(m.endedAt)}`]] : []),
-                  ...(m.status === "ended" ? [["অংশগ্রহণ", `${bn(m.attended.length)} জন`]] : []),
+                  ...(m.status === "ended" ? [["যোগ দিয়েছেন", `${bn(m.attended.length)} জন`]] : []),
                 ].map(([k, v]) => (
                   <div key={k} className="flex items-baseline justify-between gap-3 border-b border-line/70 py-2.5 last:border-b-0">
                     <dt className="text-[12px] text-muted">{k}</dt>
@@ -205,19 +207,23 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
                   </div>
                 ))}
               </dl>
-              {late && <p className="mx-5 mb-4 rounded-input bg-warning/10 px-3 py-2 text-[12px] text-warning">নির্ধারিত সময় পেরিয়েছে — শুরু করলে সবাই যোগ দিতে পারবেন।</p>}
+              {late && <p className="mx-5 mb-4 rounded-input bg-warning/10 px-3 py-2 text-[12px] text-warning">ঠিক করা সময় পেরিয়ে গেছে — শুরু করলে সবাই যোগ দিতে পারবেন।</p>}
               {open && !editingArea && (
                 <div className="border-t border-line px-5 py-3">
                   <button type="button" onClick={() => setEditingArea(true)} className="h-8 cursor-pointer rounded-button border border-line px-3 text-[12px] font-semibold text-primary hover:border-primary">
-                    এলাকা পরিবর্তন
+                    এলাকা বদলান
                   </button>
                 </div>
               )}
             </section>
 
             <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
-              <h2 className="text-[14px] font-semibold">আলোচ্যসূচি</h2>
-              <p className="mt-1.5 whitespace-pre-line text-[12.5px] leading-[1.85] text-muted">{m.agenda || "আলোচ্যসূচি দেওয়া হয়নি।"}</p>
+              <h2 className="text-[14px] font-semibold">আলোচনার বিষয়</h2>
+              {plainText(m.agenda).trim() ? (
+                <RichText value={m.agenda} className="mt-1.5 text-[12.5px] leading-[1.85] text-muted" />
+              ) : (
+                <p className="mt-1.5 text-[12.5px] leading-[1.85] text-muted">আলোচনার বিষয় দেওয়া হয়নি।</p>
+              )}
             </section>
 
             {open && (
@@ -266,7 +272,7 @@ function AreaEditor({ db, m, adminId, onDone }: { db: Database; m: Meeting; admi
   const members = areaMembers(db, areaFromGeo(geo)).length;
   return (
     <section className="rounded-card border border-primary/40 bg-white px-5 py-4 shadow-card">
-      <h2 className="mb-3 text-[15px] font-semibold">মিটিংয়ের এলাকা পরিবর্তন</h2>
+      <h2 className="mb-3 text-[15px] font-semibold">মিটিংয়ের এলাকা বদলান</h2>
       <AreaPicker geo={geo} members={members} />
       <div className="mt-4 flex justify-end gap-2">
         <button type="button" onClick={onDone} className="h-9 cursor-pointer rounded-button border border-line px-3.5 text-[12.5px] font-semibold text-muted">
@@ -280,7 +286,7 @@ function AreaEditor({ db, m, adminId, onDone }: { db: Database; m: Meeting; admi
           }}
           className="h-9 cursor-pointer rounded-button bg-primary px-4 text-[12.5px] font-semibold text-white hover:bg-primary-hover"
         >
-          সংরক্ষণ করুন
+          সেভ করুন
         </button>
       </div>
     </section>

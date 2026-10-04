@@ -5,7 +5,7 @@ import { useState } from "react";
 import { inputClass } from "@/components/form";
 import { resetPasswordWithOtp } from "@/lib/db/actions";
 import { bn, normalisePhone, phoneMasked } from "@/lib/db/format";
-import { getDb } from "@/lib/db/store";
+import { findAccountByPhone } from "@/lib/db/store";
 import { newOtp, OTP_LENGTH, OTP_MAX_TRIES, OTP_RESEND_MS, OTP_TTL_MS, smsGateway } from "@/lib/otp";
 import { MIN_PASSWORD_SCORE, passwordBand, passwordScore } from "@/lib/password";
 import { useNow } from "@/lib/use-client";
@@ -35,7 +35,7 @@ export function ForgotPasswordForm() {
 
   const send = async (number: string) => {
     const code = newOtp();
-    const { delivered } = await smsGateway.send(number, `ALARM: আপনার পাসওয়ার্ড পুনরুদ্ধার কোড ${code}। কোডটি ৫ মিনিট কার্যকর থাকবে।`);
+    const { delivered } = await smsGateway.send(number, `ALARM: আপনার পাসওয়ার্ড ফিরে পাওয়ার কোড ${code}। কোডটি ৫ মিনিট কাজ করবে।`);
     const at = Date.now();
     setPending({ phone: number, code, expires: at + OTP_TTL_MS, sentAt: at, tries: 0, delivered });
     setOtp("");
@@ -45,7 +45,7 @@ export function ForgotPasswordForm() {
   const submitPhone = async () => {
     const number = normalisePhone(phone);
     if (!number) return setError("সঠিক মোবাইল নম্বর দিন — যেমন 01711-234567।");
-    if (!getDb().users.some((u) => u.phone === number)) return setError("এই মোবাইল নম্বরে কোনো অ্যাকাউন্ট নেই। অ্যাকাউন্ট তৈরির সময় দেওয়া নম্বরটি দিন।");
+    if (!findAccountByPhone(number)) return setError("এই মোবাইল নম্বরে কোনো অ্যাকাউন্ট নেই। অ্যাকাউন্ট তৈরির সময় দেওয়া নম্বরটি দিন।");
     setBusy(true);
     await send(number);
     setBusy(false);
@@ -144,7 +144,7 @@ export function ForgotPasswordForm() {
           className="flex flex-col gap-4"
         >
           <p className="text-[13px] leading-[1.7] text-ink">
-            <span className="font-sans font-semibold">{phoneMasked(pending.phone)}</span> নম্বরে ৬ সংখ্যার কোড পাঠানো হয়েছে। কোডটি ৫ মিনিট কার্যকর থাকবে।
+            <span className="font-sans font-semibold">{phoneMasked(pending.phone)}</span> নম্বরে ৬ সংখ্যার কোড পাঠানো হয়েছে। কোডটি ৫ মিনিট কাজ করবে।
           </p>
           {!pending.delivered && (
             <p role="note" className="rounded-button border border-l-[3px] border-line border-l-warning bg-warning/5 px-3.5 py-2.5 text-[12px] leading-[1.7] text-ink">
@@ -186,7 +186,7 @@ export function ForgotPasswordForm() {
               }}
               className="cursor-pointer text-muted hover:text-primary"
             >
-              ← নম্বর পরিবর্তন
+              ← নম্বর বদলান
             </button>
             <button type="button" disabled={resendIn > 0} onClick={() => send(pending.phone)} className="cursor-pointer font-semibold text-primary hover:text-primary-hover disabled:cursor-not-allowed disabled:font-normal disabled:text-muted">
               {resendIn > 0 ? `আবার পাঠান (${bn(resendIn)} সেকেন্ড)` : "আবার কোড পাঠান"}
@@ -259,7 +259,7 @@ export function ForgotPasswordForm() {
           </div>
           <ErrorLine text={error} />
           <button type="submit" className="h-[46px] w-full cursor-pointer rounded-button bg-primary text-[14.5px] font-semibold text-white hover:bg-primary-hover">
-            পাসওয়ার্ড সংরক্ষণ করুন
+            পাসওয়ার্ড সেভ করুন
           </button>
         </form>
       )}

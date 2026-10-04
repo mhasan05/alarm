@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { bn } from "@/lib/db/format";
 
 export type Tab = "latest" | "all" | "draft" | "superseded";
-const TAB_LABEL: Record<Tab, string> = { latest: "Latest", all: "All versions", draft: "Draft", superseded: "Superseded" };
+const TAB_LABEL: Record<Tab, string> = { latest: "সর্বশেষ", all: "সব ভার্সন", draft: "খসড়া", superseded: "পুরোনো ভার্সন" };
 
 export type ReportRow = {
   code: string;
@@ -46,7 +47,7 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <div role="tablist" aria-label="Report lists" className="flex flex-wrap gap-2">
+        <div role="tablist" aria-label="প্রতিবেদনের তালিকা" className="flex flex-wrap gap-2">
           {(Object.keys(TAB_LABEL) as Tab[]).map((t) => {
             const on = tab === t;
             return (
@@ -61,7 +62,7 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
                 }`}
               >
                 {TAB_LABEL[t]}
-                <span className={`rounded-[9px] px-[7px] py-px text-[11px] ${on ? "bg-white/20 text-white" : "bg-surface text-muted"}`}>{lists[t].length}</span>
+                <span className={`rounded-[9px] px-[7px] py-px text-[11px] ${on ? "bg-white/20 text-white" : "bg-surface text-muted"}`}>{bn(lists[t].length)}</span>
               </button>
             );
           })}
@@ -71,12 +72,12 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
             <circle cx="7" cy="7" r="4.8" stroke="currentColor" strokeWidth="1.4" />
             <path d="m10.6 10.6 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
-          <span className="sr-only">Search reports</span>
+          <span className="sr-only">প্রতিবেদন খুঁজুন</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search report ID or political activist name…"
+            placeholder="প্রতিবেদন আইডি বা রাজনৈতিক কর্মীর নাম দিয়ে খুঁজুন…"
             className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-placeholder"
           />
         </label>
@@ -86,45 +87,45 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left">
             <thead>
-              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold tracking-[0.06em] text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">REPORT ID</th>
-                <th scope="col" className="px-3 py-3 font-semibold">SUBJECT</th>
-                <th scope="col" className="px-3 py-3 font-semibold">VERSION</th>
-                <th scope="col" className="px-3 py-3 font-semibold">FINDINGS</th>
-                <th scope="col" className="px-3 py-3 font-semibold">STATUS</th>
-                <th scope="col" className="px-5 py-3 text-right font-semibold">ACTION</th>
+              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold text-muted">
+                <th scope="col" className="px-5 py-3 font-semibold">প্রতিবেদন আইডি</th>
+                <th scope="col" className="px-3 py-3 font-semibold">রাজনৈতিক কর্মী</th>
+                <th scope="col" className="px-3 py-3 font-semibold">ভার্সন</th>
+                <th scope="col" className="px-3 py-3 font-semibold">পাওয়া তথ্য</th>
+                <th scope="col" className="px-3 py-3 font-semibold">অবস্থা</th>
+                <th scope="col" className="px-5 py-3 text-right font-semibold">কাজ</th>
               </tr>
             </thead>
             <tbody>
               {shown.map((r) => (
-                <tr key={`${r.code}-v${r.v}`} className="border-b border-line last:border-b-0 hover:bg-surface/40">
+                <tr key={`${r.code}-v${r.v}`} className="relative cursor-pointer border-b border-line last:border-b-0 hover:bg-surface/40">
                   <td className="px-5 py-4 align-middle">
-                    <Link href={r.href} className="font-mono text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+                    <Link href={r.href} className="font-mono text-[12.5px] font-semibold text-primary after:absolute after:inset-0 after:content-[''] hover:text-primary-hover">
                       {r.code}
                     </Link>
                     <div className="mt-0.5 text-[12px] text-muted">
-                      {r.approved ? "Issued" : "Cut"} {r.date}
+                      {r.approved ? "প্রকাশিত" : "তৈরি"} {r.date}
                     </div>
                   </td>
                   <td className="px-3 py-4 align-middle">
-                    <Link href={`/admin/politicians/${r.profileId}`} className="font-bn text-[14px] font-semibold text-ink hover:text-primary">
+                    <Link href={`/admin/politicians/${r.profileId}`} className="relative z-10 font-bn text-[14px] font-semibold text-ink hover:text-primary">
                       {r.name}
                     </Link>
                     <div className="mt-0.5 font-bn text-[12px] text-muted">{r.meta}</div>
                   </td>
                   <td className="px-3 py-4 align-middle">
-                    <span className="rounded-md bg-surface px-2 py-0.5 text-[12.5px] font-semibold text-ink">v{r.v}</span>
-                    <div className="mt-1 text-[11.5px] text-muted">{r.latest ? "latest" : "superseded"}</div>
+                    <span className="rounded-md bg-surface px-2 py-0.5 text-[12.5px] font-semibold text-ink">ভার্সন {bn(r.v)}</span>
+                    <div className="mt-1 text-[11.5px] text-muted">{r.latest ? "সর্বশেষ" : "পুরোনো"}</div>
                   </td>
                   <td className="px-3 py-4 align-middle">
                     <div className="flex flex-wrap gap-1.5">
                       <span className="inline-flex items-center gap-1.5 rounded-md bg-success/10 px-2 py-0.5 text-[12px] font-medium text-success">
                         <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-                        {r.positive} positive
+                        {bn(r.positive)}টি ইতিবাচক
                       </span>
                       <span className="inline-flex items-center gap-1.5 rounded-md bg-danger/10 px-2 py-0.5 text-[12px] font-medium text-danger">
                         <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-                        {r.negative} negative
+                        {bn(r.negative)}টি নেতিবাচক
                       </span>
                     </div>
                   </td>
@@ -135,15 +136,15 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
                       }`}
                     >
                       <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-                      {!r.latest ? "Superseded" : r.approved ? "Approved" : "Awaiting approval"}
+                      {!r.latest ? "পুরোনো ভার্সন" : r.approved ? "অনুমোদিত" : "অনুমোদনের অপেক্ষায়"}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-right align-middle">
                     <Link
                       href={r.href}
-                      className="inline-flex h-9 items-center whitespace-nowrap rounded-button border border-line bg-white px-3.5 text-[13px] font-semibold text-primary hover:border-primary hover:bg-surface"
+                      className="relative z-10 inline-flex h-9 items-center whitespace-nowrap rounded-button border border-line bg-white px-3.5 text-[13px] font-semibold text-primary hover:border-primary hover:bg-surface"
                     >
-                      View details
+                      বিস্তারিত দেখুন
                     </Link>
                   </td>
                 </tr>
@@ -151,9 +152,9 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
               {shown.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center">
-                    <p className="text-[14px] font-semibold text-ink">{q ? "No report matches this search" : "Nothing here yet"}</p>
+                    <p className="text-[14px] font-semibold text-ink">{q ? "খুঁজে কিছু পাওয়া যায়নি" : "এখনও কিছু নেই"}</p>
                     <p className="mt-1 text-[12.5px] text-muted">
-                      {q ? "Try a report ID like RPT-2026-0039 or part of a name." : tab === "draft" ? "Every report has been approved." : "No superseded versions."}
+                      {q ? "RPT-2026-0001 এর মতো প্রতিবেদন আইডি বা নামের অংশ দিয়ে চেষ্টা করুন।" : tab === "draft" ? "সব প্রতিবেদন অনুমোদিত হয়েছে।" : "কোনো পুরোনো ভার্সন নেই।"}
                     </p>
                   </td>
                 </tr>
@@ -163,7 +164,7 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3.5">
           <p className="text-[13px] text-muted">
-            Showing {shown.length} of {rows.length} report versions
+            মোট {bn(rows.length)}টি ভার্সনের মধ্যে {bn(shown.length)}টি দেখানো হচ্ছে
           </p>
           <button
             type="button"
@@ -172,16 +173,16 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
             onClick={() => setShowHow((s) => !s)}
             className="cursor-pointer text-[13px] font-semibold text-primary hover:text-primary-hover"
           >
-            How versions are cut {showHow ? "↑" : "→"}
+            ভার্সন কীভাবে তৈরি হয় {showHow ? "↑" : "→"}
           </button>
         </div>
         {showHow && (
           <div id="how-versions" className="border-t border-line bg-surface/60 px-5 py-4 text-[13px] leading-relaxed text-ink">
             <ol className="list-decimal space-y-1.5 pl-5 text-pretty">
-              <li>The chief executive editor keeps or excludes each AI finding; only kept items are written. That cut becomes <strong>v1</strong>, a draft.</li>
-              <li>The executive editor adds their remark and approves it — only then can it be shared or downloaded.</li>
-              <li>A new version is cut only when more accepted data is added and re-analysed. The earlier version becomes superseded.</li>
-              <li>Superseded versions stay readable with their own source index. Nothing is edited in place.</li>
+              <li>প্রধান নির্বাহী সম্পাদক এআই-এর পাওয়া প্রতিটি তথ্য রাখেন বা বাদ দেন; শুধু রাখা তথ্যই লেখা হয়। এটিই হয় <strong>ভার্সন ১</strong>, একটি খসড়া।</li>
+              <li>নির্বাহী সম্পাদক মন্তব্য যোগ করে অনুমোদন দিয়ে সই করেন — তারপরই শেয়ার বা ডাউনলোড করা যায়।</li>
+              <li>নতুন গ্রহণ করা তথ্য যোগ করে আবার বিশ্লেষণ করলে তবেই নতুন ভার্সন তৈরি হয়। আগের ভার্সনটি পুরোনো হয়ে যায়।</li>
+              <li>পুরোনো ভার্সনগুলো নিজের উৎসের তালিকাসহ পড়া যায়। কিছুই সরাসরি এডিট করা হয় না।</li>
             </ol>
           </div>
         )}

@@ -14,7 +14,7 @@ export function ReviewerQueueView() {
 
   return (
     <>
-      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / পর্যালোচনার সারি" title="অপেক্ষমাণ কাজ" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের তালিকা" title="অপেক্ষায় থাকা কাজ" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {overdue.length > 0 && (
@@ -24,7 +24,7 @@ export function ReviewerQueueView() {
               <path d="M8 4.4V8l2.4 1.6" stroke="#F42A41" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <p className="min-w-[220px] flex-1 text-[12.5px] leading-[1.75] text-pretty">
-              {bn(overdue.length)}টি জমা ৪৮ ঘণ্টার বেশি সময় ধরে অপেক্ষমাণ। সারি খালি না হওয়া পর্যন্ত ওই প্রোফাইলে প্রধান নির্বাহী সম্পাদক বিশ্লেষণ শুরু করতে
+              {bn(overdue.length)}টি জমা ৪৮ ঘণ্টার বেশি সময় ধরে অপেক্ষায়। তালিকা খালি না হলে ওই প্রোফাইলে প্রধান নির্বাহী সম্পাদক বিশ্লেষণ শুরু করতে
               পারবেন না।
             </p>
             <Link
@@ -38,7 +38,7 @@ export function ReviewerQueueView() {
 
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-[14.5px] font-semibold leading-[1.6]">পর্যালোচনার অপেক্ষায়</h2>
+            <h2 className="text-[14.5px] font-semibold leading-[1.6]">যাচাইয়ের অপেক্ষায়</h2>
             <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
               পুরোনো জমা আগে · তদন্ত সম্পাদক ও রাজনৈতিক কর্মী — দুই উৎসের তথ্যই একই নিয়মে যাচাই হয়
             </p>
@@ -52,9 +52,9 @@ export function ReviewerQueueView() {
                 </svg>
               </div>
               <div>
-                <div className="text-[16px] font-semibold leading-[1.6]">সারি খালি</div>
+                <div className="text-[16px] font-semibold leading-[1.6]">তালিকা খালি</div>
                 <p className="mt-2 max-w-[420px] text-[12.5px] leading-[1.85] text-muted text-pretty">
-                  আপনার এলাকার সব জমা নিষ্পত্তি হয়েছে। নতুন তথ্য এলে এখানে দেখা যাবে এবং আপনাকে জানানো হবে।
+                  আপনার এলাকার সব জমার সিদ্ধান্ত হয়ে গেছে। নতুন তথ্য এলে এখানে দেখা যাবে এবং আপনাকে জানানো হবে।
                 </p>
               </div>
               <Link
@@ -94,7 +94,7 @@ export function ReviewerQueueView() {
                         <span className="flex-none whitespace-nowrap font-mono text-[11px] font-semibold text-muted">{q.code}</span>
                         <span className="min-w-2.5 flex-1" />
                         <span className={`flex-none whitespace-nowrap text-[11.5px] font-semibold ${late ? "text-danger" : "text-muted"}`}>
-                          {q.days === 0 ? "আজ জমা" : `${bn(q.days)} দিন অপেক্ষমাণ`}
+                          {q.days === 0 ? "আজ জমা" : `${bn(q.days)} দিন ধরে অপেক্ষায়`}
                         </span>
                       </div>
                       <div className="mt-2.5 text-[13.5px] font-semibold leading-[1.65] text-pretty">{q.title}</div>
@@ -103,7 +103,7 @@ export function ReviewerQueueView() {
                       </div>
                       <div aria-hidden="true" className="min-h-[11px] flex-1" />
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5 border-t border-[#E3EEEA] pt-2.5">
-                        <span className="w-full text-[11.5px] leading-[1.6] text-muted">{bn(q.evidence.length)}টি প্রমাণ সংযুক্ত · {q.source}</span>
+                        <span className="w-full text-[11.5px] leading-[1.6] text-muted">{bn(q.evidence.length)}টি প্রমাণ দেওয়া আছে · {q.source}</span>
                         <span className="inline-flex h-9 flex-none items-center rounded-button bg-primary px-[15px] text-[12.5px] font-semibold text-white group-hover:bg-primary-hover">
                           যাচাই করুন
                         </span>

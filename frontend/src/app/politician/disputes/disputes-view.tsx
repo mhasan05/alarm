@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { bnDate } from "@/lib/db/format";
 import { canDispute, submissionOf } from "@/lib/db/selectors";
+import { plainText } from "@/lib/rich-text";
 import { AddActivityButton } from "../add-activity-button";
 import { disputeView } from "../report-article";
 import { usePolitician } from "../use-politician";
@@ -30,7 +31,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
   if (target && status?.allowed) {
     return (
       <>
-        <PageHeader backHref={`/politician/reports/${target.code}?from=reports`} crumb="রাজনৈতিক কর্মী পোর্টাল / অভিযোগ / নতুন" title="অসঙ্গতির অভিযোগ জানান" action={<AddActivityButton />} />
+        <PageHeader backHref={`/politician/reports/${target.code}?from=reports`} crumb="রাজনৈতিক কর্মী পোর্টাল / অভিযোগ / নতুন" title="ভুল তথ্যের অভিযোগ জানান" action={<AddActivityButton />} />
         <div className="flex flex-1 flex-col gap-4 px-4 pt-[22px] pb-9 sm:px-7">
           <Link
             href={`/politician/reports/${target.code}?from=reports`}
@@ -47,7 +48,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
 
   return (
     <>
-      <PageHeader crumb="রাজনৈতিক কর্মী পোর্টাল / অভিযোগ" title="অভিযোগ ও অসঙ্গতি" action={<AddActivityButton />} />
+      <PageHeader crumb="রাজনৈতিক কর্মী পোর্টাল / অভিযোগ" title="অভিযোগ" action={<AddActivityButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {filed && (
@@ -58,7 +59,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
             <div>
               <div className="text-[13px] font-semibold leading-[1.6]">অভিযোগ ({filed.code}) জমা হয়েছে</div>
               <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                {filedReport?.title} — প্রধান নির্বাহী সম্পাদক রিপোর্টটি পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন, সাধারণত {new Intl.NumberFormat("bn-BD").format(days)} কর্মদিবসের মধ্যে।
+                {filedReport?.title} — সম্পাদক রিপোর্টটি আবার যাচাই করে সিদ্ধান্ত জানাবেন, সাধারণত {new Intl.NumberFormat("bn-BD").format(days)} কাজের দিনের মধ্যে।
               </p>
             </div>
           </div>
@@ -72,14 +73,14 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
 
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার অভিযোগসমূহ</h2>
-            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">প্রধান নির্বাহী সম্পাদক প্রতিটি অভিযোগ পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন</p>
+            <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার অভিযোগ</h2>
+            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">সম্পাদক প্রতিটি অভিযোগ আবার যাচাই করে সিদ্ধান্ত জানাবেন</p>
           </div>
 
           {disputes.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-6 pt-10 pb-11 text-center">
               <div className="text-[15px] font-semibold leading-[1.6]">কোনো অভিযোগ নেই</div>
-              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">কোনো রিপোর্টে অসঙ্গতি মনে হলে সেটির বিস্তারিত পাতা থেকে অভিযোগ জানাতে পারবেন।</p>
+              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">কোনো রিপোর্টে ভুল তথ্য আছে মনে হলে সেটির বিস্তারিত পাতা থেকে অভিযোগ জানাতে পারবেন।</p>
               <Link href="/politician/reports" className="mt-2 inline-flex h-9 items-center rounded-button border border-line px-4 text-[13px] font-semibold text-primary hover:border-primary">
                 আমার রিপোর্ট দেখুন
               </Link>
@@ -106,7 +107,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
                         </span>
                       </div>
                       <div className="mt-2.5 text-[13px] font-semibold leading-[1.65] text-pretty">{about?.title}</div>
-                      <p className="mt-1.5 text-[12px] leading-[1.7] text-muted text-pretty">{d.claim}</p>
+                      <p className="mt-1.5 text-[12px] leading-[1.7] text-muted text-pretty">{plainText(d.claim)}</p>
                       <div aria-hidden="true" className="min-h-[11px] flex-1" />
                       <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#E3EEEA] pt-2.5">
                         <span className="flex-none text-[11.5px] leading-[1.6] text-muted">জমা: {bnDate(d.filedAt)}</span>

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
-import { enRelative } from "@/lib/db/format";
+import { bn, bnRelative } from "@/lib/db/format";
 import { nameOf, roleOfId } from "@/lib/db/selectors";
 import { useAdmin } from "../use-admin";
 import { isAvailable, staffRows } from "./roster";
 import { ExportRoster, RosterView, type Tab } from "./roster-view";
 
-const ACTION_DOT: Record<string, string> = { "Submitted evidence": "#006A4E", "Held submission — source unclear": "#F42A41", "Rejected submission": "#F42A41" };
+const ACTION_DOT: Record<string, string> = { "তথ্য জমা দিয়েছেন": "#006A4E", "জমা বাতিল করেছেন": "#F42A41" };
 
 
 function Tile({ icon, chip, chipCls, value, label, note, tone }: { icon: ReactNode; chip: string; chipCls: string; value: string; label: ReactNode; note: string; tone: string }) {
@@ -37,7 +37,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
     .map((a) => ({
       dot: ACTION_DOT[a.action] ?? "#1D6FC0",
       text: `${nameOf(db, a.actor)}${roleOfId(db, a.actor) === "staff" ? ` (${a.actor})` : ""} — ${a.action} · ${a.target}`,
-      time: enRelative(a.at),
+      time: bnRelative(a.at),
       staff: staffIds.has(a.actor) ? a.actor : a.target,
     }));
 
@@ -67,9 +67,9 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
         crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / তদন্ত সম্পাদক"
         title={
           <>
-            Investigation Editors · <span className="font-bn">তদন্ত সম্পাদক</span>
+            তদন্ত সম্পাদক
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {active.length} active across {districts.length} districts · {available} on duty right now
+              {bn(districts.length)}টি জেলায় {bn(active.length)} জন চালু আছেন · এখন {bn(available)} জন কাজে আছেন
             </span>
           </>
         }
@@ -80,7 +80,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
               href="/admin/field-staff/new"
               className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover"
             >
-              + Add Field Staff
+              + তদন্ত সম্পাদক যোগ করুন
             </Link>
           </div>
         }
@@ -91,7 +91,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
           href="/admin/field-staff/new"
           className="inline-flex h-11 items-center justify-center rounded-button bg-primary text-[14px] font-semibold text-white hover:bg-primary-hover md:hidden"
         >
-          + Add Field Staff
+          + তদন্ত সম্পাদক যোগ করুন
         </Link>
 
         <div className="grid grid-cols-2 gap-2.5 md:gap-4 xl:grid-cols-4">
@@ -103,15 +103,15 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 <path d="M1.8 13c.5-2.3 2.1-3.5 4.2-3.5s3.7 1.2 4.2 3.5M10.5 3.4a2.2 2.2 0 0 1 0 4.2M12 9.8c1.2.4 2 1.5 2.3 3.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
             }
-            chip={`${available} on duty`}
+            chip={`${bn(available)} জন কাজে আছেন`}
             chipCls="bg-success/10 text-success"
-            value={String(active.length)}
+            value={bn(active.length)}
             label={
               <>
-                Active Investigation Editors · <span className="font-bn">সক্রিয়</span>
+                কাজে থাকা তদন্ত সম্পাদক
               </>
             }
-            note={`${suspended} suspended · ${onLeave} on leave`}
+            note={`${bn(suspended)} জন বন্ধ · ${bn(onLeave)} জন ছুটিতে`}
           />
           <Tile
             tone="bg-primary/10 text-primary"
@@ -121,15 +121,15 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 <path d="M6.2 8.5h4M6.2 11h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
             }
-            chip={`avg ${(open / Math.max(1, active.length)).toFixed(1)} each`}
+            chip={`গড়ে জনপ্রতি ${bn((open / Math.max(1, active.length)).toFixed(1))}`}
             chipCls="bg-surface text-muted"
-            value={String(open)}
+            value={bn(open)}
             label={
               <>
-                Open assignments · <span className="font-bn">চলমান</span>
+                চলমান মাঠের কাজ
               </>
             }
-            note={`Across ${active.length} active editors`}
+            note={`${bn(active.length)} জন চালু থাকা সম্পাদকের মধ্যে`}
           />
           <Tile
             tone="bg-success/10 text-success"
@@ -139,11 +139,11 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 <path d="m5.3 8.2 1.8 1.8 3.6-3.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             }
-            chip={`${Math.round(evidence / Math.max(1, FIELD_STAFF.length))} avg each`}
+            chip={`গড়ে জনপ্রতি ${bn(Math.round(evidence / Math.max(1, FIELD_STAFF.length)))}`}
             chipCls="bg-success/10 text-success"
-            value={evidence.toLocaleString("en-US")}
-            label="Evidence items this month"
-            note={`From ${FIELD_STAFF.filter((s) => s.evidenceMonth > 0).length} editors`}
+            value={bn(evidence.toLocaleString("en-US"))}
+            label="এই মাসের প্রমাণ"
+            note={`${bn(FIELD_STAFF.filter((s) => s.evidenceMonth > 0).length)} জন সম্পাদকের কাছ থেকে`}
           />
           <Tile
             tone="bg-danger/10 text-danger"
@@ -153,15 +153,15 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 <path d="M8 6.5v3M8 11.5v.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             }
-            chip="urgent"
+            chip="জরুরি"
             chipCls="bg-danger/10 text-danger"
-            value={String(dueSoon)}
+            value={bn(dueSoon)}
             label={
               <>
-                Due within 48 hours · <span className="font-bn">জরুরি</span>
+                ৪৮ ঘণ্টার মধ্যে জমা দিতে হবে
               </>
             }
-            note={`Across ${dueStaff} editors`}
+            note={`${bn(dueStaff)} জন সম্পাদকের মধ্যে`}
           />
         </div>
 
@@ -170,20 +170,19 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
 
           <div className="flex flex-col gap-5">
             <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
-              <h2 className="text-[15px] font-semibold text-ink">District Coverage</h2>
-              <p className="mt-0.5 font-bn text-[12px] text-muted">জেলাভিত্তিক বিন্যাস</p>
+              <h2 className="text-[15px] font-semibold text-ink">জেলা অনুযায়ী দায়িত্বের এলাকা</h2>
               <ul className="mt-4 flex flex-col gap-4">
                 {districts.map(([name, d]) => (
                   <li key={name}>
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="font-bn text-[13.5px] font-semibold text-ink">{name}</span>
                       <span className="text-[12px] text-muted">
-                        {d.staff} editors · {d.open} open
+                        {bn(d.staff)} জন সম্পাদক · {bn(d.open)}টি চলমান
                       </span>
                     </div>
                     <div
                       role="meter"
-                      aria-label={`${name}: ${d.staff} investigation editors`}
+                      aria-label={`${name}: ${bn(d.staff)} জন তদন্ত সম্পাদক`}
                       aria-valuenow={d.staff}
                       aria-valuemin={0}
                       aria-valuemax={maxStaff}
@@ -200,8 +199,8 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                     ⚠
                   </span>
                   <span>
-                    <span className="font-bn">{thin.join(", ")}</span> {thin.length === 1 ? "has" : "have"} one investigation editor each. Urgent requests in those districts
-                    cannot be reassigned if that person is unavailable.
+                    <span className="font-bn">{thin.join(", ")}</span> {thin.length === 1 ? "জেলায়" : "জেলাগুলোর প্রতিটিতে"} মাত্র একজন তদন্ত সম্পাদক আছেন। তিনি না থাকলে ওই
+                    এলাকার জরুরি অনুরোধ অন্য কাউকে দেওয়া যাবে না।
                   </span>
                 </p>
               )}
@@ -209,15 +208,14 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
 
             <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
               <div className="px-5 pt-4">
-                <h2 className="text-[15px] font-semibold text-ink">Today&apos;s Field Activity</h2>
-                <p className="mt-0.5 font-bn text-[12px] text-muted">আজকের মাঠ কার্যক্রম</p>
+                <h2 className="text-[15px] font-semibold text-ink">আজকের মাঠের কাজ</h2>
               </div>
               <ol className="px-5 pt-2">
                 {STAFF_ACTIVITY.map((a) => (
-                  <li key={a.time + a.staff} className="flex gap-3 border-b border-line py-3 last:border-b-0">
+                  <li key={a.time + a.staff} className="relative flex cursor-pointer gap-3 border-b border-line py-3 last:border-b-0 hover:bg-surface/60">
                     <span className="mt-[6px] size-2 flex-none rounded-full" style={{ background: a.dot }} aria-hidden="true" />
                     <div>
-                      <Link href={`/admin/field-staff/${a.staff}`} className="text-[13px] leading-normal text-ink hover:text-primary">
+                      <Link href={`/admin/field-staff/${a.staff}`} className="text-[13px] leading-normal text-ink after:absolute after:inset-0 after:content-[''] hover:text-primary">
                         {a.text}
                       </Link>
                       <div className="mt-0.5 text-[11.5px] text-muted">{a.time}</div>
@@ -227,7 +225,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
               </ol>
               <div className="border-t border-line px-5 py-3.5">
                 <Link href="/admin/settings?tab=audit" className="text-[13px] font-semibold text-primary hover:text-primary-hover">
-                  View full audit trail →
+                  পুরো অডিট লগ দেখুন →
                 </Link>
               </div>
             </section>

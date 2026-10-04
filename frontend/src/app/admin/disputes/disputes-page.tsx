@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { StatTiles } from "@/components/charts";
-import { daysSince } from "@/lib/db/format";
+import { bn, daysSince } from "@/lib/db/format";
 import { useAdmin } from "../use-admin";
-import { DisputesView, type Tab } from "./disputes-view";
+import { DisputeList, type DisputeTab } from "@/components/disputes/dispute-list";
 
-export function DisputesPage({ initialTab }: { initialTab: Tab }) {
+export function DisputesPage({ initialTab }: { initialTab: DisputeTab }) {
   const { db } = useAdmin();
   const open = db.disputes.filter((d) => d.state === "Open");
   const resolved = db.disputes.filter((d) => d.state !== "Open");
@@ -16,10 +16,10 @@ export function DisputesPage({ initialTab }: { initialTab: Tab }) {
   const profiles = new Set(open.map((d) => d.profileId)).size;
 
   const stats = [
-    { label: "OPEN DISPUTES", value: String(open.length), color: "#F42A41", note: "খোলা অভিযোগ · awaiting your decision" },
-    { label: "OLDER THAN 48H", value: String(overdue), color: "#D97706", note: "৪৮ ঘণ্টার বেশি · answer these first" },
-    { label: "RESOLVED", value: String(resolved.length), color: "#1A7A4A", note: `নিষ্পত্তি হয়েছে · ${withdrawn} report${withdrawn === 1 ? "" : "s"} withdrawn`, href: "/admin/disputes?tab=resolved" },
-    { label: "PROFILES AFFECTED", value: String(profiles), color: "#0D1F17", note: "প্রোফাইল · reports stay visible meanwhile", href: "/admin/politicians" },
+    { label: "খোলা অভিযোগ", value: bn(open.length), color: "#F42A41", note: "আপনার সিদ্ধান্তের অপেক্ষায়" },
+    { label: "৪৮ ঘণ্টার বেশি পুরোনো", value: bn(overdue), color: "#D97706", note: "এগুলোর সিদ্ধান্ত আগে দিন" },
+    { label: "সমাধান হয়েছে", value: bn(resolved.length), color: "#1A7A4A", note: `${bn(withdrawn)}টি জমা সরিয়ে নেওয়া হয়েছে`, href: "/admin/disputes?tab=resolved" },
+    { label: "জড়িত প্রোফাইল", value: bn(profiles), color: "#0D1F17", note: "এই সময়ে জমাগুলো দেখা যায়", href: "/admin/politicians" },
   ];
 
   return (
@@ -28,9 +28,9 @@ export function DisputesPage({ initialTab }: { initialTab: Tab }) {
         crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / অভিযোগ"
         title={
           <>
-            Disputes · <span className="font-bn">অসঙ্গতির অভিযোগ</span>
+            ভুল তথ্যের অভিযোগ
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {open.length} open disputes awaiting your decision · {overdue} older than 48 hours
+              {bn(open.length)}টি খোলা অভিযোগ আপনার সিদ্ধান্তের অপেক্ষায় · {bn(overdue)}টি ৪৮ ঘণ্টার বেশি পুরোনো
             </span>
           </>
         }
@@ -43,13 +43,13 @@ export function DisputesPage({ initialTab }: { initialTab: Tab }) {
             <path d="M8 7.2v3.6M8 5.2v.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <p className="text-[13px] leading-relaxed text-ink text-pretty">
-            Only the political activist a report is about can dispute it. The report <strong className="font-semibold">stays on their profile unchanged</strong> while you
-            review — disputes are internal and carry no badge, so a challenge cannot quietly discredit a finding the executive editor already accepted.
+            শুধু যে রাজনৈতিক কর্মীকে নিয়ে জমা, তিনিই এর বিরুদ্ধে অভিযোগ করতে পারেন। আপনি যাচাই করার সময় জমাটি <strong className="font-semibold">তাঁর প্রোফাইলে যেমন আছে তেমনই থাকে</strong>
+            — অভিযোগগুলো ভেতরের বিষয়, বাইরে কোনো চিহ্ন দেখায় না। তাই নির্বাহী সম্পাদকের গ্রহণ করা কোনো তথ্য চুপচাপ ছোট করা যায় না।
           </p>
         </div>
 
         <StatTiles stats={stats} linkAs={Link} />
-        <DisputesView key={initialTab} initialTab={initialTab} />
+        <DisputeList key={initialTab} db={db} disputes={db.disputes} baseHref="/admin/disputes" initialTab={initialTab} />
       </div>
     </>
   );

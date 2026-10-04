@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/politician/profile", destination: "/politician/dashboard", permanent: true },
       { source: "/staff/work", destination: "/staff/dashboard", permanent: true },
+      // Submission pages moved under "সব জমা".
+      { source: "/admin/field-reports/:code", destination: "/admin/submissions/:code", permanent: true },
     ];
   },
 };

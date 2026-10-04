@@ -32,7 +32,7 @@ export function reviewerRows(db: Database): Reviewer[] {
   return db.reviewers.map((r) => {
     const q = queueFor(db, r.id);
     const decided = decisionsBy(db, r.id).filter((s) => s.decidedAt && monthKey(s.decidedAt) === month);
-    const accepted = decided.filter((s) => s.state === "Accepted" || s.state === "Withdrawn").length;
+    const accepted = decided.filter((s) => s.state === "Accepted").length;
     const total = decided.length + r.history.decided;
     const hours = decided.map((s) => (new Date(s.decidedAt!).getTime() - new Date(s.submittedAt).getTime()) / 3_600_000);
     const avgHours = total ? Math.round((hours.reduce((n, h) => n + h, 0) + r.history.avgHours * r.history.decided) / total) : 0;

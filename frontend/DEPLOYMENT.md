@@ -30,7 +30,7 @@ Check from any computer: `ping bdalarm.org` should show the VPS IP. (DNS changes
 **Connect to the server:**
 
 ```bash
-ssh backend_dev@YOUR_VPS_IP
+ssh backend_dev@200.97.162.198
 ```
 
 ---
@@ -84,9 +84,9 @@ git clone https://github.com/mhasan05/alarm.git
 ```bash
 cd ~/projects/alarm/frontend
 cat > .env.production << 'EOF'
-# Show the demo sign-in buttons and "Reset demo data" so the client can try every role.
-# Set to false (and rebuild) to hide them.
-NEXT_PUBLIC_DEMO_MODE=true
+# Live site: no demo account list on the login page and no "Reset demo data".
+# Set to true (and rebuild) only for a private demo.
+NEXT_PUBLIC_DEMO_MODE=false
 EOF
 ```
 
@@ -296,15 +296,16 @@ sudo visudo -c        # must say: parsed OK
 
 | Role | Mobile | ALARM ID |
 |---|---|---|
+| সুপার অ্যাডমিন (Super Admin) | 01711000000 | KAR-571093 |
 | প্রধান নির্বাহী সম্পাদক (Chief Executive Editor) | 01711000001 | KAR-482915 |
-| নির্বাহী সম্পাদক (Executive Editor) | 01755432198 | KAR-736204 |
-| তদন্ত সম্পাদক (Investigation Editor) | 01712440918 | KAR-615283 |
-| রাজনৈতিক কর্মী (Political Activist) | 01711448290 | KAR-702438 |
+| নির্বাহী সম্পাদক (Executive Editor) | 01711000002 | KAR-736204 |
+| তদন্ত সম্পাদক (Investigation Editor) | 01711000003 | KAR-615283 |
+| রাজনৈতিক কর্মী (Political Activist) | 01711000004 | KAR-814369 |
 
-With demo mode on, the login page also has one-click demo buttons.
+Demo mode is off on the live site, so sign in with a mobile number and password. Setting `NEXT_PUBLIC_DEMO_MODE=true` in `.env.production` and rebuilding brings back the one-click demo list.
 
-- **Meetings:** open a meeting link and enter an ALARM ID, e.g. `KAR-814369` (inside the area of the sample Dhaka meeting, so they join directly). An ID from outside the area, e.g. `KAR-702438`, gets the "request to join" screen instead. The প্রধান নির্বাহী সম্পাদক's own ID needs a sign-in.
-- **Data stays in each browser.** Until the backend is connected, whatever someone creates or changes is saved only in their own browser; every other person or device starts from the same sample data. **প্রধান নির্বাহী সম্পাদক portal → Settings → System Info → Reset demo data** restores it.
+- **Meetings:** open a meeting link and enter an ALARM ID, e.g. `KAR-814369` on the ward 13 meeting (inside its area, so they join directly). The same ID on the চট্টগ্রাম meeting gets the "request to join" screen instead. The প্রধান নির্বাহী সম্পাদক's own ID needs a sign-in.
+- **Data stays in each browser.** Until the backend is connected, whatever someone creates or changes is saved only in their own browser; every other person or device starts from the same sample data. Clearing the browser's site data restores it (the "Reset demo data" button appears only in demo mode).
 - **Forgot password:** until the SMS service is connected, the reset screen shows the one-time code on screen.
 - **Not indexed by search engines** — the site tells Google not to list it, which suits a client preview.
 

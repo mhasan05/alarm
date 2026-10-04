@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
+import { RichText } from "@/components/rich-text";
 import { bnDate } from "@/lib/db/format";
 import { CATEGORY_STYLE, profileOf } from "@/lib/db/selectors";
 import { NewSubmissionButton } from "../../new-submission-button";
@@ -37,8 +38,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
   const cat = CATEGORY_STYLE[sub.category];
   const st = STAFF_STATE[sub.state];
   const pending = sub.state === "Pending";
-  const closed = sub.state === "Rejected" || sub.state === "Held";
-  const revisit = pending && sub.events.at(-1)?.type === "revisit";
+  const closed = sub.state === "Rejected";
 
   return (
     <>
@@ -84,15 +84,15 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
             </div>
 
             <div>
-              <SectionLabel num="১">সূত্র ও বিবরণ</SectionLabel>
-              <p className="mt-2 text-[13.5px] leading-[1.8] text-pretty">{sub.body}</p>
+              <SectionLabel num="১">সূত্র ও বিস্তারিত</SectionLabel>
+              <RichText value={sub.body} className="mt-2 text-[13.5px] leading-[1.8] text-pretty" />
               <p className="mt-1.5 text-[12px] text-muted">সূত্র: {sub.source}</p>
             </div>
 
             <div>
-              <SectionLabel num="২">সংযুক্ত প্রমাণ · EVIDENCE</SectionLabel>
+              <SectionLabel num="২">দেওয়া প্রমাণ</SectionLabel>
               {sub.evidence.length === 0 ? (
-                <p className="mt-2 text-[12.5px] text-muted">কোনো প্রমাণ সংযুক্ত নেই।</p>
+                <p className="mt-2 text-[12.5px] text-muted">কোনো প্রমাণ দেওয়া নেই।</p>
               ) : (
                 <ul className="mt-2.5 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-3">
                   {sub.evidence.map((e) => (
@@ -112,7 +112,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
 
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="flex flex-wrap items-center gap-2 border-b border-l-4 border-line px-[22px] py-[16px]" style={{ borderLeftColor: st.fg }}>
-            <h2 className="text-[15px] font-semibold leading-[1.6]">পর্যালোচনার সিদ্ধান্ত</h2>
+            <h2 className="text-[15px] font-semibold leading-[1.6]">যাচাইয়ের সিদ্ধান্ত</h2>
             <span className="min-w-2.5 flex-1" />
             <Badge fg={st.fg} bg={st.bg}>
               {st.label}
@@ -121,9 +121,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
           <div className="flex flex-col gap-4 px-[22px] py-5">
             {pending ? (
               <p className="text-[13px] leading-[1.75] text-muted text-pretty">
-                {revisit
-                  ? `পুনরায় পরিদর্শনের অনুরোধ: ${sub.reason ?? ""} — আরও প্রমাণ সংগ্রহ করে নতুন তথ্য হিসেবে জমা দিন।`
-                  : "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়। সিদ্ধান্ত হলে কারণসহ এখানে দেখা যাবে — গ্রহণ করা হলে সংশ্লিষ্ট প্রোফাইলে প্রকাশিত হবে।"}
+                নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়। সিদ্ধান্ত হলে কারণসহ এখানে দেখা যাবে — গ্রহণ হলে ওই প্রোফাইলে দেখা যাবে।
               </p>
             ) : (
               <>
@@ -139,9 +137,6 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
                     {sub.reason}
                   </p>
                 </div>
-                {sub.state === "Withdrawn" && (
-                  <p className="text-[12.5px] leading-[1.7] text-muted">রাজনৈতিক কর্মীর অভিযোগের পর প্রধান নির্বাহী সম্পাদক এই তথ্যটি প্রোফাইল থেকে প্রত্যাহার করেছেন।</p>
-                )}
               </>
             )}
           </div>

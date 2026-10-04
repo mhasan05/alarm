@@ -7,7 +7,7 @@ import { ChangePasswordForm } from "@/components/change-password-form";
 import { EditableAvatar } from "@/components/profile";
 import { Field, inputClass, selectClass } from "@/components/form";
 import { saveParties, saveSettings, setCoverage, setReviewerStatus, setStaffStatus } from "@/lib/db/actions";
-import { enDateTime, enRelative } from "@/lib/db/format";
+import { bn, bnDate, bnDateTime, bnRelative } from "@/lib/db/format";
 import { coverageKey, nameOf, queueFor, roleOfId } from "@/lib/db/selectors";
 import { resetDb, useDb } from "@/lib/db/store";
 import { DEMO_MODE } from "@/lib/demo";
@@ -20,36 +20,41 @@ type Account = { id: string; name: string; initials: string; email: string; role
 function accountsOf(db: Database): Account[] {
   const last = (id: string) => {
     const a = db.audit.find((x) => x.actor === id);
-    return a ? enRelative(a.at) : "—";
+    return a ? bnRelative(a.at) : "—";
   };
   return [
-    ...db.admins.map((a) => ({ id: a.id, name: a.name, initials: a.initials, email: a.email, role: "Chief Executive Editor" as const, suspended: false, lastActive: last(a.id) })),
-    ...db.reviewers.filter((r) => r.status !== "Deactivated").map((r) => ({ id: r.id, name: r.name, initials: r.initials, email: r.email, role: "Executive Editor" as const, suspended: r.status === "Suspended", lastActive: last(r.id) })),
-    ...db.staff.filter((x) => x.status !== "Deactivated").map((x) => ({ id: x.id, name: x.name, initials: x.initials, email: x.email, role: "Investigation Editor" as const, suspended: x.status === "Suspended", lastActive: last(x.id) })),
+    ...db.admins.map((a) => ({ id: a.id, name: a.nameBn ?? a.name, initials: a.initials, email: a.email, role: "প্রধান নির্বাহী সম্পাদক" as const, suspended: false, lastActive: last(a.id) })),
+    ...db.reviewers.filter((r) => r.status !== "Deactivated").map((r) => ({ id: r.id, name: r.nameBn, initials: r.initials, email: r.email, role: "নির্বাহী সম্পাদক" as const, suspended: r.status === "Suspended", lastActive: last(r.id) })),
+    ...db.staff.filter((x) => x.status !== "Deactivated").map((x) => ({ id: x.id, name: x.nameBn, initials: x.initials, email: x.email, role: "তদন্ত সম্পাদক" as const, suspended: x.status === "Suspended", lastActive: last(x.id) })),
   ];
 }
 
 export const SECTIONS = {
-  general: { label: "General", sub: "সাধারণ" },
-  users: { label: "User Management", sub: "ব্যবহারকারী ব্যবস্থাপনা" },
-  roles: { label: "Roles & Permissions", sub: "ভূমিকা ও অনুমতি" },
-  coverage: { label: "Executive Editor Coverage", sub: "নির্বাহী সম্পাদকের এলাকা" },
-  parties: { label: "Parties & Organisations", sub: "দল ও সংগঠন" },
-  rules: { label: "Audit Configuration", sub: "নিরীক্ষার নিয়ম" },
-  notifications: { label: "Notification Settings", sub: "বিজ্ঞপ্তি" },
-  audit: { label: "Security & Audit Log", sub: "নিরাপত্তা ও অডিট লগ" },
-  system: { label: "System Info", sub: "সিস্টেমের তথ্য" },
+  general: { label: "সাধারণ" },
+  users: { label: "ব্যবহারকারীর তালিকা" },
+  roles: { label: "ভূমিকা ও অনুমতি" },
+  coverage: { label: "নির্বাহী সম্পাদকের দায়িত্বের এলাকা" },
+  parties: { label: "দল ও সংগঠন" },
+  rules: { label: "অডিটের নিয়ম" },
+  notifications: { label: "নোটিফিকেশন" },
+  audit: { label: "নিরাপত্তা ও অডিট লগ" },
+  system: { label: "সিস্টেমের তথ্য" },
 } as const;
 export type Section = keyof typeof SECTIONS;
 
-
 const ROLE_STYLE: Record<UserRole, string> = {
-  "Chief Executive Editor": "bg-primary/10 text-primary",
-  "Executive Editor": "bg-role-reviewer/10 text-role-reviewer",
-  "Investigation Editor": "bg-warning/10 text-warning",
+  "প্রধান নির্বাহী সম্পাদক": "bg-primary/10 text-primary",
+  "নির্বাহী সম্পাদক": "bg-role-reviewer/10 text-role-reviewer",
+  "তদন্ত সম্পাদক": "bg-warning/10 text-warning",
 };
 
-const today = () => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Dhaka" }).format(new Date());
+/** Reviewer status values (stored in English) shown in Bengali. */
+const STATUS_BN: Record<string, string> = { Active: "চালু আছে", "On duty": "কাজে আছেন", "On leave": "ছুটিতে", Suspended: "বন্ধ", Deactivated: "পুরোপুরি বন্ধ" };
+
+/** Party kinds (stored in English) shown in Bengali. */
+const KIND_BN: Record<string, string> = { Party: "দল", Organisation: "সংগঠন" };
+
+const today = () => bnDate(new Date().toISOString());
 
 const card = "overflow-hidden rounded-card border border-line bg-white shadow-card";
 
@@ -58,10 +63,7 @@ function Head({ section, extra, action }: { section: Section; extra?: string; ac
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
       <div>
         <h2 className="text-[15px] font-semibold text-ink">{SECTIONS[section].label}</h2>
-        <p className="mt-0.5 text-[12px] text-muted">
-          <span className="font-bn">{SECTIONS[section].sub}</span>
-          {extra && ` · ${extra}`}
-        </p>
+        {extra && <p className="mt-0.5 text-[12px] text-muted">{extra}</p>}
       </div>
       {action}
     </div>
@@ -74,14 +76,14 @@ function SaveBar({ section, dirty, admin, onSave, onDiscard, saved }: { section:
     <div className={`${card} flex flex-wrap items-center gap-3 px-5 py-4`}>
       <p role="status" className="min-w-[220px] flex-1 text-[12.5px] leading-normal text-muted">
         {dirty ? (
-          <span className="font-semibold text-warning">Unsaved changes. </span>
+          <span className="font-semibold text-warning">পরিবর্তন সেভ করা হয়নি। </span>
         ) : saved ? (
-          <span className="font-semibold text-success">Saved. </span>
+          <span className="font-semibold text-success">সেভ হয়েছে। </span>
         ) : null}
-        Changes to {SECTIONS[section].label} are written to the audit log under {admin} (Admin) · {today()}.
+        “{SECTIONS[section].label}”-এর পরিবর্তনগুলো {admin} (প্রধান নির্বাহী সম্পাদক)-এর নামে অডিট লগে লেখা হয় · {today()}।
       </p>
       <button type="button" disabled={!dirty} onClick={onDiscard} className="h-10 cursor-pointer px-3 text-[13.5px] font-semibold text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-50">
-        Discard
+        বাদ দিন
       </button>
       <button
         type="button"
@@ -89,7 +91,7 @@ function SaveBar({ section, dirty, admin, onSave, onDiscard, saved }: { section:
         onClick={onSave}
         className="h-10 cursor-pointer rounded-button bg-primary px-5 text-[13.5px] font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Save changes
+        সেভ করুন
       </button>
     </div>
   );
@@ -124,11 +126,11 @@ export function AdminSettings({ initial, admin, adminId }: { initial: Section; a
   const [section, setSection] = useState<Section>(initial);
   const db = useDb();
   const COUNTS: Partial<Record<Section, string>> = {
-    users: String(accountsOf(db).length),
-    roles: "3",
-    coverage: String(db.reviewers.length),
-    parties: String(db.parties.length),
-    system: "v3.0",
+    users: bn(accountsOf(db).length),
+    roles: bn(3),
+    coverage: bn(db.reviewers.length),
+    parties: bn(db.parties.length),
+    system: bn("v3.0"),
   };
 
   const go = (s: Section) => {
@@ -138,9 +140,9 @@ export function AdminSettings({ initial, admin, adminId }: { initial: Section; a
 
   return (
     <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-      <nav aria-label="Settings sections" className={`${card} p-2 lg:sticky lg:top-24`}>
+      <nav aria-label="সেটিংসের বিভাগ" className={`${card} p-2 lg:sticky lg:top-24`}>
         <label className="block p-2 lg:hidden">
-          <span className="sr-only">Settings section</span>
+          <span className="sr-only">সেটিংসের বিভাগ</span>
           <select value={section} onChange={(e) => go(e.target.value as Section)} className={selectClass}>
             {(Object.keys(SECTIONS) as Section[]).map((s) => (
               <option key={s} value={s}>
@@ -205,18 +207,16 @@ function General({ admin, adminId }: { admin: string; adminId: string }) {
           <div className="min-w-[160px] flex-1">
             <h2 className="text-[16px] font-semibold text-ink">{admin}</h2>
             <p className="text-[12px] text-muted">
-              Chief Executive Editor · {adminId} · {email}
+              প্রধান নির্বাহী সম্পাদক · {adminId} · {email}
             </p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-[11.5px] font-semibold text-success">
             <span className="size-1.5 rounded-full bg-success" />
-            Active account
+            অ্যাকাউন্ট চালু আছে
           </span>
         </div>
         <div className="px-5 py-5">
-          <h3 className="text-[13.5px] font-semibold text-ink">
-            Change password · <span className="font-bn">পাসওয়ার্ড পরিবর্তন</span>
-          </h3>
+          <h3 className="text-[13.5px] font-semibold text-ink">পাসওয়ার্ড পরিবর্তন</h3>
           <div className="mt-3 max-w-xl">
             <ChangePasswordForm />
           </div>
@@ -224,24 +224,24 @@ function General({ admin, adminId }: { admin: string; adminId: string }) {
       </section>
 
       <section className={card}>
-        <Head section="general" extra="organisation" />
+        <Head section="general" extra="প্রতিষ্ঠান" />
         <div className="grid grid-cols-1 gap-4 px-5 py-5 sm:grid-cols-2">
-          <Field id="g-org" label="Organisation name">
+          <Field id="g-org" label="প্রতিষ্ঠানের নাম">
             <input id="g-org" value={s.draft.org} onChange={(e) => set("org")(e.target.value)} className={inputClass} />
           </Field>
-          <Field id="g-lang" label="Report language">
+          <Field id="g-lang" label="প্রতিবেদনের ভাষা">
             <select id="g-lang" value={s.draft.language} onChange={(e) => set("language")(e.target.value)} className={selectClass}>
               <option value="bn">বাংলা</option>
-              <option value="en">English</option>
+              <option value="en">ইংরেজি</option>
             </select>
           </Field>
-          <Field id="g-tz" label="Time zone" hint="Used for dates on reports and the audit log.">
+          <Field id="g-tz" label="সময় অঞ্চল" hint="প্রতিবেদন ও অডিট লগের তারিখে এটি ব্যবহার হয়।">
             <select id="g-tz" value={s.draft.timezone} onChange={(e) => set("timezone")(e.target.value)} className={selectClass}>
-              <option value="Asia/Dhaka">Asia/Dhaka (GMT+6)</option>
+              <option value="Asia/Dhaka">ঢাকা (GMT+৬)</option>
               <option value="UTC">UTC</option>
             </select>
           </Field>
-          <Field id="g-footer" label="Report footer" hint="Printed at the bottom of every final report.">
+          <Field id="g-footer" label="প্রতিবেদনের ফুটার" hint="প্রতিটি চূড়ান্ত প্রতিবেদনের নিচে এটি ছাপা হয়।">
             <textarea id="g-footer" rows={3} value={s.draft.footer} onChange={(e) => set("footer")(e.target.value)} className={`${inputClass} h-auto resize-y py-2.5 font-bn`} />
           </Field>
         </div>
@@ -261,11 +261,11 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
   const s = useStaged<Account[]>(ACCOUNTS, (draft) => {
     const kept = new Map(draft.map((a) => [a.id, a]));
     for (const a of ACCOUNTS) {
-      if (a.role === "Chief Executive Editor") continue;
+      if (a.role === "প্রধান নির্বাহী সম্পাদক") continue;
       const next = kept.get(a.id);
-      const set = a.role === "Executive Editor" ? setReviewerStatus : setStaffStatus;
+      const set = a.role === "নির্বাহী সম্পাদক" ? setReviewerStatus : setStaffStatus;
       if (!next) set(a.id, adminId, "Deactivated" as never);
-      else if (next.suspended !== a.suspended) set(a.id, adminId, (next.suspended ? "Suspended" : a.role === "Executive Editor" ? "Active" : "On duty") as never);
+      else if (next.suspended !== a.suspended) set(a.id, adminId, (next.suspended ? "Suspended" : a.role === "নির্বাহী সম্পাদক" ? "Active" : "On duty") as never);
     }
   });
   const [query, setQuery] = useState("");
@@ -293,10 +293,10 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
       <section className={card}>
         <Head
           section="users"
-          extra={`${s.draft.length} accounts`}
+          extra={`${bn(s.draft.length)}টি অ্যাকাউন্ট`}
           action={
             <Link href="/admin/field-staff/new" className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-              + Add New User
+              + নতুন ব্যবহারকারী যোগ করুন
             </Link>
           }
         />
@@ -306,7 +306,7 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
               <circle cx="7" cy="7" r="4.8" stroke="currentColor" strokeWidth="1.4" />
               <path d="m10.6 10.6 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
             </svg>
-            <span className="sr-only">Search accounts</span>
+            <span className="sr-only">অ্যাকাউন্ট খুঁজুন</span>
             <input
               type="search"
               value={query}
@@ -314,24 +314,24 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
                 setQuery(e.target.value);
                 setPage(0);
               }}
-              placeholder="Search by name, email or ID…"
+              placeholder="নাম, ইমেইল বা আইডি দিয়ে খুঁজুন…"
               className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-placeholder"
             />
           </label>
-          <label className="w-[150px]">
-            <span className="sr-only">Filter by role</span>
+          <label className="w-[190px]">
+            <span className="sr-only">ভূমিকা অনুযায়ী ফিল্টার</span>
             <select
               value={role}
               onChange={(e) => {
                 setRole(e.target.value as typeof role);
                 setPage(0);
               }}
-              className={`${selectClass} h-10 font-sans`}
+              className={`${selectClass} h-10`}
             >
-              <option value="all">All roles</option>
-              <option>Chief Executive Editor</option>
-              <option>Executive Editor</option>
-              <option>Investigation Editor</option>
+              <option value="all">সব ভূমিকা</option>
+              <option>প্রধান নির্বাহী সম্পাদক</option>
+              <option>নির্বাহী সম্পাদক</option>
+              <option>তদন্ত সম্পাদক</option>
             </select>
           </label>
         </div>
@@ -339,29 +339,29 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left">
             <thead>
-              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold tracking-[0.06em] text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">NAME</th>
-                <th scope="col" className="px-3 py-3 font-semibold">EMAIL</th>
-                <th scope="col" className="px-3 py-3 font-semibold">ROLE</th>
-                <th scope="col" className="px-3 py-3 font-semibold">STATUS</th>
-                <th scope="col" className="px-3 py-3 font-semibold">LAST ACTIVE</th>
-                <th scope="col" className="px-5 py-3 text-right font-semibold">ACTIONS</th>
+              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
+                <th scope="col" className="px-5 py-3 font-semibold">নাম</th>
+                <th scope="col" className="px-3 py-3 font-semibold">ইমেইল</th>
+                <th scope="col" className="px-3 py-3 font-semibold">ভূমিকা</th>
+                <th scope="col" className="px-3 py-3 font-semibold">অবস্থা</th>
+                <th scope="col" className="px-3 py-3 font-semibold">শেষ কাজ</th>
+                <th scope="col" className="px-5 py-3 text-right font-semibold">কাজ</th>
               </tr>
             </thead>
             <tbody>
               {shown.map((a) => {
                 const you = a.id === adminId;
                 const changed = original.get(a.id)?.suspended !== a.suspended;
-                const staff = a.role === "Investigation Editor";
-                const base = staff ? "/admin/field-staff" : a.role === "Executive Editor" ? "/admin/reviewers" : null;
+                const staff = a.role === "তদন্ত সম্পাদক";
+                const base = staff ? "/admin/field-staff" : a.role === "নির্বাহী সম্পাদক" ? "/admin/reviewers" : null;
                 return (
-                  <tr key={a.id} className="border-b border-line last:border-b-0">
+                  <tr key={a.id} className={`border-b border-line last:border-b-0 ${base ? "relative cursor-pointer hover:bg-surface/40" : ""}`}>
                     <td className="px-5 py-3 align-middle">
                       <div className="flex items-center gap-3">
                         <span className={`flex size-8 flex-none items-center justify-center rounded-full text-[11.5px] font-semibold ${ROLE_STYLE[a.role]}`}>{a.initials}</span>
                         <div>
                           {base ? (
-                            <Link href={`${base}/${a.id}`} className="whitespace-nowrap text-[13.5px] font-semibold text-ink hover:text-primary">
+                            <Link href={`${base}/${a.id}`} className="whitespace-nowrap text-[13.5px] font-semibold text-ink after:absolute after:inset-0 after:content-[''] hover:text-primary">
                               {a.name}
                             </Link>
                           ) : (
@@ -369,7 +369,7 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
                           )}
                           <div className="text-[11.5px] text-muted">
                             {a.id}
-                            {you && " · you"}
+                            {you && " · আপনি"}
                           </div>
                         </div>
                       </div>
@@ -381,53 +381,53 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
                     <td className="px-3 py-3 align-middle text-[13px]">
                       <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         <span className={`size-1.5 rounded-full ${a.suspended ? "bg-danger" : "bg-success"}`} aria-hidden="true" />
-                        {a.suspended ? "Suspended" : "Active"}
-                        {changed && <span className="text-[11px] font-semibold text-warning">· unsaved</span>}
+                        {a.suspended ? "বন্ধ" : "চালু আছে"}
+                        {changed && <span className="text-[11px] font-semibold text-warning">· সেভ করা হয়নি</span>}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 align-middle text-[13px] text-muted">{a.lastActive}</td>
                     <td className="px-5 py-3 align-middle">
                       {confirmDelete === a.id ? (
-                        <div className="flex items-center justify-end gap-2" role="group" aria-label={`Confirm removing ${a.name}`}>
-                          <span className="text-[12px] text-danger">Remove?</span>
-                          <button type="button" onClick={() => remove(a.id)} className="h-8 cursor-pointer rounded-button bg-danger px-2.5 text-[12px] font-semibold text-white hover:bg-danger-hover">
-                            Remove
+                        <div className="relative z-10 flex items-center justify-end gap-2" role="group" aria-label={`${a.name}-কে সরানো নিশ্চিত করুন`}>
+                          <span className="whitespace-nowrap text-[12px] text-danger">সরাবেন?</span>
+                          <button type="button" onClick={() => remove(a.id)} className="h-8 cursor-pointer whitespace-nowrap rounded-button bg-danger px-2.5 text-[12px] font-semibold text-white hover:bg-danger-hover">
+                            সরান
                           </button>
-                          <button type="button" onClick={() => setConfirmDelete(null)} className="h-8 cursor-pointer rounded-button border border-line px-2.5 text-[12px] font-semibold text-ink">
-                            Keep
+                          <button type="button" onClick={() => setConfirmDelete(null)} className="h-8 cursor-pointer whitespace-nowrap rounded-button border border-line px-2.5 text-[12px] font-semibold text-ink">
+                            রাখুন
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="relative z-10 flex items-center justify-end gap-2">
                           {base ? (
                             <Link href={`${base}/new?edit=${a.id}`} className="inline-flex h-8 items-center rounded-button border border-line px-2.5 text-[12px] font-semibold text-primary hover:border-primary">
-                              Edit
+                              এডিট
                             </Link>
                           ) : (
                             <span
-                              title="Your own details are edited under General"
+                              title="নিজের তথ্য “সাধারণ” বিভাগে এডিট করুন"
                               className="inline-flex h-8 cursor-not-allowed items-center rounded-button border border-line px-2.5 text-[12px] font-semibold text-muted opacity-60"
                             >
-                              Edit
+                              এডিট
                             </span>
                           )}
                           <button
                             type="button"
                             disabled={you}
                             onClick={() => toggle(a.id)}
-                            title={you ? "You can't suspend your own account" : undefined}
+                            title={you ? "নিজের অ্যাকাউন্ট বন্ধ করা যায় না" : undefined}
                             className={`h-8 cursor-pointer rounded-button border px-2.5 text-[12px] font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${
                               a.suspended ? "border-danger/40 text-danger hover:bg-danger/5" : "border-warning/40 text-warning hover:bg-warning/5"
                             }`}
                           >
-                            {a.suspended ? "Restore" : "Suspend"}
+                            {a.suspended ? "আবার চালু করুন" : "বন্ধ করুন"}
                           </button>
                           <button
                             type="button"
                             disabled={you}
                             onClick={() => setConfirmDelete(a.id)}
-                            aria-label={`Remove ${a.name}`}
-                            title={you ? "You can't remove your own account" : "Remove account"}
+                            aria-label={`${a.name}-কে সরান`}
+                            title={you ? "নিজের অ্যাকাউন্ট সরানো যায় না" : "অ্যাকাউন্ট সরান"}
                             className="flex size-8 cursor-pointer items-center justify-center rounded-button border border-danger/40 text-danger hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -443,7 +443,7 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
               {shown.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-10 text-center text-[13px] text-muted">
-                    No account matches this search.
+                    খুঁজে কিছু পাওয়া যায়নি।
                   </td>
                 </tr>
               )}
@@ -452,12 +452,12 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3.5">
           <p className="text-[13px] text-muted">
-            Showing {shown.length} of {rows.length} accounts
-            {removed > 0 && <span className="font-semibold text-warning"> · {removed} marked for removal</span>}
+            {bn(rows.length)}টি অ্যাকাউন্টের মধ্যে {bn(shown.length)}টি দেখানো হচ্ছে
+            {removed > 0 && <span className="font-semibold text-warning"> · {bn(removed)}টি সরানোর জন্য বাছাই করা</span>}
           </p>
-          <nav aria-label="Pages" className="flex gap-1.5">
+          <nav aria-label="পৃষ্ঠা" className="flex gap-1.5">
             <button type="button" disabled={current === 0} onClick={() => setPage(current - 1)} className="h-8 cursor-pointer rounded-button border border-line px-3 text-[12.5px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40">
-              Previous
+              আগের
             </button>
             {Array.from({ length: pages }, (_, i) => (
               <button
@@ -467,11 +467,11 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
                 onClick={() => setPage(i)}
                 className={`size-8 cursor-pointer rounded-button border text-[12.5px] font-semibold ${i === current ? "border-primary bg-primary text-white" : "border-line text-ink"}`}
               >
-                {i + 1}
+                {bn(i + 1)}
               </button>
             ))}
             <button type="button" disabled={current >= pages - 1} onClick={() => setPage(current + 1)} className="h-8 cursor-pointer rounded-button border border-line px-3 text-[12.5px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40">
-              Next
+              পরের
             </button>
           </nav>
         </div>
@@ -483,22 +483,22 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
 
 // ── Roles & Permissions ──────────────────────────────────────────────────────
 
-const ROLE_KEY: Record<UserRole, "admin" | "reviewer" | "staff"> = { "Chief Executive Editor": "admin", "Executive Editor": "reviewer", "Investigation Editor": "staff" };
+const ROLE_KEY: Record<UserRole, "admin" | "reviewer" | "staff"> = { "প্রধান নির্বাহী সম্পাদক": "admin", "নির্বাহী সম্পাদক": "reviewer", "তদন্ত সম্পাদক": "staff" };
 
 function Roles({ admin, adminId }: { admin: string; adminId: string }) {
   const db = useDb();
   const s = useStaged(db.settings.permissions, (v) => saveSettings({ permissions: v }, adminId, "roles & permissions"));
-  const roles: UserRole[] = ["Chief Executive Editor", "Executive Editor", "Investigation Editor"];
+  const roles: UserRole[] = ["প্রধান নির্বাহী সম্পাদক", "নির্বাহী সম্পাদক", "তদন্ত সম্পাদক"];
   const PERMISSIONS = PERMISSION_META;
   return (
     <>
       <section className={card}>
-        <Head section="roles" extra="3 roles" />
+        <Head section="roles" extra={`${bn(3)}টি ভূমিকা`} />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[620px] text-left">
             <thead>
-              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold tracking-[0.06em] text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">PERMISSION</th>
+              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
+                <th scope="col" className="px-5 py-3 font-semibold">অনুমতি</th>
                 {roles.map((r) => (
                   <th key={r} scope="col" className="px-3 py-3 text-center font-semibold">
                     <span className={`rounded-md px-2 py-0.5 ${ROLE_STYLE[r]}`}>{r}</span>
@@ -510,9 +510,9 @@ function Roles({ admin, adminId }: { admin: string; adminId: string }) {
               {PERMISSIONS.map((p) => (
                 <tr key={p.label} className="border-b border-line last:border-b-0">
                   <td className="px-5 py-3 text-[13px] text-ink">
-                    <span className="mr-2 text-[11px] font-semibold tracking-[0.04em] text-muted uppercase">{p.area}</span>
+                    <span className="mr-2 text-[11.5px] font-semibold text-muted">{p.area}</span>
                     {p.label}
-                    {p.locked && <span className="ml-2 text-[11px] text-muted">· fixed by policy</span>}
+                    {p.locked && <span className="ml-2 text-[11px] text-muted">· নিয়ম অনুযায়ী ঠিক করা</span>}
                   </td>
                   {roles.map((r) => (
                     <td key={r} className="px-3 py-3 text-center">
@@ -532,7 +532,7 @@ function Roles({ admin, adminId }: { admin: string; adminId: string }) {
           </table>
         </div>
         <p className="border-t border-line px-5 py-3 text-[12px] text-muted">
-          Investigation editors never see executive editor names, and executive editors see a source label instead of investigation editor names — these follow from the permissions above.
+          তদন্ত সম্পাদকরা কখনো নির্বাহী সম্পাদকের নাম দেখেন না, আর নির্বাহী সম্পাদকরা তদন্ত সম্পাদকের নামের বদলে একটি উৎসের লেবেল দেখেন — এটা ওপরের অনুমতি থেকেই ঠিক হয়।
         </p>
       </section>
       <SaveBar section="roles" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
@@ -555,7 +555,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="coverage" extra={`${COVERAGE.length} executive editors`} />
+        <Head section="coverage" extra={`${bn(COVERAGE.length)} জন নির্বাহী সম্পাদক`} />
         <ul>
           {COVERAGE.map((c, i) => (
             <li key={c.id} className="border-b border-line px-5 py-4 last:border-b-0">
@@ -563,7 +563,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
                 <div>
                   <div className="text-[14px] font-semibold text-ink">{c.name}</div>
                   <div className="text-[12px] text-muted">
-                    {c.id} · {c.status} · {c.queue} waiting in queue
+                    {c.id} · {STATUS_BN[c.status] ?? c.status} · তালিকায় অপেক্ষায় {bn(c.queue)}টি
                   </div>
                 </div>
               </div>
@@ -574,14 +574,14 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
                     <button
                       type="button"
                       onClick={() => s.setDraft((d) => d.map((areas, j) => (j === i ? areas.filter((x) => x !== a) : areas)))}
-                      aria-label={`Remove ${a} from ${c.name}`}
+                      aria-label={`${c.name}-এর এলাকা থেকে ${a} সরান`}
                       className="flex size-5 cursor-pointer items-center justify-center rounded text-muted hover:bg-danger/10 hover:text-danger"
                     >
                       ×
                     </button>
                   </li>
                 ))}
-                {s.draft[i].length === 0 && <li className="text-[12.5px] text-danger">No area — this executive editor will get no submissions.</li>}
+                {s.draft[i].length === 0 && <li className="text-[12.5px] text-danger">কোনো এলাকা নেই — এই নির্বাহী সম্পাদক কোনো জমা পাবেন না।</li>}
               </ul>
               <form
                 className="mt-2.5 flex max-w-md gap-2"
@@ -594,7 +594,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
                 }}
               >
                 <label className="min-w-0 flex-1">
-                  <span className="sr-only">Add an area for {c.name}</span>
+                  <span className="sr-only">{c.name}-এর জন্য এলাকা যোগ করুন</span>
                   <input
                     list="coverage-areas"
                     value={adding[c.id] ?? ""}
@@ -604,7 +604,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
                   />
                 </label>
                 <button type="submit" className="h-9 cursor-pointer rounded-button border border-line px-3 text-[12.5px] font-semibold text-primary hover:border-primary">
-                  Add area
+                  এলাকা যোগ করুন
                 </button>
               </form>
             </li>
@@ -635,8 +635,8 @@ function Parties({ admin, adminId }: { admin: string; adminId: string }) {
   const [error, setError] = useState("");
   const add = () => {
     const v = name.trim();
-    if (!v) return setError("Enter a name.");
-    if (s.draft.some((p) => p.name === v)) return setError("Already in the list.");
+    if (!v) return setError("একটি নাম লিখুন।");
+    if (s.draft.some((p) => p.name === v)) return setError("এটি আগেই তালিকায় আছে।");
     s.setDraft((d) => [...d, { name: v, kind, requests: 0 }]);
     setName("");
     setError("");
@@ -644,7 +644,7 @@ function Parties({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="parties" extra={`${s.draft.length} entries`} />
+        <Head section="parties" extra={`${bn(s.draft.length)}টি নাম`} />
         <form
           className="flex flex-wrap items-start gap-2.5 border-b border-line px-5 py-3.5"
           onSubmit={(e) => {
@@ -653,33 +653,33 @@ function Parties({ admin, adminId }: { admin: string; adminId: string }) {
           }}
         >
           <label className="min-w-0 flex-[1_1_240px]">
-            <span className="sr-only">Party or organisation name</span>
+            <span className="sr-only">দল বা সংগঠনের নাম</span>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="নাম লিখুন" aria-invalid={!!error} className={`${inputClass} h-10 font-bn ${error ? "border-danger!" : ""}`} />
             {error && <span className="mt-1 block text-[12px] text-danger">{error}</span>}
           </label>
           <label className="w-[160px]">
-            <span className="sr-only">Type</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={`${selectClass} h-10 font-sans`}>
-              <option>Party</option>
-              <option>Organisation</option>
+            <span className="sr-only">ধরন</span>
+            <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={`${selectClass} h-10`}>
+              <option value="Party">দল</option>
+              <option value="Organisation">সংগঠন</option>
             </select>
           </label>
           <button type="submit" className="h-10 cursor-pointer rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-            Add
+            যোগ করুন
           </button>
         </form>
         <ul>
           {s.draft.map((p) => (
             <li key={p.name} className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
               <span className="min-w-0 flex-1 font-bn text-[13.5px] text-ink">{p.name}</span>
-              <span className="rounded-md bg-surface px-2 py-0.5 text-[11.5px] text-muted">{p.kind}</span>
-              <span className="w-[92px] text-right text-[12px] text-muted">{p.requests} in use</span>
+              <span className="rounded-md bg-surface px-2 py-0.5 text-[11.5px] text-muted">{KIND_BN[p.kind] ?? p.kind}</span>
+              <span className="w-[110px] text-right text-[12px] text-muted">{bn(p.requests)}টিতে ব্যবহার হয়েছে</span>
               <button
                 type="button"
                 disabled={p.requests > 0}
-                title={p.requests > 0 ? "In use by profiles or reports — can't be removed" : "Remove"}
+                title={p.requests > 0 ? "প্রোফাইল বা প্রতিবেদনে ব্যবহার হয়েছে — সরানো যাবে না" : "সরান"}
                 onClick={() => s.setDraft((d) => d.filter((x) => x.name !== p.name))}
-                aria-label={`Remove ${p.name}`}
+                aria-label={`${p.name} সরান`}
                 className="flex size-8 cursor-pointer items-center justify-center rounded-button border border-line text-muted hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ×
@@ -708,7 +708,7 @@ function Rules({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="rules" extra="applies to new audits" />
+        <Head section="rules" extra="শুধু নতুন অডিটে কাজ করবে" />
         <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2">
           {RULES.map((r) => {
             const bad = invalid.includes(r.key);
@@ -717,7 +717,7 @@ function Rules({ admin, adminId }: { admin: string; adminId: string }) {
                 key={r.key}
                 id={`r-${r.key}`}
                 label={r.label}
-                hint={bad ? `Enter a whole number from ${r.min} to ${r.max}.` : r.note}
+                hint={bad ? `${bn(r.min)} থেকে ${bn(r.max)}-এর মধ্যে একটি পূর্ণ সংখ্যা লিখুন।` : r.note}
                 hintClassName={bad ? "text-danger" : "text-muted"}
               >
                 <div className="flex items-center gap-2.5">
@@ -756,14 +756,14 @@ function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="notifications" extra="sent to the chief executive editor" />
+        <Head section="notifications" extra="প্রধান নির্বাহী সম্পাদকের কাছে পাঠানো হয়" />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[520px] text-left">
             <thead>
-              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold tracking-[0.06em] text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">EVENT</th>
-                <th scope="col" className="w-24 px-3 py-3 text-center font-semibold">SMS</th>
-                <th scope="col" className="w-24 px-5 py-3 text-center font-semibold">EMAIL</th>
+              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
+                <th scope="col" className="px-5 py-3 font-semibold">ঘটনা</th>
+                <th scope="col" className="w-24 px-3 py-3 text-center font-semibold">এসএমএস</th>
+                <th scope="col" className="w-24 px-5 py-3 text-center font-semibold">ইমেইল</th>
               </tr>
             </thead>
             <tbody>
@@ -776,7 +776,7 @@ function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
                         type="button"
                         role="switch"
                         aria-checked={n[ch]}
-                        aria-label={`${ch.toUpperCase()}: ${n.label}`}
+                        aria-label={`${ch === "sms" ? "এসএমএস" : "ইমেইল"}: ${n.label}`}
                         onClick={() => flip(n.key, ch)}
                         className={`relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors ${n[ch] ? "bg-primary" : "bg-line"}`}
                       >
@@ -797,7 +797,7 @@ function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
 
 // ── Security & Audit Log ─────────────────────────────────────────────────────
 
-const ROLE_LABEL = { admin: "Chief Executive Editor", reviewer: "Executive Editor", staff: "Investigation Editor", politician: "Political Activist", system: "System" } as const;
+const ROLE_LABEL = { admin: "প্রধান নির্বাহী সম্পাদক", reviewer: "নির্বাহী সম্পাদক", staff: "তদন্ত সম্পাদক", politician: "রাজনৈতিক কর্মী", system: "সিস্টেম" } as const;
 
 function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
   const db = useDb();
@@ -805,12 +805,12 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
     saveSettings({ security: { twoFactor: v.twoFactor, timeout: Number(v.timeout) } }, adminId, "security"),
   );
   const [who, setWho] = useState<"all" | string>("all");
-  const roles = ["Chief Executive Editor", "Executive Editor", "Investigation Editor", "Political Activist", "System"];
-  const all = db.audit.map((e) => ({ when: enDateTime(e.at), actor: nameOf(db, e.actor), role: ROLE_LABEL[roleOfId(db, e.actor)], action: e.action, target: e.target }));
+  const roles = Object.values(ROLE_LABEL);
+  const all = db.audit.map((e) => ({ when: bnDateTime(e.at), actor: nameOf(db, e.actor), role: ROLE_LABEL[roleOfId(db, e.actor)], action: e.action, target: e.target }));
   const rows = all.filter((e) => who === "all" || e.role === who).slice(0, 200);
 
   const exportCsv = () => {
-    const csv = [["When", "Actor", "Role", "Action", "Target"], ...rows.map((e) => [e.when, e.actor, e.role, e.action, e.target])]
+    const csv = [["সময়", "কে", "ভূমিকা", "কাজ", "বিষয়"], ...rows.map((e) => [e.when, e.actor, e.role, e.action, e.target])]
       .map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(","))
       .join("\r\n");
     const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
@@ -824,29 +824,29 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="audit" extra="security" />
+        <Head section="audit" extra="নিরাপত্তা" />
         <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2">
           <div className="flex items-start justify-between gap-4 rounded-card border border-line px-4 py-3.5">
             <div>
-              <div className="text-[13.5px] font-semibold text-ink">Two-step sign-in for chief executive and executive editors</div>
-              <p className="mt-0.5 text-[12px] text-muted">An SMS code is required on every new device.</p>
+              <div className="text-[13.5px] font-semibold text-ink">প্রধান নির্বাহী সম্পাদক ও নির্বাহী সম্পাদকের জন্য দুই-ধাপের সাইন-ইন</div>
+              <p className="mt-0.5 text-[12px] text-muted">প্রতিটি নতুন ডিভাইসে একটি এসএমএস কোড লাগবে।</p>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={s.draft.twoFactor}
-              aria-label="Two-step sign-in"
+              aria-label="দুই-ধাপের সাইন-ইন"
               onClick={() => s.setDraft((d) => ({ ...d, twoFactor: !d.twoFactor }))}
               className={`relative mt-1 inline-flex h-5 w-9 flex-none cursor-pointer items-center rounded-full ${s.draft.twoFactor ? "bg-primary" : "bg-line"}`}
             >
               <span className={`size-4 rounded-full bg-white shadow transition-transform ${s.draft.twoFactor ? "translate-x-[18px]" : "translate-x-0.5"}`} />
             </button>
           </div>
-          <Field id="sec-timeout" label="Sign out after inactivity">
-            <select id="sec-timeout" value={s.draft.timeout} onChange={(e) => s.setDraft((d) => ({ ...d, timeout: e.target.value }))} className={`${selectClass} font-sans`}>
-              <option value="15">15 minutes</option>
-              <option value="30">30 minutes</option>
-              <option value="60">1 hour</option>
+          <Field id="sec-timeout" label="কিছু না করলে নিজে থেকে সাইন-আউট">
+            <select id="sec-timeout" value={s.draft.timeout} onChange={(e) => s.setDraft((d) => ({ ...d, timeout: e.target.value }))} className={selectClass}>
+              <option value="15">১৫ মিনিট</option>
+              <option value="30">৩০ মিনিট</option>
+              <option value="60">১ ঘণ্টা</option>
             </select>
           </Field>
         </div>
@@ -856,41 +856,39 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
       <section id="audit-log" className={card}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
           <div>
-            <h2 className="text-[15px] font-semibold text-ink">Audit log</h2>
-            <p className="mt-0.5 text-[12px] text-muted">
-              <span className="font-bn">অডিট লগ</span> · every decision, with account and time · read-only
-            </p>
+            <h2 className="text-[15px] font-semibold text-ink">অডিট লগ</h2>
+            <p className="mt-0.5 text-[12px] text-muted">প্রতিটি সিদ্ধান্ত, অ্যাকাউন্ট ও সময়সহ · শুধু দেখার জন্য</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <label>
-              <span className="sr-only">Filter by role</span>
-              <select value={who} onChange={(e) => setWho(e.target.value)} className={`${selectClass} h-9 w-[150px] font-sans text-[13px]`}>
-                <option value="all">Everyone</option>
+              <span className="sr-only">ভূমিকা অনুযায়ী ফিল্টার</span>
+              <select value={who} onChange={(e) => setWho(e.target.value)} className={`${selectClass} h-9 w-[190px] text-[13px]`}>
+                <option value="all">সবাই</option>
                 {roles.map((r) => (
                   <option key={r}>{r}</option>
                 ))}
               </select>
             </label>
             <button type="button" onClick={exportCsv} className="h-9 cursor-pointer rounded-button border border-line px-3 text-[12.5px] font-semibold text-primary hover:border-primary">
-              Export CSV
+              CSV ডাউনলোড
             </button>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[680px] text-left">
             <thead>
-              <tr className="border-b border-line bg-surface/60 text-[11px] font-semibold tracking-[0.06em] text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">WHEN</th>
-                <th scope="col" className="px-3 py-3 font-semibold">WHO</th>
-                <th scope="col" className="px-3 py-3 font-semibold">ACTION</th>
-                <th scope="col" className="px-5 py-3 font-semibold">TARGET</th>
+              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
+                <th scope="col" className="px-5 py-3 font-semibold">সময়</th>
+                <th scope="col" className="px-3 py-3 font-semibold">কে</th>
+                <th scope="col" className="px-3 py-3 font-semibold">কাজ</th>
+                <th scope="col" className="px-5 py-3 font-semibold">বিষয়</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((e, i) => {
                 const href = auditHref(e.target, db);
                 return (
-                  <tr key={i} className="border-b border-line last:border-b-0">
+                  <tr key={i} className={`border-b border-line last:border-b-0 ${href ? "relative cursor-pointer hover:bg-surface/40" : ""}`}>
                     <td className="whitespace-nowrap px-5 py-3 text-[12.5px] text-muted">{e.when}</td>
                     <td className="px-3 py-3 text-[13px]">
                       <div className="font-bn font-semibold text-ink">{e.actor}</div>
@@ -899,7 +897,7 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
                     <td className="px-3 py-3 text-[13px] text-ink">{e.action}</td>
                     <td className="px-5 py-3 font-bn text-[12.5px]">
                       {href ? (
-                        <Link href={href} className="font-semibold text-primary hover:text-primary-hover">
+                        <Link href={href} className="font-semibold text-primary after:absolute after:inset-0 after:content-[''] hover:text-primary-hover">
                           {e.target}
                         </Link>
                       ) : (
@@ -913,7 +911,7 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
           </table>
         </div>
         <p className="border-t border-line px-5 py-3 text-[12px] text-muted">
-          Entries can&apos;t be edited or deleted. Showing {rows.length} of {all.length}.
+          এন্ট্রি এডিট করা বা মুছে ফেলা যায় না। {bn(all.length)}টির মধ্যে {bn(rows.length)}টি দেখানো হচ্ছে।
         </p>
       </section>
     </>
@@ -926,9 +924,9 @@ function SystemInfo() {
   const [confirming, setConfirming] = useState(false);
   const [done, setDone] = useState(false);
   const rows: [string, string][] = [
-    ["Version", "ALARM v1.0 · web"],
-    ["Portals", "Chief Executive Editor · Executive Editor · Investigation Editor · Political Activist"],
-    ["Languages", "বাংলা · English"],
+    ["ভার্সন", `ALARM ${bn("v1.0")} · ওয়েব`],
+    ["পোর্টাল", "প্রধান নির্বাহী সম্পাদক · নির্বাহী সম্পাদক · তদন্ত সম্পাদক · রাজনৈতিক কর্মী"],
+    ["ভাষা", "বাংলা · ইংরেজি"],
   ];
   return (
     <section className={card}>
@@ -943,13 +941,13 @@ function SystemInfo() {
       </dl>
       {DEMO_MODE && (
       <div className="border-t border-line px-5 py-4">
-        <h3 className="text-[13.5px] font-semibold text-ink">Demo data</h3>
+        <h3 className="text-[13.5px] font-semibold text-ink">ডেমো ডেটা</h3>
         <p className="mt-0.5 text-[12px] leading-relaxed text-muted text-pretty">
-          This preview keeps its data in the browser. Resetting restores the original sample records for every portal on this device.
+          এই প্রিভিউয়ের ডেটা ব্রাউজারে রাখা হয়। রিসেট করলে এই ডিভাইসে আপনার প্রতিষ্ঠানের মূল নমুনা রেকর্ড ফিরে আসবে। অন্য কোনো প্রতিষ্ঠানের ডেটা বদলাবে না।
         </p>
         {confirming ? (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-[12.5px] text-danger">Reset all changes made on this device?</span>
+            <span className="text-[12.5px] text-danger">এই ডিভাইসে করা সব পরিবর্তন রিসেট করবেন?</span>
             <button
               type="button"
               onClick={() => {
@@ -959,10 +957,10 @@ function SystemInfo() {
               }}
               className="h-9 cursor-pointer rounded-button bg-danger px-3.5 text-[12.5px] font-semibold text-white hover:bg-danger-hover"
             >
-              Reset
+              রিসেট করুন
             </button>
             <button type="button" onClick={() => setConfirming(false)} className="h-9 cursor-pointer rounded-button border border-line px-3 text-[12.5px] font-semibold text-muted">
-              Cancel
+              বাতিল
             </button>
           </div>
         ) : (
@@ -974,12 +972,12 @@ function SystemInfo() {
             }}
             className="mt-3 h-9 cursor-pointer rounded-button border border-danger/50 px-3.5 text-[12.5px] font-semibold text-danger hover:bg-danger/5"
           >
-            Reset demo data
+            ডেমো ডেটা রিসেট করুন
           </button>
         )}
         {done && (
           <p role="status" className="mt-2 text-[12px] text-success">
-            Sample data restored.
+            নমুনা ডেটা ফিরিয়ে আনা হয়েছে।
           </p>
         )}
       </div>

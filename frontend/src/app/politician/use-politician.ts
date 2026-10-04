@@ -7,14 +7,14 @@ import type { Submission } from "@/lib/db/types";
 
 /**
  * The signed-in politician's own data. They see published reports, and their own submissions in any
- * state — never staff submissions still in review, rejected or held.
+ * state — never staff submissions still in review or rejected, unless they disputed one.
  */
 export function usePolitician() {
   const db = useDb();
   const me = useMe();
   const profile = me?.profile;
   const all = profile ? submissionsFor(db, profile.id) : [];
-  const visible = all.filter((s) => s.state === "Accepted" || s.state === "Withdrawn" || s.origin === "self");
+  const visible = all.filter((s) => s.state === "Accepted" || s.origin === "self" || disputeForSubmission(db, s.code));
   const published = all.filter((s) => s.state === "Accepted");
   const ownOpen = all.filter((s) => s.origin === "self" && s.state !== "Accepted");
   return {

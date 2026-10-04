@@ -122,7 +122,7 @@ export function SettingsView({
                 <span className="size-1.5 rounded-full bg-current" />
                 {status}
               </span>
-              <p className="mt-2 text-[11px] leading-[1.6] text-muted">ছবি পরিবর্তন করতে ছবিতে ক্লিক করুন</p>
+              <p className="mt-2 text-[11px] leading-[1.6] text-muted">ছবি বদলাতে ছবিতে ক্লিক করুন</p>
             </div>
             {facts.length > 0 && (
               <dl className="border-t border-line px-5 py-2">
@@ -141,9 +141,9 @@ export function SettingsView({
               <Icon name="lock" className="size-4" />
             </span>
             <div>
-              <div className="text-[13px] font-semibold leading-[1.5]">তথ্য সংশোধন</div>
+              <div className="text-[13px] font-semibold leading-[1.5]">তথ্য ঠিক করা</div>
               <p className="mt-0.5 text-[12px] leading-[1.7] text-muted text-pretty">
-                প্রোফাইলের তথ্য এখান থেকে পরিবর্তন করা যায় না। কোনো তথ্য ভুল থাকলে প্রধান নির্বাহী সম্পাদককে জানান — যাচাইয়ের পর তিনি সংশোধন করবেন।
+                প্রোফাইলের তথ্য এখান থেকে বদলানো যায় না। কোনো তথ্য ভুল থাকলে প্রধান নির্বাহী সম্পাদককে জানান — যাচাই করে তিনি ঠিক করে দেবেন।
               </p>
             </div>
           </div>
@@ -171,7 +171,7 @@ export function SettingsView({
           ))}
 
           <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-            <CardHead icon="key" title="পাসওয়ার্ড পরিবর্তন" subtitle="বর্তমান পাসওয়ার্ড দিয়ে নিশ্চিত করে একটি নতুন, শক্তিশালী পাসওয়ার্ড দিন।" />
+            <CardHead icon="key" title="পাসওয়ার্ড বদলান" subtitle="এখনকার পাসওয়ার্ড দিয়ে নিশ্চিত করে একটি নতুন, শক্তিশালী পাসওয়ার্ড দিন।" />
             <div className="px-5 py-5">
               <ChangePasswordForm />
             </div>

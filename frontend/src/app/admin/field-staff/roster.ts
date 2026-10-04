@@ -7,6 +7,8 @@ import type { Database, StaffStatus } from "@/lib/db/types";
 export type FieldStaff = {
   id: string;
   name: string;
+  /** Bengali display name (falls back to `name`). */
+  nameBn: string;
   initials: string;
   phone: string;
   district: string;
@@ -31,6 +33,7 @@ export function staffRows(db: Database): FieldStaff[] {
     return {
       id: s.id,
       name: s.name,
+      nameBn: s.nameBn || s.name,
       initials: s.initials,
       phone: phoneIntl(s.phone),
       district: s.district,

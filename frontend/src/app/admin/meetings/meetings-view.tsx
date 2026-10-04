@@ -22,20 +22,16 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
 
   const stats = [
     { label: "চলমান", value: bn(upcoming.filter((m) => m.status === "live").length), color: "#F42A41", note: "এখন চলছে" },
-    { label: "আসন্ন", value: bn(upcoming.filter((m) => m.status === "scheduled").length), color: "#1D6FC0", note: "নির্ধারিত মিটিং" },
+    { label: "সামনের", value: bn(upcoming.filter((m) => m.status === "scheduled").length), color: "#1D6FC0", note: "সময় ঠিক করা মিটিং" },
     { label: "যোগ দেওয়ার অনুরোধ", value: bn(requests), color: "#D97706", note: "আপনার অনুমোদনের অপেক্ষায়" },
-    { label: "শেষ হয়েছে", value: bn(past.filter((m) => m.status === "ended").length), color: "#0D1F17", note: "সম্পন্ন মিটিং", href: "/admin/meetings?tab=past" },
+    { label: "শেষ হয়েছে", value: bn(past.filter((m) => m.status === "ended").length), color: "#0D1F17", note: "শেষ হওয়া মিটিং", href: "/admin/meetings?tab=past" },
   ];
 
   return (
     <>
       <PageHeader
         crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / মিটিং"
-        title={
-          <>
-            Meetings · <span className="font-bn">মিটিং</span>
-          </>
-        }
+        title={<span className="font-bn">মিটিং</span>}
         action={
           <Link href="/admin/meetings/new" className="inline-flex h-[38px] items-center rounded-button bg-primary px-3.5 font-bn text-[13.5px] font-semibold text-white hover:bg-primary-hover">
             + নতুন মিটিং
@@ -48,8 +44,8 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
             <div className="min-w-[180px] flex-1">
-              <h2 className="font-bn text-[14.5px] font-semibold">{tab === "upcoming" ? "আসন্ন ও চলমান মিটিং" : "শেষ ও বাতিল মিটিং"}</h2>
-              <p className="mt-0.5 font-bn text-[12px] text-muted">লিংক শেয়ার করুন — লগইন ছাড়াই ALARM আইডি দিয়ে যোগ দেওয়া যায়; আমন্ত্রিত নন এমন আইডি অনুরোধ পাঠায়</p>
+              <h2 className="font-bn text-[14.5px] font-semibold">{tab === "upcoming" ? "সামনের ও চলমান মিটিং" : "শেষ ও বাতিল মিটিং"}</h2>
+              <p className="mt-0.5 font-bn text-[12px] text-muted">লিংক শেয়ার করুন — লগইন ছাড়াই ALARM আইডি দিয়ে যোগ দেওয়া যায়; আমন্ত্রণ নেই এমন আইডি অনুরোধ পাঠায়</p>
             </div>
             <nav className="flex gap-2" aria-label="মিটিং তালিকা">
               {(["upcoming", "past"] as const).map((t) => (
@@ -59,7 +55,7 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
                   aria-current={tab === t ? "true" : undefined}
                   className={`flex h-8 items-center gap-1.5 rounded-button border px-3 font-bn text-[12.5px] font-semibold ${tab === t ? "border-primary bg-primary text-white" : "border-line text-muted hover:border-primary hover:text-primary"}`}
                 >
-                  {t === "upcoming" ? "আসন্ন" : "পূর্ববর্তী"}
+                  {t === "upcoming" ? "সামনের" : "আগের"}
                   <span className={`rounded-[9px] px-1.5 text-[11px] ${tab === t ? "bg-white/20" : "bg-surface"}`}>{bn((t === "upcoming" ? upcoming : past).length)}</span>
                 </Link>
               ))}
@@ -68,7 +64,7 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
 
           {list.length === 0 ? (
             <div className="flex flex-col items-center gap-3 px-6 py-12 text-center font-bn">
-              <p className="text-[13px] text-muted">{tab === "upcoming" ? "কোনো আসন্ন মিটিং নেই।" : "এখনও কোনো মিটিং শেষ হয়নি।"}</p>
+              <p className="text-[13px] text-muted">{tab === "upcoming" ? "সামনে কোনো মিটিং নেই।" : "এখনও কোনো মিটিং শেষ হয়নি।"}</p>
               {tab === "upcoming" && (
                 <Link href="/admin/meetings/new" className="inline-flex h-9 items-center rounded-button border border-line px-4 text-[13px] font-semibold text-primary hover:border-primary">
                   প্রথম মিটিং তৈরি করুন
@@ -97,7 +93,7 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
                       <div className="flex flex-wrap items-center gap-2.5 border-t border-[#E3EEEA] pt-2.5 text-[11.5px] text-muted">
                         <span className="truncate">এলাকা: {areaLabel(m.area)}</span>
                         {m.invitees.length > 0 && <span>· +{bn(m.invitees.length)} জন আমন্ত্রিত</span>}
-                        <span className="ml-auto inline-flex h-8 items-center rounded-button border border-line bg-white px-3 text-[11.5px] font-semibold text-primary group-hover:border-primary">পরিচালনা</span>
+                        <span className="ml-auto inline-flex h-8 items-center rounded-button border border-line bg-white px-3 text-[11.5px] font-semibold text-primary group-hover:border-primary">খুলুন</span>
                       </div>
                     </Link>
                   </li>

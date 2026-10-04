@@ -1,5 +1,6 @@
 "use client";
 
+import { allPhones } from "@/lib/db/store";
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
@@ -22,7 +23,9 @@ export function AddStaffPage({ edit }: { edit?: string }) {
   }
   // The ALARM ID (KAR- + 6 random digits) is issued when the account is saved.
   const nextId = "KAR-••••••";
-  const takenPhones = db.users.filter((u) => u.id !== editing?.id).map((u) => u.phone);
+  // Phones are unique across every organisation (the editing account's own phone excepted).
+  const own = editing ? db.users.find((u) => u.id === editing.id)?.phone : undefined;
+  const takenPhones = allPhones().filter((p) => p !== own);
 
   return (
     <>
@@ -39,10 +42,10 @@ export function AddStaffPage({ edit }: { edit?: string }) {
                 <Link href={`/admin/field-staff/${editing.id}`} className="text-primary hover:text-primary-hover">
                   {editing.id}
                 </Link>{" "}
-                / Edit
+                / এডিট
               </>
             ) : (
-              "নতুন কর্মী"
+              "নতুন তদন্ত সম্পাদক"
             )}
           </>
         }
@@ -50,15 +53,15 @@ export function AddStaffPage({ edit }: { edit?: string }) {
           <>
             {editing ? (
               <>
-                Edit profile · <span className="font-bn">প্রোফাইল সম্পাদনা</span>
+                প্রোফাইল এডিট
               </>
             ) : (
               <>
-                Add Investigation Editor · <span className="font-bn">নতুন তদন্ত সম্পাদক</span>
+                নতুন তদন্ত সম্পাদক
               </>
             )}
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {editing ? `${editing.name} · ${editing.id}` : "Creates a mobile collection account. ALARM ID (KAR-) is issued automatically on save."}
+              {editing ? `${editing.nameBn || editing.name} · ${editing.id}` : "মোবাইলে তথ্য সংগ্রহের অ্যাকাউন্ট তৈরি হবে। সেভ করলে ALARM আইডি (KAR-) নিজে থেকেই দেওয়া হবে।"}
             </span>
           </>
         }
@@ -67,7 +70,7 @@ export function AddStaffPage({ edit }: { edit?: string }) {
         <StaffForm
           key={editing?.id ?? "new"}
           nextId={nextId}
-          admin={admin?.name ?? "Chief Executive Editor"}
+          admin={admin?.nameBn ?? admin?.name ?? "প্রধান নির্বাহী সম্পাদক"}
           adminId={adminId}
           takenPhones={takenPhones}
           roster={staffRows(db)}

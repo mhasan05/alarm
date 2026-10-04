@@ -8,6 +8,28 @@ import type { FinalReport, ReportFinding, ReportVersion } from "@/lib/db/types";
 
 const refs = (r: number[]) => `সূত্র ${r.map(bn).join(", ")}`;
 
+// Version titles, notes and dates may come from older English seed data; show them in Bengali.
+const VERSION_TITLE_BN: Record<string, string> = {
+  "Initial report": "প্রথম ভার্সন",
+  "Re-analysed and re-cut": "আবার বিশ্লেষণ ও নতুন ভার্সন",
+};
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/** Bengali title for a report version. */
+export const versionTitle = (title: string) => VERSION_TITLE_BN[title] ?? title;
+/** Bengali part of a "বাংলা · English" version note. */
+export const versionWhy = (why: string) => why.split(" · ")[0];
+/** Bengali date for a report version ("16 Sep 2026", an ISO date, or already Bengali). */
+export function versionDate(date: string) {
+  const m = /^(\d{1,2}) ([A-Za-z]{3})[A-Za-z]* (\d{4})$/.exec(date.trim());
+  if (m) {
+    const month = MONTHS.indexOf(m[2].toLowerCase());
+    if (month >= 0) return bnDate(`${m[3]}-${String(month + 1).padStart(2, "0")}-${m[1].padStart(2, "0")}T12:00:00+06:00`);
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(date) && !Number.isNaN(Date.parse(date))) return bnDate(date);
+  return bn(date);
+}
+
 function Section({ num, title, aside, tone, children }: { num: string; title: string; aside?: string; tone?: "pos" | "neg"; children: ReactNode }) {
   const band = tone === "pos" ? "border-l-success bg-success/8" : tone === "neg" ? "border-l-danger bg-danger/8" : "";
   return (
@@ -34,10 +56,10 @@ function FindingItem({ f, tone }: { f: ReportFinding; tone: "pos" | "neg" }) {
       <li className="mt-4 rounded-card border border-line p-4 sm:p-5">
         <p className="font-bn text-[14.5px] font-bold leading-[1.7] text-ink">{f.text}</p>
         <span className="mt-2 inline-block rounded-md bg-primary/10 px-2 py-0.5 font-bn text-[12px] font-semibold text-primary">
-          {bn(f.refs.length)}টি স্বতন্ত্র সূত্র
+          {bn(f.refs.length)}টি আলাদা সূত্র
         </span>
         <div className="mt-4 border-t border-line pt-3">
-          <div className="font-bn text-[12px] font-semibold text-muted">এভিডেন্স চেইন</div>
+          <div className="font-bn text-[12px] font-semibold text-muted">প্রমাণের ধারা</div>
           <ol className="mt-2 flex flex-col gap-3">
             {f.chain.map((c, i) => (
               <li key={i} className="flex gap-3">
@@ -106,13 +128,13 @@ export function ReportDocument({
               <Logo size={52} />
               <div>
                 <div className="text-[18px] font-bold leading-none tracking-[0.13em] text-primary">ALARM</div>
-                <div className="mt-1 text-[11px] text-muted">AI-Powered Audit &amp; Accountability System</div>
+                <div className="mt-1 text-[11px] text-muted">এআই-চালিত অডিট ও জবাবদিহি ব্যবস্থা</div>
               </div>
             </div>
             <div className="text-right font-bn text-[12px] leading-relaxed text-muted">
               <div className="font-sans text-[13px] font-semibold text-ink">{audit}</div>
               <div>{approved ? "প্রকাশিত" : "তৈরি"} {bnDate(report.published)}</div>
-              <div>সংস্করণ {bn(version.v)}.০ · গোপনীয়</div>
+              <div>ভার্সন {bn(version.v)}.০ · গোপনীয়</div>
             </div>
           </header>
 
@@ -126,7 +148,7 @@ export function ReportDocument({
                 </svg>
                 ব্যক্তির ছবি
                 <br />
-                সংযুক্ত হয়নি
+                যোগ করা হয়নি
               </div>
               <div className="min-w-0 flex-1">
                 {profileHref ? (
@@ -141,7 +163,7 @@ export function ReportDocument({
                   <div>
                     <dt className="text-[11px] text-muted">এনআইডি</dt>
                     <dd className="text-[13px] text-ink">
-                      {report.subject.nid} <span className="text-[11px] text-muted">গোপনকৃত</span>
+                      {report.subject.nid} <span className="text-[11px] text-muted">লুকানো</span>
                     </dd>
                   </div>
                   <div>
@@ -160,7 +182,7 @@ export function ReportDocument({
               <dl className="grid flex-1 grid-cols-1 gap-4 font-bn sm:grid-cols-3">
                 {[
                   ["অডিটের উদ্দেশ্য", report.purpose],
-                  ["অনুরোধকারী", report.requester],
+                  ["অনুরোধ করেছেন", report.requester],
                   ["নির্বাহী সম্পাদক", reviewerName],
                 ].map(([k, val]) => (
                   <div key={k}>
@@ -172,7 +194,7 @@ export function ReportDocument({
               <div className="flex items-center gap-3 border-line sm:border-l sm:pl-5">
                 <div
                   role="img"
-                  aria-label={`Confidence ${report.confidence.pct}%`}
+                  aria-label={`আস্থার মাত্রা ${bn(report.confidence.pct)}%`}
                   className="flex size-[62px] items-center justify-center rounded-full"
                   style={{ background: `conic-gradient(#006A4E ${report.confidence.pct * 3.6}deg, #E3EEEA 0)` }}
                 >
@@ -184,19 +206,19 @@ export function ReportDocument({
                   আস্থার মাত্রা
                   <div className="text-[13px] font-semibold text-primary">{report.confidence.label}</div>
                   সূত্রের মিল
-                  <br />ও সাম্প্রতিকতা
+                  <br />ও তথ্য কত নতুন
                 </div>
               </div>
             </div>
 
-            <Section num="০১" title="নির্বাহী সারসংক্ষেপ">
+            <Section num="০১" title="সারাংশ">
               <p className="mt-3 font-bn text-[14px] leading-[1.85] text-ink">
                 {report.summary.replace("{pos}", bn(positive.length)).replace("{neg}", bn(negative.length))}
               </p>
               <p className="mt-2 font-bn text-[12.5px] leading-relaxed text-muted">{report.summaryNote}</p>
             </Section>
 
-            <Section num="০২" title="ইতিবাচক কার্যক্রম" aside={`${bn(positive.length)}টি সিদ্ধান্ত`} tone="pos">
+            <Section num="০২" title="ইতিবাচক কাজ" aside={`${bn(positive.length)}টি সিদ্ধান্ত`} tone="pos">
               <ul className="mt-1">
                 {positive.map((f) => (
                   <FindingItem key={f.text} f={f} tone="pos" />
@@ -204,7 +226,7 @@ export function ReportDocument({
               </ul>
             </Section>
 
-            <Section num="০৩" title="নেতিবাচক কার্যক্রম" aside={`${bn(negative.length)}টি সিদ্ধান্ত`} tone="neg">
+            <Section num="০৩" title="নেতিবাচক কাজ" aside={`${bn(negative.length)}টি সিদ্ধান্ত`} tone="neg">
               <p className="mt-3 font-bn text-[12.5px] text-muted">{report.negativeIntro}</p>
               <ul className="mt-1">
                 {negative.map((f) => (
@@ -254,11 +276,11 @@ export function ReportDocument({
                       </svg>
                       <div className="font-bn leading-tight">
                         <div className="text-[13.5px] font-semibold">অনুমোদিত</div>
-                        <div className="text-[11px]">স্বাক্ষর আইডি {report.approval.signature}</div>
+                        <div className="text-[11px]">সই আইডি {report.approval.signature}</div>
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-button border-2 border-dashed border-line px-4 py-2 font-bn text-[12.5px] text-muted">স্বাক্ষরের অপেক্ষায়</div>
+                    <div className="rounded-button border-2 border-dashed border-line px-4 py-2 font-bn text-[12.5px] text-muted">সইয়ের অপেক্ষায়</div>
                   )}
                 </div>
               </div>
@@ -267,10 +289,10 @@ export function ReportDocument({
 
           <footer className="flex flex-wrap justify-between gap-3 border-t border-line px-5 py-3.5 font-bn text-[11px] text-muted sm:px-9">
             <span className="text-pretty">
-              ALARM Bangladesh কর্তৃক প্রস্তুত। সিস্টেমের তথ্য সংরক্ষণ নীতিমালা অনুযায়ী ব্যক্তিগত তথ্য গোপন রাখা হয়েছে। অননুমোদিত বিতরণ লগে সংরক্ষিত হয়।
+              ALARM Bangladesh তৈরি করেছে। সিস্টেমের তথ্য রাখার নিয়ম মেনে ব্যক্তিগত তথ্য গোপন রাখা হয়েছে। অনুমতি ছাড়া কাউকে দিলে তা লগে লেখা থাকে।
             </span>
             <span className="whitespace-nowrap">
-              পৃষ্ঠা ১ / ১ · {audit} · v{version.v}
+              পাতা ১ / ১ · {audit} · ভার্সন {bn(version.v)}
             </span>
           </footer>
         </article>
@@ -288,15 +310,13 @@ export function VersionHistory({ report, version, hrefFor }: { report: FinalRepo
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
             <div>
-              <h2 className="text-[14.5px] font-semibold text-ink">
-                Version history · <span className="font-bn">সংস্করণ তালিকা</span>
-              </h2>
+              <h2 className="text-[14.5px] font-semibold text-ink">ভার্সন তালিকা</h2>
               <p className="mt-0.5 text-[12px] text-muted">
-                Showing v{version.v} of {code} · {report.versions.length} version{report.versions.length === 1 ? "" : "s"} ·{" "}
-                {isCurrent ? "this is the current report" : "superseded — kept readable with its own source index"}
+                {code}-এর ভার্সন {bn(version.v)} দেখানো হচ্ছে · মোট {bn(report.versions.length)}টি ভার্সন ·{" "}
+                {isCurrent ? "এটিই এখনকার প্রতিবেদন" : "পুরোনো ভার্সন — এর নিজের সূত্র তালিকাসহ পড়া যায়"}
               </p>
             </div>
-            <nav aria-label="Report versions" className="flex flex-wrap gap-2">
+            <nav aria-label="প্রতিবেদনের ভার্সন" className="flex flex-wrap gap-2">
               {report.versions.map((x) => {
                 const on = x.v === version.v;
                 return (
@@ -308,9 +328,9 @@ export function VersionHistory({ report, version, hrefFor }: { report: FinalRepo
                       on ? "border-primary bg-primary text-white" : "border-line bg-white text-muted hover:border-primary hover:text-primary"
                     }`}
                   >
-                    v{x.v}
+                    ভার্সন {bn(x.v)}
                     <span className={`rounded-md px-1.5 text-[10.5px] font-medium ${on ? "bg-white/20" : "bg-surface"}`}>
-                      {x.v === current.v ? "current" : "superseded"}
+                      {x.v === current.v ? "এখনকার" : "পুরোনো"}
                     </span>
                   </Link>
                 );
@@ -321,29 +341,29 @@ export function VersionHistory({ report, version, hrefFor }: { report: FinalRepo
             {report.versions.map((x) => (
               <li key={x.v} className={`border-b border-line last:border-b-0 ${x.v === version.v ? "bg-surface/60" : ""}`}>
                 <Link href={versionHref(x.v)} className="flex flex-wrap items-start gap-x-5 gap-y-1 px-5 py-3 hover:bg-surface/60">
-                  <span className="w-6 text-[12.5px] font-semibold text-muted">v{x.v}</span>
+                  <span className="w-16 text-[12.5px] font-semibold text-muted">ভার্সন {bn(x.v)}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-semibold text-ink">{x.title}</span>
-                    <span className="block font-bn text-[12px] text-muted">{x.why}</span>
+                    <span className="block text-[13px] font-semibold text-ink">{versionTitle(x.title)}</span>
+                    <span className="block font-bn text-[12px] text-muted">{versionWhy(x.why)}</span>
                   </span>
-                  <span className="text-right text-[12px] text-muted max-sm:w-full max-sm:pl-11 max-sm:text-left">
-                    <span className="block text-ink">{x.date}</span>
-                    {x.positive} positive · {x.negative} negative
+                  <span className="text-right text-[12px] text-muted max-sm:w-full max-sm:pl-[84px] max-sm:text-left">
+                    <span className="block text-ink">{versionDate(x.date)}</span>
+                    {bn(x.positive)}টি ইতিবাচক · {bn(x.negative)}টি নেতিবাচক
                   </span>
                 </Link>
               </li>
             ))}
           </ul>
           <p className="border-t border-line px-5 py-3 text-[11.5px] text-muted">
-            A new version is cut only when more data is added and re-analysed. Superseded versions stay readable and keep their own source index.
+            শুধু নতুন তথ্য যোগ করে আবার বিশ্লেষণ করলেই নতুন ভার্সন তৈরি হয়। পুরোনো ভার্সনগুলো তাদের নিজের সূত্র তালিকাসহ পড়া যায়।
           </p>
         </section>
 
         {!isCurrent && (
           <p role="status" className="rounded-card border border-warning/40 bg-warning/8 px-5 py-3 text-[13px] text-ink print:hidden">
-            You are reading superseded v{version.v} ({version.date}).{" "}
+            আপনি পুরোনো ভার্সন {bn(version.v)} ({versionDate(version.date)}) পড়ছেন।{" "}
             <Link href={versionHref(current.v)} className="font-semibold text-primary hover:text-primary-hover">
-              Open the current v{current.v} →
+              এখনকার ভার্সন {bn(current.v)} খুলুন →
             </Link>
           </p>
         )}

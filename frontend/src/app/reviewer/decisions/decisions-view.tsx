@@ -10,13 +10,13 @@ import { useReviewer } from "../use-reviewer";
 
 import { FILTERS, type Filter } from "./filters";
 
-const accepted = (s: Submission) => s.state === "Accepted" || s.state === "Withdrawn";
-export const decisionLabel = (s: Submission) => (s.state === "Held" ? "স্থগিত" : accepted(s) ? "গৃহীত" : "বাতিল");
+const accepted = (s: Submission) => s.state === "Accepted";
+export const decisionLabel = (s: Submission) => (accepted(s) ? "গ্রহণ হয়েছে" : "বাতিল");
 
 export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
   const { db, decisions, stats } = useReviewer();
-  const count = (f: Filter) => (f === "সব" ? decisions.length : decisions.filter((d) => (f === "গৃহীত") === accepted(d)).length);
-  const list = filter === "সব" ? decisions : decisions.filter((d) => (filter === "গৃহীত") === accepted(d));
+  const count = (f: Filter) => (f === "সব" ? decisions.length : decisions.filter((d) => (f === "গ্রহণ হয়েছে") === accepted(d)).length);
+  const list = filter === "সব" ? decisions : decisions.filter((d) => (filter === "গ্রহণ হয়েছে") === accepted(d));
 
   return (
     <>
@@ -28,7 +28,7 @@ export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
             <div className="min-w-[180px] flex-1">
               <h2 className="text-[14.5px] font-semibold leading-[1.6]">সাম্প্রতিক সিদ্ধান্ত</h2>
               <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                এ মাসের {bn(stats.monthTotal)}টি সিদ্ধান্তের মধ্যে রেকর্ডে থাকা {bn(decisions.length)}টি · প্রতিটি সিদ্ধান্ত অডিট লগে সংরক্ষিত
+                এ মাসের {bn(stats.monthTotal)}টি সিদ্ধান্তের মধ্যে রেকর্ডে থাকা {bn(decisions.length)}টি · প্রতিটি সিদ্ধান্ত অডিট লগে লেখা থাকে
               </p>
             </div>
             <nav aria-label="সিদ্ধান্ত অনুযায়ী ফিল্টার" className="flex flex-wrap gap-2">
@@ -100,7 +100,7 @@ export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
             </ul>
           )}
           <p className="px-5 pt-[13px] pb-4 text-[11.5px] leading-[1.7] text-muted text-pretty">
-            এ মাসে মোট {bn(stats.monthTotal)}টি সিদ্ধান্ত নিয়েছেন — {bn(stats.monthAccepted)}টি গৃহীত, {bn(stats.monthRejected)}টি বাতিল।
+            এ মাসে মোট {bn(stats.monthTotal)}টি সিদ্ধান্ত নিয়েছেন — {bn(stats.monthAccepted)}টি গ্রহণ, {bn(stats.monthRejected)}টি বাতিল।
           </p>
         </section>
       </div>

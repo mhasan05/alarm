@@ -6,14 +6,19 @@ Audit and accountability system for ALARM Bangladesh (bdalarm.org). Next.js 16 (
 
 | # | Role (Bengali) | English | Portal |
 |---|---|---|---|
+| — | সুপার অ্যাডমিন | Super Admin | `/super` |
 | ১ | প্রধান নির্বাহী সম্পাদক | Chief Executive Editor | `/admin` |
 | ২ | নির্বাহী সম্পাদক | Executive Editor | `/reviewer` |
 | ৩ | তদন্ত সম্পাদক | Investigation Editor | `/staff` |
 | ৪ | রাজনৈতিক কর্মী | Political Activist | `/politician` |
 
+**Separate systems:** the সুপার অ্যাডমিন creates প্রধান নির্বাহী সম্পাদক accounts, and each one gets its own organisation with completely separate data. The সুপার অ্যাডমিন can open any admin's account in one click and switch back, and can suspend an admin, which stops that whole organisation. In the frontend the store (`src/lib/db/store.ts`) keeps one database per organisation and only ever hands a screen the signed-in user's own organisation; the backend must enforce the same tenant isolation on every query.
+
 Every account is identified by a unique **ALARM ID**: `KAR-` + 6 random digits (e.g. `KAR-123456`). It is the primary key for all roles. There is no self-registration: the প্রধান নির্বাহী সম্পাদক creates every account, and a নির্বাহী সম্পাদক can create রাজনৈতিক কর্মী accounts inside their own area.
 
-Sample accounts are listed in [readme2.md](readme2.md) (password `Alarm@2026`).
+Sample accounts (one per role, mobiles 01711000000–01711000004) and the sample story are in [readme2.md](readme2.md) (password `Alarm@2026`).
+
+The প্রধান নির্বাহী সম্পাদক can edit any submission from a তদন্ত সম্পাদক or রাজনৈতিক কর্মী at any stage (সব জমা → সম্পাদনা). The decision stays as it is; every edit and its reason is recorded in the submission history and the audit log.
 
 ## Run locally
 

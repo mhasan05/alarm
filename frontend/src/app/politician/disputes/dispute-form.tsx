@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EvidenceDropzone, EvidenceList, useEvidenceFiles } from "@/components/evidence";
 import { Field, inputClass, Required } from "@/components/form";
+import { RichTextEditor } from "@/components/rich-text";
 import { useMe } from "@/lib/auth-client";
 import { fileDispute } from "@/lib/db/actions";
+import { filesToEvidence } from "@/lib/evidence-files";
+import { plainText } from "@/lib/rich-text";
 
 const OTHER = "অন্যান্য";
-const REASONS = ["তথ্য ভুল", "প্রসঙ্গ অসম্পূর্ণ", "উৎস অনির্ভরযোগ্য", "আমার সাথে সম্পর্কিত নয়", OTHER];
+const REASONS = ["তথ্য ভুল", "পুরো ঘটনা বলা হয়নি", "উৎস বিশ্বাসযোগ্য নয়", "আমার সাথে জড়িত নয়", OTHER];
 
 export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; reportTitle: string }) {
   const router = useRouter();
@@ -22,13 +25,13 @@ export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; r
 
   const isOther = reason === OTHER;
   const reasonOk = !isOther || otherReason.trim().length > 0;
-  const textOk = text.trim().length > 12;
+  const textOk = plainText(text).trim().length > 12;
   const ready = reasonOk && textOk;
 
   return (
     <div className="overflow-hidden rounded-card border border-danger bg-white shadow-card">
       <div className="border-b border-line px-5 py-4">
-        <h2 className="text-[14.5px] font-semibold leading-[1.6]">অসঙ্গতির অভিযোগ জানান</h2>
+        <h2 className="text-[14.5px] font-semibold leading-[1.6]">ভুল তথ্যের অভিযোগ জানান</h2>
         <p className="mt-[3px] text-[12px] leading-[1.65] text-muted text-pretty">
           যে রিপোর্ট নিয়ে অভিযোগ: <strong className="font-semibold text-ink">{reportTitle}</strong>
         </p>
@@ -37,12 +40,14 @@ export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; r
       <form
         noValidate
         className="flex flex-col gap-[18px] p-5"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           setAttempted(true);
           if (!ready || !me) return;
+          // Keep the files themselves so the editors can open them while resolving the dispute.
+          const files = await filesToEvidence(evidence.items.map((i) => i.file), "রাজনৈতিক কর্মীর দেওয়া");
           const code = fileDispute(
-            { submissionCode: reportCode, reason: isOther ? otherReason.trim() : reason, claim: text, attachments: evidence.items.map((i) => i.file.name) },
+            { submissionCode: reportCode, reason: isOther ? otherReason.trim() : reason, claim: text, attachments: evidence.items.map((i) => i.file.name), files },
             me.userId,
           );
           router.push(`/politician/disputes?submitted=${code}`);
@@ -98,14 +103,13 @@ export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; r
           hint={attempted && !textOk ? "কেন তথ্যটি ভুল তা আরও স্পষ্ট করে লিখুন।" : undefined}
           hintClassName="text-danger"
         >
-          <textarea
+          <RichTextEditor
             id="dp-text"
-            rows={4}
-            placeholder="কোন তথ্যটি ভুল এবং কেন, তা স্পষ্ট করে লিখুন। আপনার কাছে বিপরীত প্রমাণ থাকলে সংযুক্ত করুন।"
+            placeholder="কোন তথ্যটি ভুল এবং কেন, তা স্পষ্ট করে লিখুন। এর উল্টো প্রমাণ থাকলে যোগ করুন।"
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            aria-invalid={attempted && !textOk}
-            className={`${inputClass} h-auto! resize-y py-3 leading-[1.75] ${attempted && !textOk ? "border-danger!" : ""}`}
+            onChange={setText}
+            invalid={attempted && !textOk}
+            describedBy={attempted && !textOk ? "dp-text-msg" : undefined}
           />
         </Field>
 
@@ -118,7 +122,7 @@ export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; r
               <path d="M9.3 1.8v3.4h3.3" stroke="#006A4E" strokeWidth="1.4" />
             </svg>
           }
-          title="বিপরীত প্রমাণ সংযুক্ত করুন"
+          title="উল্টো প্রমাণ যোগ করুন"
         />
         <EvidenceList items={evidence.items} error={evidence.error} onRemove={evidence.remove} />
 
@@ -130,7 +134,7 @@ export function DisputeForm({ reportCode, reportTitle }: { reportCode: string; r
             }`}
           >
             {ready
-              ? "অভিযোগ জমা দিলে প্রধান নির্বাহী সম্পাদক রিপোর্টটি পুনরায় যাচাই করবেন। যাচাই চলাকালে তথ্যটি প্রোফাইলে থাকবে।"
+              ? "অভিযোগ জমা দিলে সম্পাদক রিপোর্টটি আবার যাচাই করবেন। যাচাই চলার সময় তথ্যটি প্রোফাইলে থাকবে।"
               : !reasonOk
                 ? "অভিযোগের ধরন লিখুন।"
                 : "আপনার বক্তব্য লিখুন — কেন তথ্যটি ভুল তা স্পষ্ট করুন।"}

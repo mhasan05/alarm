@@ -11,14 +11,10 @@ export function SettingsPage({ initial }: { initial: Section }) {
       <PageHeader
         backHref="/admin/dashboard"
         crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / সেটিংস"
-        title={
-          <>
-            Settings · <span className="font-bn">সেটিংস</span>
-          </>
-        }
+        title="সেটিংস"
       />
       <div className="flex flex-1 flex-col px-4 pt-[22px] pb-9 sm:px-7">
-        <AdminSettings key={initial} initial={initial} admin={admin?.name ?? "Chief Executive Editor"} adminId={adminId} />
+        <AdminSettings key={initial} initial={initial} admin={admin?.nameBn ?? admin?.name ?? "প্রধান নির্বাহী সম্পাদক"} adminId={adminId} />
       </div>
     </>
   );

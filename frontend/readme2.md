@@ -2,41 +2,28 @@ Sample accounts (password for every account: Alarm@2026)
 
 Every account is identified by its ALARM ID (KAR- followed by 6 digits). Sign in with the mobile number.
 
+| Role | Name | Mobile | ALARM ID |
+|---|---|---|---|
+| সুপার অ্যাডমিন (Super Admin) | আরিফুর রহমান | 01711000000 | KAR-571093 |
+| ১ প্রধান নির্বাহী সম্পাদক (Chief Executive Editor) | রাজিব খান | 01711000001 | KAR-482915 |
+| ২ নির্বাহী সম্পাদক (Executive Editor) | ফারহানা ইয়াসমিন | 01711000002 | KAR-736204 |
+| ৩ তদন্ত সম্পাদক (Investigation Editor) | জাহিদুল হক | 01711000003 | KAR-615283 |
+| ৪ রাজনৈতিক কর্মী (Political Activist) | মোঃ রফিকুল ইসলাম | 01711000004 | KAR-814369 |
 
-১ প্রধান নির্বাহী সম্পাদক (Chief Executive Editor)
+The সুপার অ্যাডমিন is above every organisation. The other four belong to the sample organisation **ALARM Bangladesh (ORG-001)** and all work in the same area: ঢাকা → মিরপুর মডেল থানা → ওয়ার্ড ১৩.
 
-ALARM ID	Name	Mobile	Status
-KAR-482915	Razib Khan	01711000001	Active
+Sample content (one connected story):
+- Submissions SUB-0401 – SUB-0411 about রফিকুল ইসলাম, collected by জাহিদুল হক (two are his own):
+  - accepted: 0401, 0402, 0403, 0405, 0407, 0408
+  - rejected: 0404 (anonymous source) · held: 0406 (no issuing office)
+  - waiting in ফারহানা ইয়াসমিন's queue: 0409, 0410, 0411
+- Report RPT-2026-0001, version 1, signed by ফারহানা ইয়াসমিন. 0407 and 0408 were accepted later, so the next version can be generated once the queue is empty.
+- Disputes: DSP-001 on SUB-0403 (decided: his response added), DSP-002 on SUB-0407 (open, waiting for রাজিব খান).
+- Field assignments: ASG-01 (done) and ASG-02 (open, due 10 October).
+- Meetings: MTG-003 for ward 13 on 8 October (everyone joins directly), MTG-002 for চট্টগ্রাম বিভাগ on 14 October (ফারহানা ইয়াসমিন is invited; জাহিদুল হক has asked to join), MTG-001 ended on 29 September.
 
-
-২ নির্বাহী সম্পাদক (Executive Editor)
-
-ALARM ID	Name	Mobile	Status
-KAR-736204	Farhana Yasmin	01755432198	Active (Rajshahi · Boalia, Chattogram · Kotwali, Dhaka · Mirpur Model)
-KAR-158392	Tahmina Rahman	01819660709	Active
-KAR-327548	Nasrin Sultana	01913130413	Active
-KAR-904617	Arif Hossain	01711110311	On leave (can still sign in)
-
-
-৩ তদন্ত সম্পাদক (Investigation Editor)
-
-ALARM ID	Name	Mobile	Status
-KAR-615283	Jahidul Haque	01712440918	On duty (Dhaka · Mirpur Model)
-KAR-528610	Sumaiya Islam	01717270027	On duty (Rajshahi · Boalia)
-KAR-274906	Shirin Akter	01815220424	On duty
-KAR-839151	Rasel Mahmud	01911330731	On duty
-KAR-460372	Nazmun Nahar	01713900209	On duty
-KAR-947263	Mizanur Rahman	01816330933	On duty
-KAR-381054	Ferdous Alam	01714150015	On leave (can still sign in)
-KAR-193847	Imran Chowdhury	01819554242	Suspended: sign-in is blocked
-
-
-৪ রাজনৈতিক কর্মী (Political Activist)
-
-ALARM ID	Name	Mobile	Status
-KAR-702438	আব্দুল করিম শেখ (Rajshahi-2)	01711448290	Active, has the most data
-KAR-265917	সাবরিনা আক্তার চৌধুরী (Chattogram-9)	01819330472	Active
-KAR-814369	মোঃ রফিকুল ইসলাম (Dhaka-14)	01552118840	Active
-KAR-539021	তানভীর হোসেন ভূঁইয়া (Sylhet-1)	01711902316	Active
-KAR-693152	মোঃ জুয়েল রানা (Dhaka-17)	01913207755	Active
-KAR-126784	নুসরাত জাহান মীম (Khulna-4)	01780664129	Suspended: sign-in is blocked
+সুপার অ্যাডমিন (Super Admin):
+- Creates প্রধান নির্বাহী সম্পাদক accounts. Each one gets a brand-new, completely separate system (organisation): their own নির্বাহী সম্পাদক, তদন্ত সম্পাদক, রাজনৈতিক কর্মী, submissions, reports, meetings and audit log. No organisation can see another's data.
+- Opens any admin's account in one click ("অ্যাকাউন্টে প্রবেশ") and switches back from the purple bar ("সুপার অ্যাডমিনে ফিরুন").
+- Suspends or restores an admin. A suspended admin's whole system stops: nobody in it can sign in, and anyone already signed in sees a "system suspended" screen. Data is kept and comes back on restore.
+- Resets an admin's password. Every action is in the সুপার অ্যাডমিন's own activity log.

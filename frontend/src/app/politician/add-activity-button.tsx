@@ -6,7 +6,7 @@ export function AddActivityButton({ className = "h-[38px] px-4" }: { className?:
       href="/politician/add-activity"
       className={`inline-flex items-center rounded-button bg-primary text-[13.5px] font-semibold text-white hover:bg-primary-hover ${className}`}
     >
-      + কার্যক্রম যোগ করুন
+      + কাজ যোগ করুন
     </Link>
   );
 }

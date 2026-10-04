@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
+import { RichText } from "@/components/rich-text";
 import { bnDate } from "@/lib/db/format";
 import { CATEGORY_STYLE, profileOf } from "@/lib/db/selectors";
 import { EvidenceManager } from "../../reviewer-evidence";
@@ -18,7 +19,7 @@ export function DecisionDetailView({ code }: { code: string }) {
 
   const profile = profileOf(db, h.profileId);
   const cat = CATEGORY_STYLE[h.category];
-  const accepted = h.state === "Accepted" || h.state === "Withdrawn";
+  const accepted = h.state === "Accepted";
   const stFg = accepted ? "#1A7A4A" : "#F42A41";
 
   return (
@@ -64,8 +65,8 @@ export function DecisionDetailView({ code }: { code: string }) {
             </div>
 
             <div>
-              <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">সূত্র ও বিবরণ · SOURCE</div>
-              <p className="mt-2 text-[13.5px] leading-[1.8] text-pretty">{h.body}</p>
+              <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">সূত্র ও বিস্তারিত</div>
+              <RichText value={h.body} className="mt-2 text-[13.5px] leading-[1.8] text-pretty" />
             </div>
 
             {h.evidence.length > 0 && (
@@ -82,11 +83,9 @@ export function DecisionDetailView({ code }: { code: string }) {
           </div>
 
           <div className="border-t border-line bg-[#FAFDFC] px-[22px] py-[15px] text-[11.5px] leading-[1.7] text-muted text-pretty">
-            {h.state === "Withdrawn"
-              ? "এই তথ্যটি গৃহীত হয়েছিল, পরে রাজনৈতিক কর্মীর অভিযোগের ভিত্তিতে প্রধান নির্বাহী সম্পাদক প্রোফাইল থেকে প্রত্যাহার করেছেন।"
-              : accepted
-                ? "এই তথ্যটি প্রোফাইলে প্রকাশিত এবং স্কোরে গণনা করা হয়েছে। রাজনৈতিক কর্মী চাইলে এর বিরুদ্ধে অভিযোগ জানাতে পারেন।"
-                : "বাতিল হওয়া তথ্য প্রোফাইলে দেখা যায় না, তবে রেকর্ডে সংরক্ষিত থাকে। একই তথ্য আবার জমা দেওয়া যাবে না।"}
+            {accepted
+              ? "এই তথ্যটি প্রোফাইলে দেখানো হচ্ছে এবং স্কোরে ধরা হয়েছে। রাজনৈতিক কর্মী চাইলে এ নিয়ে অভিযোগ জানাতে পারেন।"
+              : "বাতিল হওয়া তথ্য প্রোফাইলে দেখা যায় না, তবে রেকর্ডে রাখা থাকে। একই তথ্য আবার জমা দেওয়া যাবে না।"}
           </div>
         </article>
       </div>

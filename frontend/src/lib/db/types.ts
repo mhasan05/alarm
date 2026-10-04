@@ -4,8 +4,8 @@
 export type Category = "ইতিবাচক" | "নেতিবাচক";
 export type Role = "admin" | "reviewer" | "staff" | "politician";
 
-/** Pending → reviewer decides. Held = set aside, source unclear. Withdrawn = removed after a dispute. */
-export type SubmissionState = "Pending" | "Accepted" | "Rejected" | "Held" | "Withdrawn";
+/** Every submission is either accepted or rejected — nothing else. Pending until someone decides. */
+export type SubmissionState = "Pending" | "Accepted" | "Rejected";
 
 export type Evidence = {
   id: string;
@@ -13,13 +13,20 @@ export type Evidence = {
   kind: string;
   title: string;
   meta: string;
+  /**
+   * The uploaded file, when there is one. `data` is a data URL kept for previews of small files only;
+   * the backend will store the real file and return a URL instead.
+   */
+  file?: EvidenceFile;
 };
+
+export type EvidenceFile = { name: string; type: string; size: number; data?: string };
 
 export type SubmissionEvent = {
   at: string; // ISO
   /** User id of whoever acted (staff, politician, reviewer or admin). */
   by: string;
-  type: "submitted" | "edited" | "accepted" | "rejected" | "held" | "revisit" | "withdrawn";
+  type: "submitted" | "edited" | "accepted" | "rejected";
   note?: string;
 };
 
@@ -52,8 +59,6 @@ export type Submission = {
   decidedBy?: string;
   /** Recorded decision reason. */
   reason?: string;
-  /** The politician's response, added by the admin after a dispute. */
-  response?: string;
   field?: FieldDetail;
   events: SubmissionEvent[];
 };
@@ -88,7 +93,11 @@ export type Profile = {
   audit: { code: string; opened: string };
 };
 
-export type DisputeState = "Open" | "Kept" | "Response" | "Removed";
+/**
+ * A dispute is either rejected (the submission stays as it is) or accepted (the submission is
+ * rejected and leaves the profile). Open until someone decides.
+ */
+export type DisputeState = "Open" | "Kept" | "Removed";
 
 export type Dispute = {
   code: string;
@@ -96,7 +105,10 @@ export type Dispute = {
   profileId: string;
   reason: string;
   claim: string;
+  /** File names the রাজনৈতিক কর্মী attached (kept for older records). */
   attachments: string[];
+  /** The attached files themselves, previewable when small enough. */
+  files?: Evidence[];
   filedAt: string;
   state: DisputeState;
   decidedAt?: string;
@@ -234,7 +246,7 @@ export type Settings = {
   security: { twoFactor: boolean; timeout: number };
 };
 
-export type Admin = { id: string; name: string; initials: string; email: string; phone: string };
+export type Admin = { id: string; name: string; nameBn?: string; initials: string; email: string; phone: string };
 
 // ── Meetings ────────────────────────────────────────────────────────────────
 
@@ -299,3 +311,30 @@ export type Database = {
   meetings: Meeting[];
   audit: AuditEntry[];
 };
+
+// ── Organisations (multi-tenant) ────────────────────────────────────────────
+
+/** The one account above every organisation: creates প্রধান নির্বাহী সম্পাদক accounts and can act as them. */
+export type SuperAdmin = { id: string; name: string; phone: string; email: string; password: string };
+
+export type OrgStatus = "Active" | "Suspended";
+
+/**
+ * One প্রধান নির্বাহী সম্পাদক's separate system. Everything inside `db` — accounts, submissions, reports,
+ * meetings, audit log — belongs to this organisation only; no other organisation can read it.
+ */
+export type Org = {
+  id: string;
+  name: string;
+  /** ALARM ID of the organisation's প্রধান নির্বাহী সম্পাদক. */
+  adminId: string;
+  status: OrgStatus;
+  createdAt: string;
+  suspendedAt?: string;
+  /** Why the সুপার অ্যাডমিন suspended it. */
+  suspendReason?: string;
+  db: Database;
+};
+
+/** Everything the frontend stores: the সুপার অ্যাডমিন, every organisation, and the সুপার অ্যাডমিন's own log. */
+export type RootStore = { version: number; superAdmin: SuperAdmin; orgs: Org[]; audit: AuditEntry[] };

@@ -17,12 +17,12 @@ export function StaffSettings() {
       <SettingsView
         name={staff.nameBn}
         role={`তদন্ত সম্পাদক · ${staff.id}`}
-        status={staff.status === "On leave" ? "ছুটিতে" : "সক্রিয় অ্যাকাউন্ট"}
+        status={staff.status === "On leave" ? "ছুটিতে" : "চালু আছে"}
         statusTone={staff.status === "On leave" ? "warning" : "success"}
         facts={[
           ["ALARM আইডি", alarmIdOf(db, staff.id)],
           ["মোবাইল", phoneBn(staff.phone)],
-          ["যোগদান", bnDate(staff.joined)],
+          ["যোগ দিয়েছেন", bnDate(staff.joined)],
         ]}
         groups={[
           {
@@ -36,7 +36,7 @@ export function StaffSettings() {
           },
           {
             // The assigned reviewer is intentionally not shown to staff.
-            title: "কর্মএলাকা",
+            title: "কাজের এলাকা",
             icon: "area",
             rows: [
               ["বিভাগ · জেলা", `${staff.division} · ${staff.district}`],
@@ -48,8 +48,8 @@ export function StaffSettings() {
             title: "অ্যাকাউন্ট",
             icon: "account",
             rows: [
-              ["ভূমিকা", "তদন্ত সম্পাদক"],
-              ["যোগদানের তারিখ", bnDate(staff.joined)],
+              ["পদ", "তদন্ত সম্পাদক"],
+              ["যোগ দেওয়ার তারিখ", bnDate(staff.joined)],
             ],
           },
         ]}

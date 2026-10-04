@@ -3,45 +3,46 @@
 import { roleOfId } from "./db/selectors";
 import type { Database } from "./db/types";
 
-export type UserRole = "Chief Executive Editor" | "Executive Editor" | "Investigation Editor";
+/** Displayed role names (UI only, never stored). */
+export type UserRole = "প্রধান নির্বাহী সম্পাদক" | "নির্বাহী সম্পাদক" | "তদন্ত সম্পাদক";
 
 export const PERMISSION_META: { key: string; area: string; label: string; locked?: boolean }[] = [
-  { key: "submit", area: "Collection", label: "Submit field evidence" },
-  { key: "editAfter", area: "Collection", label: "Edit a submission after sending", locked: true },
-  { key: "decide", area: "Review", label: "Accept, hold or reject submissions" },
-  { key: "editBefore", area: "Review", label: "Edit evidence before deciding" },
-  { key: "staffNames", area: "Review", label: "See submitting staff names" },
-  { key: "curate", area: "Reports", label: "Keep or exclude AI findings" },
-  { key: "sign", area: "Reports", label: "Approve and sign final reports" },
-  { key: "share", area: "Reports", label: "Download and share reports" },
-  { key: "accounts", area: "Accounts", label: "Create, suspend and deactivate accounts", locked: true },
-  { key: "disputes", area: "Accounts", label: "Decide political activist disputes" },
+  { key: "submit", area: "সংগ্রহ", label: "মাঠের প্রমাণ জমা দেওয়া" },
+  { key: "editAfter", area: "সংগ্রহ", label: "পাঠানোর পর জমা এডিট", locked: true },
+  { key: "decide", area: "যাচাই", label: "জমা গ্রহণ বা বাতিল করা" },
+  { key: "editBefore", area: "যাচাই", label: "সিদ্ধান্তের আগে প্রমাণ এডিট" },
+  { key: "staffNames", area: "যাচাই", label: "যিনি জমা দিয়েছেন সেই তদন্ত সম্পাদকের নাম দেখা" },
+  { key: "curate", area: "প্রতিবেদন", label: "এআই-এর খুঁজে পাওয়া তথ্য রাখা বা বাদ দেওয়া" },
+  { key: "sign", area: "প্রতিবেদন", label: "চূড়ান্ত প্রতিবেদন অনুমোদন দিয়ে সই" },
+  { key: "share", area: "প্রতিবেদন", label: "প্রতিবেদন ডাউনলোড ও শেয়ার" },
+  { key: "accounts", area: "অ্যাকাউন্ট", label: "অ্যাকাউন্ট তৈরি, বন্ধ ও পুরোপুরি বন্ধ করা", locked: true },
+  { key: "disputes", area: "অ্যাকাউন্ট", label: "রাজনৈতিক কর্মীর অভিযোগের সিদ্ধান্ত" },
 ];
 
 export const RULE_META = [
-  { key: "sources", label: "Independent sources for a negative finding", unit: "sources", min: 1, max: 5, note: "Below this, a negative finding stays single-source and carries a note." },
-  { key: "dispute", label: "Dispute response window", unit: "working days", min: 1, max: 14, note: "Shown to political activists as the usual decision time." },
-  { key: "caseload", label: "Caseload limit per investigation editor", unit: "open", min: 2, max: 12, note: "Investigation editors are flagged one below the limit and blocked above it." },
-  { key: "window", label: "Upload window after capture", unit: "hours", min: 1, max: 72, note: "Later uploads get an integrity warning." },
+  { key: "sources", label: "নেতিবাচক তথ্যের জন্য আলাদা সূত্র", unit: "সূত্র", min: 1, max: 5, note: "এর কম হলে নেতিবাচক তথ্যটি এক সূত্রের তথ্য হিসেবে থাকবে, সঙ্গে একটি নোট যোগ হবে।" },
+  { key: "dispute", label: "অভিযোগের উত্তর দেওয়ার সময়সীমা", unit: "কাজের দিন", min: 1, max: 14, note: "সিদ্ধান্ত পেতে সাধারণত কত দিন লাগে, তা রাজনৈতিক কর্মীদের দেখানো হয়।" },
+  { key: "caseload", label: "প্রতি তদন্ত সম্পাদকের কাজের চাপের সীমা", unit: "খোলা কাজ", min: 2, max: 12, note: "সীমার একটি কম হলে তদন্ত সম্পাদককে সতর্ক করা হয়, আর সীমা ছাড়ালে নতুন কাজ দেওয়া বন্ধ থাকে।" },
+  { key: "window", label: "ছবি বা ভিডিও তোলার পর আপলোডের সময়সীমা", unit: "ঘণ্টা", min: 1, max: 72, note: "এর পরে আপলোড করলে যাচাইয়ের সময় সতর্কবার্তা দেখানো হয়।" },
 ] as const;
 
 export const NOTIFICATION_META: { key: string; label: string }[] = [
-  { key: "dispute", label: "Political activist files a dispute" },
-  { key: "overdue", label: "Dispute older than 48 hours" },
-  { key: "held", label: "Executive Editor holds a submission — source unclear" },
-  { key: "caseload", label: "Investigation Editor reaches the caseload warning" },
-  { key: "report", label: "Final report approved by the executive editor" },
+  { key: "dispute", label: "রাজনৈতিক কর্মী অভিযোগ জমা দিলে" },
+  { key: "overdue", label: "অভিযোগ ৪৮ ঘণ্টার বেশি পুরোনো হলে" },
+  { key: "held", label: "নির্বাহী সম্পাদক কোনো জমা বাতিল করলে" },
+  { key: "caseload", label: "তদন্ত সম্পাদক কাজের চাপের সতর্কসীমায় পৌঁছালে" },
+  { key: "report", label: "নির্বাহী সম্পাদক চূড়ান্ত প্রতিবেদন অনুমোদন করলে" },
 ];
 
 /** Where an audit-log target opens, when it has a page. */
 export function auditHref(target: string, db?: Database): string | null {
   const code = target.split(" ")[0];
-  if (/^DSP-/.test(code)) return "/admin/disputes?tab=all";
+  if (/^DSP-/.test(code)) return `/admin/disputes/${code}`;
   if (/^RPT-/.test(code)) return `/admin/reports/${code}`;
   if (/^KAR-\d{6}$/.test(code)) {
     const role = db ? roleOfId(db, code) : "politician";
     return role === "staff" ? `/admin/field-staff/${code}` : role === "reviewer" ? `/admin/reviewers/${code}` : role === "politician" ? `/admin/politicians/${code}` : null;
   }
-  if (/^SUB-/.test(code)) return `/admin/field-reports/${code}`;
+  if (/^SUB-/.test(code)) return `/admin/submissions/${code}`;
   return null;
 }

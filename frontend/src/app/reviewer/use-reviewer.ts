@@ -12,7 +12,7 @@ export const OVERDUE_DAYS = 2;
 const dayKey = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date(iso));
 const weekday = (d: Date) => new Intl.DateTimeFormat("bn-BD", { weekday: "short", timeZone: "Asia/Dhaka" }).format(d);
 
-const isAccept = (s: Submission) => s.state === "Accepted" || s.state === "Withdrawn";
+const isAccept = (s: Submission) => s.state === "Accepted";
 
 /** The signed-in reviewer's queue, decisions and coverage. */
 export function useReviewer() {
@@ -51,7 +51,7 @@ export function useReviewer() {
         ...p,
         pending: subs.filter((s) => s.state === "Pending").length,
         accepted: subs.filter((s) => s.state === "Accepted").length,
-        rejected: subs.filter((s) => s.state === "Rejected" || s.state === "Held").length,
+        rejected: subs.filter((s) => s.state === "Rejected").length,
       };
     }),
     stats: {

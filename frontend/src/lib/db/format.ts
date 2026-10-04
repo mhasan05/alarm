@@ -25,6 +25,9 @@ export const enTime = (iso: string) => parts(iso, "en-US", { hour: "2-digit", mi
 /** 08 Sep 2026, 10:14 */
 export const enDateTime = (iso: string) => `${enDate(iso)}, ${parts(iso, "en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
 
+/** ০৮ সেপ্টেম্বর ২০২৬, সকাল ১০:১৪ */
+export const bnDateTime = (iso: string) => `${bnDate(iso)}, ${bnTime(iso)}`;
+
 const dayKey = (iso: string) => parts(iso, "en-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
 
 /** Whole days between an ISO time and now (Dhaka calendar days). */
@@ -45,6 +48,12 @@ export function bnRelative(iso: string) {
   const d = daysSince(iso);
   return `${d === 0 ? "আজ" : d === 1 ? "গতকাল" : bnDayMonth(iso)} · ${bnTime(iso)}`;
 }
+
+/** "৩ দিন খোলা", "আজ" */
+export const bnAge = (iso: string, suffix = "খোলা") => {
+  const d = daysSince(iso);
+  return d === 0 ? "আজ" : `${bn(d)} দিন ${suffix}`;
+};
 
 /** "3 days open", "1 day open", "today" */
 export const enAge = (iso: string, suffix = "open") => {

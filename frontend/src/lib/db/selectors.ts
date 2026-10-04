@@ -12,25 +12,18 @@ export const disputeOf = (db: Database, code: string) => db.disputes.find((d) =>
 export const reportOf = (db: Database, code: string) => db.reports.find((r) => r.code === code);
 export const userOf = (db: Database, id: string) => db.users.find((u) => u.id === id);
 
-/** Display name for any account id (English for team members, Bengali for politicians). */
+/** Display name for any account id, in Bengali. */
 export function nameOf(db: Database, id: string): string {
-  if (id === "system") return "System";
-  return (
-    db.admins.find((a) => a.id === id)?.name ??
-    reviewerOf(db, id)?.name ??
-    staffOf(db, id)?.name ??
-    profileOf(db, id)?.name ??
-    id
-  );
+  if (id === "system") return "সিস্টেম";
+  const admin = db.admins.find((a) => a.id === id);
+  return admin?.nameBn ?? admin?.name ?? reviewerOf(db, id)?.nameBn ?? staffOf(db, id)?.nameBn ?? profileOf(db, id)?.name ?? id;
 }
 
-/** Bengali name for team members (used on Bengali screens). */
 /** The person's ALARM ID. Every account's id is its ALARM ID (KAR- + 6 digits). */
 export const alarmIdOf = (_db: Database, id: string) => id;
 
-export function nameBnOf(db: Database, id: string): string {
-  return reviewerOf(db, id)?.nameBn ?? staffOf(db, id)?.nameBn ?? profileOf(db, id)?.name ?? nameOf(db, id);
-}
+/** Bengali name (same as nameOf; kept for existing callers). */
+export const nameBnOf = (db: Database, id: string) => nameOf(db, id);
 
 export type AccountRole = "admin" | "reviewer" | "staff" | "politician";
 export const roleOfId = (db: Database, id: string): AccountRole | "system" =>
@@ -68,7 +61,6 @@ export type ProfileSummary = {
   negative: number;
   pending: number;
   rejected: number;
-  held: number;
   score: number;
   band: { label: string; color: string };
 };
@@ -83,18 +75,17 @@ export function summarize(subs: Submission[]): ProfileSummary {
     negative: acc.length - positive,
     pending: subs.filter(isOpen).length,
     rejected: subs.filter((s) => s.state === "Rejected").length,
-    held: subs.filter((s) => s.state === "Held").length,
     score,
     band: scoreBand(score, acc.length),
   };
 }
 
 export function scoreBand(score: number, accepted = 1) {
-  if (!accepted) return { label: "এখনও কোনো তথ্য প্রকাশিত হয়নি", color: "#4A7060" };
+  if (!accepted) return { label: "এখনও কোনো তথ্য প্রকাশ হয়নি", color: "#4A7060" };
   return score >= 67
     ? { label: "বেশিরভাগ ইতিবাচক", color: "#1A7A4A" }
     : score >= 34
-      ? { label: "মিশ্র রেকর্ড", color: "#D97706" }
+      ? { label: "ভালো-মন্দ মেশানো", color: "#D97706" }
       : { label: "বেশিরভাগ নেতিবাচক", color: "#F42A41" };
 }
 
@@ -138,14 +129,28 @@ export const openDisputes = (db: Database) => db.disputes.filter((d) => d.state 
 export const disputesFor = (db: Database, profileId: string) =>
   db.disputes.filter((d) => d.profileId === profileId).sort((a, b) => b.filedAt.localeCompare(a.filedAt));
 
+/**
+ * Who may resolve (and edit the submission of) a dispute: the প্রধান নির্বাহী সম্পাদক always, and an
+ * active নির্বাহী সম্পাদক whose coverage includes the রাজনৈতিক কর্মী's area.
+ */
+export function canResolveDispute(db: Database, userId: string, d: Dispute): boolean {
+  if (db.admins.some((a) => a.id === userId)) return true;
+  const r = reviewerOf(db, userId);
+  const p = profileOf(db, d.profileId);
+  return !!r && !!p && r.status === "Active" && r.areas.includes(coverageKey(p));
+}
+
+/** Disputes a নির্বাহী সম্পাদক can resolve, newest first. */
+export const disputesForReviewer = (db: Database, reviewerId: string) =>
+  db.disputes.filter((d) => canResolveDispute(db, reviewerId, d)).sort((a, b) => b.filedAt.localeCompare(a.filedAt));
+
 /** Whether a politician may dispute a submission, and the label explaining why not. */
 export function canDispute(db: Database, s: Submission): { allowed: boolean; label: string } {
-  if (s.state === "Rejected" || s.state === "Held") return { allowed: false, label: "প্রকাশিত নয়" };
-  if (s.state === "Withdrawn") return { allowed: false, label: "প্রত্যাহার করা হয়েছে" };
+  if (s.state === "Rejected") return { allowed: false, label: "প্রকাশ হয়নি" };
   if (disputeForSubmission(db, s.code)) return { allowed: false, label: "অভিযোগ জমা হয়েছে" };
-  if (s.state === "Pending") return { allowed: false, label: "পর্যালোচনার পর অভিযোগ করা যাবে" };
+  if (s.state === "Pending") return { allowed: false, label: "যাচাইয়ের পর অভিযোগ করা যাবে" };
   if (s.origin === "self") return { allowed: false, label: "নিজের দেওয়া তথ্য" };
-  return { allowed: true, label: "এই তথ্যে অসঙ্গতির অভিযোগ করুন" };
+  return { allowed: true, label: "এই তথ্যে ভুল থাকলে অভিযোগ করুন" };
 }
 
 // ── Analysis & reports ──────────────────────────────────────────────────────
@@ -183,19 +188,16 @@ export const CATEGORY_STYLE: Record<Category, { fg: string; bg: string }> = {
 };
 
 export const STATE_BN: Record<SubmissionState, { label: string; fg: string; bg: string }> = {
-  Accepted: { label: "গৃহীত", fg: "#1A7A4A", bg: "rgba(26,122,74,0.10)" },
-  Pending: { label: "পর্যালোচনাধীন", fg: "#D97706", bg: "rgba(217,119,6,0.10)" },
+  Accepted: { label: "গ্রহণ হয়েছে", fg: "#1A7A4A", bg: "rgba(26,122,74,0.10)" },
+  Pending: { label: "যাচাই চলছে", fg: "#D97706", bg: "rgba(217,119,6,0.10)" },
   Rejected: { label: "বাতিল", fg: "#F42A41", bg: "rgba(244,42,65,0.10)" },
-  Held: { label: "স্থগিত", fg: "#F42A41", bg: "rgba(244,42,65,0.10)" },
-  Withdrawn: { label: "প্রত্যাহৃত", fg: "#4A7060", bg: "rgba(74,112,96,0.10)" },
 };
 
-export const STATE_EN: Record<SubmissionState, { label: string; cls: string }> = {
-  Accepted: { label: "Accepted", cls: "bg-success/10 text-success" },
-  Pending: { label: "In review", cls: "bg-warning/10 text-warning" },
-  Rejected: { label: "Rejected", cls: "bg-danger/10 text-danger" },
-  Held: { label: "Held", cls: "bg-danger/10 text-danger" },
-  Withdrawn: { label: "Withdrawn", cls: "bg-surface text-muted" },
+/** Status chip (label + Tailwind classes) for team portals. */
+export const STATE_CHIP: Record<SubmissionState, { label: string; cls: string }> = {
+  Accepted: { label: "গ্রহণ হয়েছে", cls: "bg-success/10 text-success" },
+  Pending: { label: "যাচাই চলছে", cls: "bg-warning/10 text-warning" },
+  Rejected: { label: "বাতিল", cls: "bg-danger/10 text-danger" },
 };
 
 export const ORIGIN_STYLE = {
@@ -204,4 +206,4 @@ export const ORIGIN_STYLE = {
 } as const;
 
 /** Evidence tier follows the submission state. */
-export const tierOf = (s: SubmissionState) => (s === "Accepted" ? "যাচাইকৃত" : s === "Pending" ? "রিপোর্টেড" : "অযাচাইকৃত");
+export const tierOf = (s: SubmissionState) => (s === "Accepted" ? "যাচাই করা" : s === "Pending" ? "জমা পড়েছে" : "যাচাই হয়নি");

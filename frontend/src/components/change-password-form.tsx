@@ -65,11 +65,11 @@ export function ChangePasswordForm() {
   const ready = currentOk && strongOk && differentOk && confirmOk;
 
   const blocker = !currentOk
-    ? "বর্তমান পাসওয়ার্ড লিখুন।"
+    ? "এখনকার পাসওয়ার্ড লিখুন।"
     : !strongOk
       ? "একটি শক্তিশালী পাসওয়ার্ড দিন — কমপক্ষে ১২ অক্ষর, বড়-ছোট হরফ ও সংখ্যা মিলিয়ে।"
       : !differentOk
-        ? "নতুন পাসওয়ার্ড বর্তমান পাসওয়ার্ডের মতো হতে পারবে না।"
+        ? "নতুন পাসওয়ার্ড এখনকার পাসওয়ার্ডের মতো হতে পারবে না।"
         : !confirmOk
           ? "দুটি পাসওয়ার্ড মিলছে না — আবার লিখুন।"
           : "";
@@ -101,7 +101,7 @@ export function ChangePasswordForm() {
             <path d="m5 12.5 4.5 4.5L19 7.5" stroke="#1A7A4A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <p className="text-[12.5px] leading-[1.65]">
-            <span className="font-semibold">পাসওয়ার্ড পরিবর্তন হয়েছে।</span> পরের বার নতুন পাসওয়ার্ড দিয়ে লগইন করুন।
+            <span className="font-semibold">পাসওয়ার্ড বদলানো হয়েছে।</span> পরের বার নতুন পাসওয়ার্ড দিয়ে লগইন করুন।
           </p>
         </div>
       )}
@@ -112,7 +112,7 @@ export function ChangePasswordForm() {
         </p>
       )}
 
-      <Field id="pw-current" label="বর্তমান পাসওয়ার্ড" required>
+      <Field id="pw-current" label="এখনকার পাসওয়ার্ড" required>
         <PasswordInput
           id="pw-current"
           value={current}
@@ -132,7 +132,7 @@ export function ChangePasswordForm() {
           id="pw-new"
           label="নতুন পাসওয়ার্ড"
           required
-          hint={!differentOk ? "বর্তমান পাসওয়ার্ডের মতো হতে পারবে না" : undefined}
+          hint={!differentOk ? "এখনকার পাসওয়ার্ডের মতো হতে পারবে না" : undefined}
           hintClassName="text-danger"
         >
           <PasswordInput
@@ -182,13 +182,13 @@ export function ChangePasswordForm() {
           role="status"
           className={`min-w-[200px] flex-1 text-[11.5px] leading-[1.65] text-pretty ${attempted && blocker ? "text-danger" : "text-muted"}`}
         >
-          {attempted && blocker ? blocker : "নিরাপত্তার জন্য পাসওয়ার্ড পরিবর্তনের পর অন্য সব ডিভাইস থেকে লগ আউট হয়ে যাবে।"}
+          {attempted && blocker ? blocker : "নিরাপত্তার জন্য পাসওয়ার্ড বদলানোর পর অন্য সব ডিভাইস থেকে লগ আউট হয়ে যাবে।"}
         </p>
         <button
           type="submit"
           className="h-11 flex-none cursor-pointer rounded-button bg-primary px-[22px] text-[14px] font-semibold text-white hover:bg-primary-hover"
         >
-          পাসওয়ার্ড পরিবর্তন করুন
+          পাসওয়ার্ড বদলান
         </button>
       </div>
     </form>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type DragEvent, type ReactNode } from "react";
 import { bnOf } from "@/lib/geo";
+import { EVIDENCE_ACCEPT, isEvidenceFile, wrongTypeMessage } from "@/lib/evidence-files";
 
 type Evidence = { id: string; file: File; url: string };
 
@@ -29,16 +30,20 @@ export function useEvidenceFiles({ maxFiles = 10, maxMB = 10 }: { maxFiles?: num
 
   const add = (list: FileList | null) => {
     if (!list) return;
-    const chosen = Array.from(list);
+    const all = Array.from(list);
+    const chosen = all.filter(isEvidenceFile);
+    const wrongType = all.length - chosen.length;
     const tooBig = chosen.filter((f) => f.size > maxBytes);
     const ok = chosen.filter((f) => f.size <= maxBytes);
     const room = maxFiles - files.length;
     setFiles((prev) => [...prev, ...ok.slice(0, room)]);
     setError(
-      tooBig.length
+      wrongType
+        ? wrongTypeMessage(wrongType)
+        : tooBig.length
         ? `${bnOf(tooBig.length)}টি ফাইল ${bnOf(maxMB)} MB-এর বেশি — বাদ দেওয়া হয়েছে।`
         : ok.length > room
-          ? `সর্বোচ্চ ${bnOf(maxFiles)}টি ফাইল সংযুক্ত করা যাবে।`
+          ? `সবচেয়ে বেশি ${bnOf(maxFiles)}টি ফাইল যোগ করা যাবে।`
           : "",
     );
   };
@@ -59,7 +64,7 @@ export function EvidenceDropzone({
   note,
   children,
   onFiles,
-  accept = "image/*,application/pdf",
+  accept = EVIDENCE_ACCEPT,
   invalid,
   className = "",
 }: {
@@ -123,7 +128,7 @@ export function EvidenceList({
   if (!items.length && !error) return null;
   return (
     <div className="flex flex-col gap-2.5">
-      {items.length > 0 && <div className="text-[12px] font-semibold text-muted">সংযুক্ত প্রমাণ · {bnOf(items.length)}টি</div>}
+      {items.length > 0 && <div className="text-[12px] font-semibold text-muted">যোগ করা প্রমাণ · {bnOf(items.length)}টি</div>}
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
         {items.map((e, i) => (
           <li key={e.id} className="relative overflow-hidden rounded-card border border-line bg-white">
@@ -167,13 +172,13 @@ export function EvidenceList({
   );
 }
 
-/** Thumbnail label for an uploaded file, e.g. "ছবি", "নথি · PDF". */
+/** Thumbnail label for an uploaded file, e.g. "ছবি", "কাগজপত্র · PDF". */
 export function evidenceKind(file: File) {
   if (file.type.startsWith("image/")) return "ছবি";
   if (file.type.startsWith("video/")) return "ভিডিও";
   if (file.type.startsWith("audio/")) return "অডিও";
-  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) return "নথি · PDF";
-  return "নথি";
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) return "কাগজপত্র · PDF";
+  return "কাগজপত্র";
 }
 
 /** Uploaded files as evidence records (the files themselves go to storage once the backend exists). */

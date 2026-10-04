@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AddReviewerPage } from "./add-reviewer-page";
 
-export const metadata: Metadata = { title: "Add Executive Editor · ALARM" };
+export const metadata: Metadata = { title: "নতুন নির্বাহী সম্পাদক · ALARM" };
 
 /** New reviewer account; `?edit=KAR-…` opens the same form pre-filled. */
 export default async function Page({ searchParams }: PageProps<"/admin/reviewers/new">) {

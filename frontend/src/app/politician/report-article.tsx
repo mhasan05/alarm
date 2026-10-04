@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { RichText } from "@/components/rich-text";
 import { bnDate } from "@/lib/db/format";
 import { CATEGORY_STYLE, ORIGIN_STYLE, STATE_BN } from "@/lib/db/selectors";
 import type { Dispute, DisputeState, Submission } from "@/lib/db/types";
@@ -86,14 +87,14 @@ export function ReportArticle({
 
       <div className="flex flex-col gap-5 px-[22px] py-5">
         <div>
-          <SectionLabel num="১">বিবরণ · DESCRIPTION</SectionLabel>
-          <p className="mt-2 text-[13.5px] leading-[1.8] text-pretty">{report.body}</p>
+          <SectionLabel num="১">বিস্তারিত</SectionLabel>
+          <RichText value={report.body} className="mt-2 text-[13.5px] leading-[1.8] text-pretty" />
         </div>
 
         <div>
-          <SectionLabel num="২">সংযুক্ত প্রমাণ · EVIDENCE</SectionLabel>
+          <SectionLabel num="২">দেওয়া প্রমাণ</SectionLabel>
           {report.evidence.length === 0 ? (
-            <p className="mt-2 text-[12.5px] text-muted">কোনো প্রমাণ সংযুক্ত নেই।</p>
+            <p className="mt-2 text-[12.5px] text-muted">কোনো প্রমাণ দেওয়া নেই।</p>
           ) : (
             <ul className="mt-2.5 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-3">
               {report.evidence.map((e) => (
@@ -109,12 +110,6 @@ export function ReportArticle({
           )}
         </div>
 
-        {report.response && (
-          <div className="rounded-card border border-l-[3px] border-line border-l-role-reviewer bg-surface px-4 py-3">
-            <SectionLabel>রিপোর্টে যুক্ত আপনার বক্তব্য</SectionLabel>
-            <p className="mt-1.5 text-[13px] leading-[1.75] text-pretty">{report.response}</p>
-          </div>
-        )}
       </div>
 
       {showFooter && disputeStatus && (
@@ -141,10 +136,9 @@ export function ReportArticle({
 /** How a dispute reads to the politician. */
 export function disputeView(d: Dispute, workingDays: number): { state: string; outcome: string; fg: string; bg: string; outcomeFg: string } {
   const map: Record<DisputeState, { state: string; outcome: string; fg: string; outcomeFg: string }> = {
-    Open: { state: "প্রধান নির্বাহী সম্পাদক যাচাই করছেন", outcome: `সিদ্ধান্তের অপেক্ষায় · সাধারণত ${new Intl.NumberFormat("bn-BD").format(workingDays)} কর্মদিবস`, fg: "#D97706", outcomeFg: "#D97706" },
-    Kept: { state: "রিপোর্ট বহাল", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টটি বহাল রেখেছেন", fg: "#4A7060", outcomeFg: "#4A7060" },
-    Response: { state: "আংশিক গৃহীত", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন, তথ্যটি বহাল রয়েছে", fg: "#1D6FC0", outcomeFg: "#4A7060" },
-    Removed: { state: "গৃহীত", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টটি প্রত্যাহার করেছেন · প্রোফাইল থেকে সরানো হয়েছে", fg: "#1A7A4A", outcomeFg: "#1A7A4A" },
+    Open: { state: "সম্পাদক যাচাই করছেন", outcome: `সিদ্ধান্তের অপেক্ষায় · সাধারণত ${new Intl.NumberFormat("bn-BD").format(workingDays)} কাজের দিন`, fg: "#D97706", outcomeFg: "#D97706" },
+    Kept: { state: "অভিযোগ বাতিল হয়েছে", outcome: "সম্পাদক রিপোর্টটি ঠিক রেখেছেন", fg: "#4A7060", outcomeFg: "#4A7060" },
+    Removed: { state: "অভিযোগ গ্রহণ হয়েছে", outcome: "সম্পাদক রিপোর্টটি বাতিল করেছেন · প্রোফাইল থেকে সরানো হয়েছে", fg: "#1A7A4A", outcomeFg: "#1A7A4A" },
   };
   const v = map[d.state];
   return { ...v, bg: `${v.fg}1A` };
@@ -180,7 +174,7 @@ export function DisputeCard({ dispute: d, workingDays, title = "আমার অ
           </div>
           {d.attachments.length > 0 && (
             <div>
-              <dt className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">সংযুক্তি</dt>
+              <dt className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">যুক্ত ফাইল</dt>
               <dd className="mt-1.5 text-[12.5px] leading-[1.6]">{d.attachments.join(" · ")}</dd>
             </div>
           )}
@@ -188,7 +182,7 @@ export function DisputeCard({ dispute: d, workingDays, title = "আমার অ
 
         <div>
           <SectionLabel>আপনার বক্তব্য</SectionLabel>
-          <p className="mt-2 text-[13.5px] leading-[1.8] text-pretty">{d.claim}</p>
+          <RichText value={d.claim} className="mt-2 text-[13.5px] leading-[1.8] text-pretty" />
         </div>
 
         <div className="rounded-card border border-l-[3px] border-line bg-surface px-4 py-3" style={{ borderLeftColor: v.fg }}>

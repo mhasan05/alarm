@@ -14,7 +14,7 @@ const hindSiliguri = Hind_Siliguri({
   weight: ["400", "500", "600", "700"],
 });
 
-const DESCRIPTION = "ALARM Bangladesh — রাজনৈতিক কর্মীদের কাজের যাচাইকৃত অডিট ও জবাবদিহিতা ব্যবস্থা।";
+const DESCRIPTION = "ALARM Bangladesh — রাজনৈতিক কর্মীদের কাজের যাচাই করা অডিট ও জবাবদিহিতা ব্যবস্থা।";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://bdalarm.org"),
@@ -28,7 +28,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary", title: "ALARM — অডিট ও জবাবদিহিতা প্ল্যাটফর্ম", description: DESCRIPTION, images: ["/logo.png"] },
 };
 
-export const viewport: Viewport = { themeColor: "#006a4e" };
+// viewportFit "cover" lets phone layouts pad around the notch and home bar (env(safe-area-inset-*)).
+export const viewport: Viewport = { themeColor: "#006a4e", viewportFit: "cover" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

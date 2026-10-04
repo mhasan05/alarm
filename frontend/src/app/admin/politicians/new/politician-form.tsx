@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Field, inputClass, Required, selectClass } from "@/components/form";
 import { createProfile } from "@/lib/db/actions";
-import { bn, normalisePhone, phoneIntl } from "@/lib/db/format";
+import { bn, normalisePhone, phoneBn } from "@/lib/db/format";
 import { MIN_PASSWORD_SCORE, passwordBand, passwordScore } from "@/lib/password";
 import { locateArea } from "@/lib/geo";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
@@ -55,7 +55,7 @@ function Card({ num, title, sub, children }: { num: string; title: string; sub: 
   return (
     <section className="rounded-card border border-line bg-white shadow-card">
       <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <span className="flex size-6 flex-none items-center justify-center rounded-full bg-primary text-[12px] font-semibold text-white">{num}</span>
+        <span className="flex size-6 flex-none items-center justify-center rounded-full bg-primary text-[12px] font-semibold text-white">{bn(num)}</span>
         <div>
           <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
           <p className="font-bn text-[12px] text-muted">{sub}</p>
@@ -77,7 +77,7 @@ export function PoliticianForm({
   onAddAnother,
   allowedAreas,
   listHref = "/admin/politicians",
-  listLabel = "Back to the list",
+  listLabel = "তালিকায় ফিরুন",
   profileHref = (id: string) => `/admin/politicians/${id}`,
 }: {
   nextId: string;
@@ -122,7 +122,7 @@ export function PoliticianForm({
       : !phoneOk(phone)
         ? "সঠিক মোবাইল নম্বর দিন — যেমন 01712-345678।"
         : takenPhones.includes(normalisePhone(phone))
-          ? "এই মোবাইল নম্বরটি অন্য একটি অ্যাকাউন্টে ব্যবহৃত হচ্ছে।"
+          ? "এই মোবাইল নম্বরটি অন্য একটি অ্যাকাউন্টে আছে।"
           : "",
     nid: !nid ? "এনআইডি নম্বর দিন।" : !nidOk(nid) ? "এনআইডি ১০ বা ১৭ সংখ্যার হতে হবে।" : "",
     email: email && !emailOk(email) ? "সঠিক ইমেইল দিন অথবা খালি রাখুন।" : "",
@@ -184,34 +184,34 @@ export function PoliticianForm({
           </span>
           <div>
             <h2 className="text-[17px] font-semibold text-ink">
-              <span className="font-bn">{done.name}</span> · {done.id} created
+              <span className="font-bn">{done.name}</span> · {done.id} তৈরি হয়েছে
             </h2>
-            <p className="font-bn text-[12.5px] text-muted">অ্যাকাউন্ট সক্রিয় — এখনই লগইন করা যাবে।</p>
+            <p className="font-bn text-[12.5px] text-muted">অ্যাকাউন্ট চালু — এখনই লগইন করা যাবে।</p>
           </div>
         </div>
         <div className="px-6 py-5">
-          <h3 className="text-[14px] font-semibold text-ink">Sign-in details to share · লগইনের তথ্য</h3>
+          <h3 className="text-[14px] font-semibold text-ink">যে লগইনের তথ্য জানাতে হবে</h3>
           <p className="mt-0.5 text-[12.5px] text-muted text-pretty">
-            Share these with the political activist privately. The password is shown only now — ask them to change it from Settings after the first sign-in.
+            এই তথ্য গোপনে রাজনৈতিক কর্মীকে জানান। পাসওয়ার্ডটি শুধু এখনই দেখানো হচ্ছে — প্রথম লগইনের পর সেটিংস থেকে বদলাতে বলুন।
           </p>
           <dl className="mt-4 grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-3">
             <div className="bg-surface/60 px-4 py-3">
-              <dt className="text-[11.5px] text-muted">ALARM ID · আইডি</dt>
+              <dt className="text-[11.5px] text-muted">ALARM আইডি</dt>
               <dd className="mt-0.5 font-mono text-[15px] font-semibold text-ink">{done.id}</dd>
             </div>
             <div className="bg-surface/60 px-4 py-3">
-              <dt className="text-[11.5px] text-muted">Mobile · মোবাইল নম্বর</dt>
-              <dd className="mt-0.5 font-mono text-[15px] font-semibold text-ink">{phoneIntl(done.phone)}</dd>
+              <dt className="text-[11.5px] text-muted">মোবাইল নম্বর</dt>
+              <dd className="mt-0.5 font-mono text-[15px] font-semibold text-ink">{phoneBn(done.phone)}</dd>
             </div>
             <div className="bg-surface/60 px-4 py-3">
-              <dt className="text-[11.5px] text-muted">Temporary password · প্রাথমিক পাসওয়ার্ড</dt>
+              <dt className="text-[11.5px] text-muted">প্রথম পাসওয়ার্ড</dt>
               <dd className="mt-0.5 font-mono text-[15px] font-semibold break-all text-ink">{done.password}</dd>
             </div>
           </dl>
           <div className="mt-5 flex flex-wrap gap-2.5">
             {profileHref && (
               <Link href={profileHref(done.id)} className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-                Open profile
+                প্রোফাইল খুলুন
               </Link>
             )}
             <button
@@ -219,7 +219,7 @@ export function PoliticianForm({
               onClick={onAddAnother}
               className="h-10 cursor-pointer rounded-button border border-line bg-white px-4 text-[13.5px] font-semibold text-primary hover:border-primary"
             >
-              Add another
+              আরেকটি যোগ করুন
             </button>
             <Link href={listHref} className="inline-flex h-10 items-center px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
               {listLabel}
@@ -246,14 +246,14 @@ export function PoliticianForm({
           </p>
         )}
 
-        <Card num="1" title="Personal Details" sub="ব্যক্তিগত তথ্য">
+        <Card num="1" title="ব্যক্তিগত তথ্য" sub="নাম, যোগাযোগ ও পরিচয়">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field id="pf-name" label="পূর্ণ নাম · Full name" required hint={show("name") || undefined} hintClassName="text-danger">
+            <Field id="pf-name" label="পূর্ণ নাম" required hint={show("name") || undefined} hintClassName="text-danger">
               <input id="pf-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="মোঃ আব্দুল করিম" autoComplete="off" aria-invalid={!!show("name")} className={`${inputClass} ${border("name")}`} />
             </Field>
             <Field
               id="pf-phone"
-              label="মোবাইল নম্বর · Mobile"
+              label="মোবাইল নম্বর"
               required
               hint={show("phone") || "এই নম্বর দিয়েই লগইন করবেন।"}
               hintClassName={show("phone") ? "text-danger" : "text-muted"}
@@ -262,28 +262,28 @@ export function PoliticianForm({
             </Field>
             <Field
               id="pf-nid"
-              label="এনআইডি নম্বর · NID"
+              label="এনআইডি নম্বর"
               required
               hint={show("nid") || "প্রোফাইলে শুধু প্রথম ও শেষ চার সংখ্যা দেখানো হয়।"}
               hintClassName={show("nid") ? "text-danger" : "text-muted"}
             >
               <input id="pf-nid" inputMode="numeric" value={nid} onChange={(e) => setNid(e.target.value)} placeholder="১০ বা ১৭ সংখ্যা" aria-invalid={!!show("nid")} className={`${inputClass} ${border("nid")}`} />
             </Field>
-            <Field id="pf-dob" label="জন্ম তারিখ · Date of birth">
+            <Field id="pf-dob" label="জন্ম তারিখ">
               <input id="pf-dob" type="date" value={dob} max={`${THIS_YEAR - 18}-12-31`} onChange={(e) => setDob(e.target.value)} className={`${inputClass} px-[11px]`} />
             </Field>
-            <Field id="pf-email" label="ইমেইল · Email" hint={show("email") || undefined} hintClassName="text-danger">
+            <Field id="pf-email" label="ইমেইল" hint={show("email") || undefined} hintClassName="text-danger">
               <input id="pf-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" aria-invalid={!!show("email")} className={`${inputClass} ${border("email")}`} />
             </Field>
-            <Field id="pf-facebook" label="ফেসবুক প্রোফাইল · Facebook">
+            <Field id="pf-facebook" label="ফেসবুক প্রোফাইল">
               <input id="pf-facebook" value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="facebook.com/…" className={inputClass} />
             </Field>
           </div>
         </Card>
 
-        <Card num="2" title="Post & Area" sub="পদ ও এলাকা">
+        <Card num="2" title="পদ ও এলাকা" sub="দায়িত্ব ও ভোটের এলাকা">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field id="pf-post" label="পদ · Post" required hint={show("post") || undefined} hintClassName="text-danger">
+            <Field id="pf-post" label="পদ" required hint={show("post") || undefined} hintClassName="text-danger">
               <select id="pf-post" value={post} onChange={(e) => setPost(e.target.value)} className={`${selectClass} ${border("post")}`}>
                 <option value="">পদ বেছে নিন</option>
                 {POSTS.map((o) => (
@@ -291,7 +291,7 @@ export function PoliticianForm({
                 ))}
               </select>
             </Field>
-            <Field id="pf-party" label="দল / সংগঠন · Party" required hint={show("party") || undefined} hintClassName="text-danger">
+            <Field id="pf-party" label="দল / সংগঠন" required hint={show("party") || undefined} hintClassName="text-danger">
               <select id="pf-party" value={party} onChange={(e) => setParty(e.target.value)} className={`${selectClass} ${border("party")}`}>
                 <option value="">দল বেছে নিন</option>
                 {parties.map((o) => (
@@ -299,24 +299,24 @@ export function PoliticianForm({
                 ))}
               </select>
             </Field>
-            <Field id="pf-since" label="দায়িত্ব গ্রহণের বছর" required hint={show("since") || undefined} hintClassName="text-danger">
+            <Field id="pf-since" label="দায়িত্ব নেওয়ার বছর" required hint={show("since") || undefined} hintClassName="text-danger">
               <input id="pf-since" inputMode="numeric" value={since} onChange={(e) => setSince(e.target.value.replace(/\D/g, "").slice(0, 4))} aria-invalid={!!show("since")} className={`${inputClass} ${border("since")}`} />
             </Field>
           </div>
 
           <div className="mt-6 font-bn text-[12.5px] font-semibold">
-            নির্বাচনী এলাকা · Constituency <Required />
+            ভোটের এলাকা <Required />
           </div>
           <p
             className={`mt-2 rounded-input border px-4 py-2.5 font-bn text-[13px] ${
               show("area") ? "border-danger bg-danger/5 text-danger" : complete ? "border-success/40 bg-success/5 text-ink" : "border-line bg-surface text-muted"
             }`}
           >
-            {complete ? `${[sel.ward, areaLabel].filter(Boolean).join(", ")} · ${sel.seat}` : show("area") || "এখনও কোনো এলাকা বাছাই করা হয়নি"}
+            {complete ? `${[sel.ward, areaLabel].filter(Boolean).join(", ")} · ${sel.seat}` : show("area") || "এখনও কোনো এলাকা বেছে নেওয়া হয়নি"}
           </p>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allowedAreas ? (
-              <Field id="pf-division" label="আপনার দায়িত্বের এলাকা" required hint="শুধু আপনার দায়িত্বপ্রাপ্ত এলাকায় অ্যাকাউন্ট তৈরি করা যায়।">
+              <Field id="pf-division" label="আপনার দায়িত্বের এলাকা" required hint="শুধু আপনার দায়িত্বে থাকা এলাকায় অ্যাকাউন্ট তৈরি করা যায়।">
                 <select
                   id="pf-division"
                   value={sel.district && sel.area ? `${sel.district} · ${sel.area}` : ""}
@@ -332,7 +332,7 @@ export function PoliticianForm({
                   }}
                   className={`${selectClass} ${!complete && show("area") ? "border-danger!" : ""}`}
                 >
-                  <option value="">{allowedAreas.length ? "এলাকা বেছে নিন" : "কোনো এলাকা নির্ধারিত নেই"}</option>
+                  <option value="">{allowedAreas.length ? "এলাকা বেছে নিন" : "কোনো এলাকা দেওয়া নেই"}</option>
                   {allowedAreas.map((a) => (
                     <option key={a} value={a}>
                       {a}
@@ -384,7 +384,7 @@ export function PoliticianForm({
                 ))}
               </select>
             </Field>
-            <Field id="pf-seat" label="সংসদীয় আসন" required>
+            <Field id="pf-seat" label="সংসদের আসন" required>
               <select id="pf-seat" value={sel.seat} disabled={!sel.upazila} onChange={(e) => set.seat(e.target.value)} className={selectClass}>
                 <option value="">{sel.upazila ? "আসন বেছে নিন" : "আগে এলাকা বেছে নিন"}</option>
                 {options.seats.map((o) => (
@@ -394,17 +394,17 @@ export function PoliticianForm({
             </Field>
           </div>
           <div className="mt-4">
-            <Field id="pf-office" label="কার্যালয়ের ঠিকানা · Office address">
-              <input id="pf-office" value={office} onChange={(e) => setOffice(e.target.value)} placeholder="ওয়ার্ড কার্যালয়, …" className={inputClass} />
+            <Field id="pf-office" label="অফিসের ঠিকানা">
+              <input id="pf-office" value={office} onChange={(e) => setOffice(e.target.value)} placeholder="ওয়ার্ড অফিস, …" className={inputClass} />
             </Field>
           </div>
         </Card>
 
-        <Card num="3" title="Sign-in" sub="লগইনের তথ্য">
+        <Card num="3" title="লগইনের তথ্য" sub="মোবাইল নম্বর ও প্রথম পাসওয়ার্ড">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-[7px]">
               <label htmlFor="pf-password" className="font-bn text-[12.5px] font-semibold leading-[1.6]">
-                প্রাথমিক পাসওয়ার্ড · Temporary password <Required />
+                প্রথম পাসওয়ার্ড <Required />
               </label>
               <div className={`flex h-11 items-center rounded-input border bg-white pr-1.5 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(0,106,78,0.10)] ${show("password") ? "border-danger" : "border-line"}`}>
                 <input
@@ -451,18 +451,18 @@ export function PoliticianForm({
                 <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
                 <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.3" />
               </svg>
-              অ্যাকাউন্ট তৈরির সাথে সাথে সক্রিয় হবে। মোবাইল নম্বর ও প্রাথমিক পাসওয়ার্ড পরের ধাপে একবারই দেখানো হবে — গোপনে রাজনৈতিক কর্মীকে জানান।
+              অ্যাকাউন্ট তৈরির সাথে সাথে চালু হবে। মোবাইল নম্বর ও প্রথম পাসওয়ার্ড পরের ধাপে একবারই দেখানো হবে — গোপনে রাজনৈতিক কর্মীকে জানান।
             </div>
           </div>
         </Card>
 
         <div className="flex flex-wrap items-center gap-3 rounded-card border border-line bg-white px-5 py-4 shadow-card">
-          <p className="min-w-[200px] flex-1 text-[12px] leading-normal text-muted">Account creation is logged under {admin}.</p>
+          <p className="min-w-[200px] flex-1 text-[12px] leading-normal text-muted">অ্যাকাউন্ট তৈরির তথ্য {admin}-এর নামে লগে লেখা থাকবে।</p>
           <Link href={listHref} className="px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
-            Cancel
+            বাতিল
           </Link>
           <button type="submit" className="h-10 cursor-pointer rounded-button bg-primary px-5 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-            Create account
+            অ্যাকাউন্ট তৈরি করুন
           </button>
         </div>
       </div>
@@ -471,8 +471,8 @@ export function PoliticianForm({
       <aside className="flex flex-col gap-5 xl:sticky xl:top-5">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-[15px] font-semibold text-ink">Profile preview</h2>
-            <p className="font-bn text-[12px] text-muted">প্রোফাইলের প্রাকদর্শন</p>
+            <h2 className="text-[15px] font-semibold text-ink">প্রোফাইল দেখতে যেমন হবে</h2>
+            <p className="font-bn text-[12px] text-muted">রাজনৈতিক কর্মী যেভাবে দেখবেন</p>
           </div>
           <div className="flex flex-col items-center px-5 py-5 text-center">
             <span className="flex size-16 items-center justify-center rounded-full bg-primary/12 font-bn text-[24px] font-semibold text-primary">
@@ -484,9 +484,9 @@ export function PoliticianForm({
           <dl className="border-t border-line px-5 py-2 font-bn">
             {[
               ["ALARM আইডি", `${nextId} · তৈরির পর`],
-              ["নির্বাচনী এলাকা", sel.seat || "—"],
+              ["ভোটের এলাকা", sel.seat || "—"],
               ["এলাকা", areaLabel || "—"],
-              ["মোবাইল", phoneOk(phone) ? phoneIntl(normalisePhone(phone)) : "—"],
+              ["মোবাইল", phoneOk(phone) ? phoneBn(normalisePhone(phone)) : "—"],
             ].map(([k, v]) => (
               <div key={k} className="flex items-baseline justify-between gap-3 border-b border-line/70 py-2.5 last:border-b-0">
                 <dt className="text-[12px] text-muted">{k}</dt>
@@ -499,9 +499,9 @@ export function PoliticianForm({
           <h2 className="text-[14px] font-semibold text-ink">তৈরির পর যা হবে</h2>
           <ol className="mt-3 flex flex-col gap-2.5 text-[12.5px] leading-[1.7] text-muted">
             {[
-              "অ্যাকাউন্ট সক্রিয় হবে এবং অডিট শুরু হবে।",
+              "অ্যাকাউন্ট চালু হবে এবং অডিট শুরু হবে।",
               "এলাকার তদন্ত সম্পাদক ও নির্বাহী সম্পাদক প্রোফাইলটি দেখতে পাবেন।",
-              "রাজনৈতিক কর্মী লগইন করে নিজের প্রোফাইল দেখতে ও কার্যক্রম যোগ করতে পারবেন।",
+              "রাজনৈতিক কর্মী লগইন করে নিজের প্রোফাইল দেখতে ও কাজ যোগ করতে পারবেন।",
             ].map((t, i) => (
               <li key={t} className="flex gap-2.5">
                 <span className="flex size-5 flex-none items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">{bn(i + 1)}</span>

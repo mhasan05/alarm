@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { bn } from "@/lib/db/format";
 
 // Account status controls shared by the field-staff and reviewer detail pages. The page passes the
 // current status and callbacks that save the change, so every screen shows the same state.
@@ -15,11 +16,20 @@ const STATUS_STYLE: Record<AccountStatus, string> = {
   Deactivated: "bg-ink/10 text-ink",
 };
 
+/** Bengali labels for the stored (English) status values. */
+export const STATUS_LABEL: Record<AccountStatus, string> = {
+  Active: "চালু আছে",
+  "On duty": "কাজে আছেন",
+  "On leave": "ছুটিতে",
+  Suspended: "বন্ধ",
+  Deactivated: "পুরোপুরি বন্ধ",
+};
+
 export function StaffStatusBadge({ status }: { status: AccountStatus }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium ${STATUS_STYLE[status]}`}>
       <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-      {status}
+      {STATUS_LABEL[status]}
     </span>
   );
 }
@@ -32,7 +42,7 @@ export function AccountActions({
   maskedPhone,
   open,
   activeLabel,
-  openNoun = "open assignment",
+  openNoun = "চলমান কাজ",
   onStatus,
   onReset,
 }: {
@@ -56,37 +66,37 @@ export function AccountActions({
     setConfirm(null);
     if (a === "reset") {
       onReset();
-      setMessage(`A temporary password was sent by SMS to ${maskedPhone}. ${name} must change it at next sign-in.`);
+      setMessage(`${maskedPhone} নম্বরে এসএমএস-এ একটি অস্থায়ী পাসওয়ার্ড পাঠানো হয়েছে। পরের বার সাইন ইন করার সময় ${name}-কে এটি বদলাতে হবে।`);
     }
     if (a === "suspend") {
       if (suspended) {
         onStatus(activeLabel);
-        setMessage(`${name} can sign in again.`);
+        setMessage(`${name} আবার সাইন ইন করতে পারবেন।`);
       } else {
         onStatus("Suspended");
-        setMessage(`${name} is suspended — sign-in is blocked.${open ? ` Reassign their ${open} ${openNoun}${open === 1 ? "" : "s"}.` : ""}`);
+        setMessage(`${name}-এর অ্যাকাউন্ট বন্ধ করা হয়েছে — সাইন ইন করা যাবে না।${open ? ` তাঁর ${bn(open)}টি ${openNoun} অন্য কাউকে দিন।` : ""}`);
       }
     }
     if (a === "deactivate") {
       setBefore(status);
       onStatus("Deactivated");
-      setMessage(`${name}'s account is deactivated. Submitted evidence and audit-trail entries are kept.`);
+      setMessage(`${name}-এর অ্যাকাউন্ট পুরোপুরি বন্ধ করা হয়েছে। জমা দেওয়া প্রমাণ ও অডিট লগের তথ্য রাখা আছে।`);
     }
   };
 
   const CONFIRM: Record<Exclude<Pending, null>, { q: string; yes: string; cls: string }> = {
-    reset: { q: `Send ${name} a temporary password by SMS?`, yes: "Send", cls: "bg-primary hover:bg-primary-hover" },
+    reset: { q: `${name}-কে এসএমএস-এ একটি অস্থায়ী পাসওয়ার্ড পাঠাবেন?`, yes: "পাঠান", cls: "bg-primary hover:bg-primary-hover" },
     suspend: suspended
-      ? { q: `Lift the suspension and let ${name} sign in again?`, yes: "Reactivate", cls: "bg-primary hover:bg-primary-hover" }
-      : { q: `Suspend ${name}? They can't sign in or upload until reactivated.`, yes: "Suspend", cls: "bg-warning hover:bg-warning/90" },
-    deactivate: { q: `Deactivate ${name}'s account? This closes it for good; evidence and the audit trail are kept.`, yes: "Deactivate", cls: "bg-danger hover:bg-danger-hover" },
+      ? { q: `${name}-এর অ্যাকাউন্ট আবার চালু করে সাইন ইন করতে দেবেন?`, yes: "আবার চালু করুন", cls: "bg-primary hover:bg-primary-hover" }
+      : { q: `${name}-এর অ্যাকাউন্ট বন্ধ করবেন? আবার চালু না করা পর্যন্ত তিনি সাইন ইন বা আপলোড করতে পারবেন না।`, yes: "বন্ধ করুন", cls: "bg-warning hover:bg-warning/90" },
+    deactivate: { q: `${name}-এর অ্যাকাউন্ট পুরোপুরি বন্ধ করবেন? এটি আর চালু করা যাবে না; প্রমাণ ও অডিট লগ রাখা থাকবে।`, yes: "পুরোপুরি বন্ধ করুন", cls: "bg-danger hover:bg-danger-hover" },
   };
 
   const button = "h-10 w-full cursor-pointer rounded-button border bg-white text-[13.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
-      <h2 className="text-[15px] font-semibold text-ink">Account Actions</h2>
+      <h2 className="text-[15px] font-semibold text-ink">অ্যাকাউন্ট নিয়ন্ত্রণ</h2>
       {confirm ? (
         <div role="alertdialog" aria-labelledby="acct-confirm" className="mt-3 rounded-card border border-line bg-surface/60 p-4">
           <p id="acct-confirm" className="text-[13px] leading-normal text-ink text-pretty">
@@ -97,20 +107,20 @@ export function AccountActions({
               {CONFIRM[confirm].yes}
             </button>
             <button type="button" onClick={() => setConfirm(null)} className="h-9 cursor-pointer rounded-button border border-line bg-white px-4 text-[13px] font-semibold text-ink hover:border-primary">
-              Cancel
+              বাতিল
             </button>
           </div>
         </div>
       ) : (
         <div className="mt-3 flex flex-col gap-2.5">
           <button type="button" disabled={deactivated} onClick={() => setConfirm("reset")} className={`${button} border-line text-primary hover:border-primary hover:bg-surface`}>
-            Reset password
+            পাসওয়ার্ড রিসেট
           </button>
           <button type="button" disabled={deactivated} onClick={() => setConfirm("suspend")} className={`${button} border-line text-warning hover:border-warning`}>
-            {suspended ? "Reactivate account" : "Suspend account"}
+            {suspended ? "অ্যাকাউন্ট আবার চালু করুন" : "অ্যাকাউন্ট বন্ধ করুন"}
           </button>
           <button type="button" disabled={deactivated} onClick={() => setConfirm("deactivate")} className={`${button} border-danger text-danger hover:bg-danger/5`}>
-            {deactivated ? "Account deactivated" : "Deactivate account"}
+            {deactivated ? "পুরোপুরি বন্ধ" : "পুরোপুরি বন্ধ করুন"}
           </button>
         </div>
       )}
@@ -127,12 +137,12 @@ export function AccountActions({
               }}
               className="ml-2 cursor-pointer font-semibold text-primary hover:text-primary-hover"
             >
-              Undo
+              আগের মতো করুন
             </button>
           )}
         </div>
       )}
-      <p className="mt-3 text-[11.5px] text-muted">Deactivation keeps all submitted evidence and audit-trail entries intact.</p>
+      <p className="mt-3 text-[11.5px] text-muted">পুরোপুরি বন্ধ করলেও জমা দেওয়া সব প্রমাণ ও অডিট লগের তথ্য ঠিকঠাক থাকে।</p>
     </section>
   );
 }

@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { evidenceKind } from "@/components/evidence";
 import { inputClass, Required } from "@/components/form";
+import { RichText, RichTextEditor } from "@/components/rich-text";
 import { decide as recordDecision, undoDecision } from "@/lib/db/actions";
 import { bn, bnDate, daysSince } from "@/lib/db/format";
 import { CATEGORY_STYLE, ORIGIN_STYLE } from "@/lib/db/selectors";
 import type { Category, Evidence, Submission } from "@/lib/db/types";
+import { plainText, toSafeHtml } from "@/lib/rich-text";
 import { EvidenceManager, type EvidenceItem } from "../../reviewer-evidence";
 import { OVERDUE_DAYS } from "../../use-reviewer";
 
@@ -50,12 +52,13 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
   const late = days >= OVERDUE_DAYS;
   const evidenceChanged = evidence.some((e) => e.added || e.removed);
   const activeEvidence = evidence.filter((e) => !e.removed).length;
-  const changedFields = (Object.keys(original) as (keyof Editable)[]).filter((k) => data[k] !== original[k]);
-  const draftValid = draft.title.trim().length > 6 && draft.body.trim().length > 0;
+  const changedFields = (Object.keys(original) as (keyof Editable)[]).filter((k) => (k === "body" ? toSafeHtml(data.body) !== toSafeHtml(original.body) : data[k] !== original[k]));
+  const draftBodyOk = plainText(draft.body).trim().length > 0;
+  const draftValid = draft.title.trim().length > 6 && draftBodyOk;
   const reasonOk = reason.trim().length >= MIN_REASON;
   const ready = reasonOk && !editing;
 
-  const FIELD_LABEL: Record<keyof Editable, string> = { category: "শ্রেণি", title: "শিরোনাম", body: "সূত্র ও বিবরণ" };
+  const FIELD_LABEL: Record<keyof Editable, string> = { category: "ধরন", title: "শিরোনাম", body: "সূত্র ও বিস্তারিত" };
   const changedLabels = [...changedFields.map((k) => FIELD_LABEL[k]), ...(evidenceChanged ? ["প্রমাণ"] : [])];
 
   const [evidenceError, setEvidenceError] = useState("");
@@ -71,7 +74,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
     // Record the decision with any edits; edited evidence replaces the submitted list.
     const kept: Evidence[] = evidence
       .filter((e) => !e.removed)
-      .map((e) => (e.added && e.file ? { id: e.id, kind: evidenceKind(e.file), title: e.title, meta: "নির্বাহী সম্পাদকের সংযোজন" } : { id: e.id, kind: e.thumb, title: e.title, meta: e.meta }));
+      .map((e) => (e.added && e.file ? { id: e.id, kind: evidenceKind(e.file), title: e.title, meta: "নির্বাহী সম্পাদক যোগ করেছেন" } : { id: e.id, kind: e.thumb, title: e.title, meta: e.meta }));
     const edits = changedLabels.length ? { category: data.category, title: data.title, body: data.body, evidence: kept } : undefined;
     recordDecision(item.code, reviewerId, d === "গৃহীত" ? "Accepted" : "Rejected", reason.trim(), edits);
     setDecided(d);
@@ -82,7 +85,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
       <section className="rounded-card border border-line bg-white px-6 py-8 text-center shadow-card">
         <h2 className="text-[16px] font-semibold">এই জমার সিদ্ধান্ত হয়ে গেছে</h2>
         <p className="mx-auto mt-1.5 max-w-md text-[12.5px] leading-relaxed text-muted text-pretty">
-          {item.code} আর পর্যালোচনার সারিতে নেই।{item.decidedBy === reviewerId ? " আপনার সিদ্ধান্তের বিস্তারিত ইতিহাসে দেখুন।" : " অন্য একজন নির্বাহী সম্পাদক এটি নিষ্পত্তি করেছেন।"}
+          {item.code} আর যাচাইয়ের তালিকায় নেই।{item.decidedBy === reviewerId ? " আপনার সিদ্ধান্তের বিস্তারিত ইতিহাসে দেখুন।" : " অন্য একজন নির্বাহী সম্পাদক এটির সিদ্ধান্ত দিয়েছেন।"}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2.5">
           {item.decidedBy === reviewerId && (
@@ -91,7 +94,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
             </Link>
           )}
           <Link href="/reviewer/queue" className="inline-flex h-10 items-center rounded-button border border-line px-4 text-[13px] font-semibold text-primary hover:border-primary">
-            সারিতে ফিরুন
+            তালিকায় ফিরুন
           </Link>
         </div>
       </section>
@@ -116,12 +119,12 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
           <span className="flex-none whitespace-nowrap font-mono text-[11px] font-semibold text-muted">{item.code}</span>
           {changedLabels.length > 0 && (
             <span className="flex-none whitespace-nowrap rounded-input bg-role-reviewer/10 px-2 py-[3px] text-[11px] font-semibold text-role-reviewer">
-              নির্বাহী সম্পাদক সম্পাদিত
+              নির্বাহী সম্পাদক এডিট করেছেন
             </span>
           )}
           <span className="min-w-2.5 flex-1" />
           <span className={`flex-none whitespace-nowrap text-[11.5px] font-semibold ${late ? "text-danger" : "text-muted"}`}>
-            {days === 0 ? "আজ জমা" : `${bn(days)} দিন অপেক্ষমাণ`}
+            {days === 0 ? "আজ জমা" : `${bn(days)} দিন ধরে অপেক্ষায়`}
           </span>
         </div>
         {!editing && <h2 className="mt-3 text-[18px] font-semibold leading-[1.65] text-pretty">{data.title}</h2>}
@@ -143,13 +146,13 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
         {editing ? (
           <div className="flex flex-col gap-[18px] rounded-card border border-role-reviewer/40 bg-role-reviewer/[0.03] p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[13px] font-semibold">তথ্য সম্পাদনা</span>
-              <span className="text-[11.5px] text-muted">· মূল জমা অডিট লগে সংরক্ষিত থাকবে</span>
+              <span className="text-[13px] font-semibold">তথ্য এডিট</span>
+              <span className="text-[11.5px] text-muted">· আসল জমা অডিট লগে রাখা থাকবে</span>
             </div>
 
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 text-[12.5px] font-semibold leading-[1.6]">
-                শ্রেণি <Required />
+                ধরন <Required />
               </legend>
               <div role="radiogroup" className="flex flex-wrap gap-2.5">
                 {CATEGORIES.map((c) => {
@@ -190,20 +193,14 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
 
             <div className="flex flex-col gap-[7px]">
               <label htmlFor="ed-body" className="text-[12.5px] font-semibold leading-[1.6]">
-                সূত্র ও বিবরণ <Required />
+                সূত্র ও বিস্তারিত <Required />
               </label>
-              <textarea
-                id="ed-body"
-                rows={4}
-                value={draft.body}
-                onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
-                className={`${inputClass} h-auto! resize-y py-3 leading-[1.75] ${!draft.body.trim() ? "border-danger!" : ""}`}
-              />
+              <RichTextEditor id="ed-body" value={draft.body} onChange={(body) => setDraft((d) => ({ ...d, body }))} invalid={!draftBodyOk} />
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
               <p className="min-w-[200px] flex-1 text-[11.5px] leading-[1.65] text-muted text-pretty">
-                প্রমাণ যোগ বা সরাতে নিচের প্রমাণ অংশ ব্যবহার করুন।
+                প্রমাণ যোগ করতে বা সরাতে নিচের প্রমাণ অংশ দেখুন।
               </p>
               <button
                 type="button"
@@ -219,19 +216,19 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
                 type="button"
                 disabled={!draftValid}
                 onClick={() => {
-                  setData({ ...draft, title: draft.title.trim(), body: draft.body.trim() });
+                  setData({ ...draft, title: draft.title.trim() });
                   setEditing(false);
                 }}
                 className="h-10 cursor-pointer rounded-button bg-role-reviewer px-5 text-[13px] font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
               >
-                পরিবর্তন সংরক্ষণ করুন
+                পরিবর্তন সেভ করুন
               </button>
             </div>
           </div>
         ) : (
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex-1 text-[10.5px] font-semibold tracking-[0.05em] text-muted">সূত্র ও বিবরণ · SOURCE</div>
+              <div className="flex-1 text-[10.5px] font-semibold tracking-[0.05em] text-muted">সূত্র ও বিস্তারিত</div>
               {!decided && (
                 <button
                   type="button"
@@ -244,17 +241,17 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M10.6 2.6 13.4 5.4 5.6 13.2H2.8v-2.8z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
                   </svg>
-                  তথ্য সম্পাদনা করুন
+                  তথ্য এডিট করুন
                 </button>
               )}
             </div>
-            <p className="mt-2 text-[13.5px] leading-[1.8] text-pretty">{data.body}</p>
+            <RichText value={data.body} className="mt-2 text-[13.5px] leading-[1.8] text-pretty" />
           </div>
         )}
 
         {changedLabels.length > 0 && !editing && (
           <div className="flex flex-wrap items-center gap-2 rounded-card border border-l-[3px] border-line border-l-role-reviewer bg-surface px-3.5 py-2.5 text-[12px] leading-[1.65]">
-            <span className="font-semibold">আপনি সম্পাদনা করেছেন:</span>
+            <span className="font-semibold">আপনি এডিট করেছেন:</span>
             <span className="text-muted">{changedLabels.join(", ")}</span>
             <span className="min-w-2 flex-1" />
             {!decided && (
@@ -268,7 +265,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
                 }}
                 className="cursor-pointer text-[12px] font-semibold text-muted underline underline-offset-2 hover:text-ink"
               >
-                মূল তথ্যে ফিরিয়ে নিন
+                আগের তথ্যে ফিরে যান
               </button>
             )}
           </div>
@@ -285,7 +282,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
             <textarea
               id="rv-reason"
               rows={3}
-              placeholder="কোন প্রমাণের ভিত্তিতে গ্রহণ করছেন, অথবা কেন বাতিল করছেন — স্পষ্ট করে লিখুন। জমাদানকারী তদন্ত সম্পাদক এটি দেখতে পাবেন।"
+              placeholder="কোন প্রমাণ দেখে গ্রহণ করছেন, বা কেন বাতিল করছেন — পরিষ্কার করে লিখুন। যে তদন্ত সম্পাদক জমা দিয়েছেন, তিনি এটি দেখতে পাবেন।"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               aria-invalid={attempted && !reasonOk}
@@ -317,10 +314,10 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
             }`}
           >
             {editing
-              ? "সিদ্ধান্তের আগে সম্পাদনা সংরক্ষণ বা বাতিল করুন।"
+              ? "সিদ্ধান্তের আগে এডিট সেভ করুন বা বাতিল করুন।"
               : reasonOk
-                ? "গ্রহণ করলে তথ্যটি সঙ্গে সঙ্গে প্রোফাইলে প্রকাশিত হবে · বাতিল করলে কারণসহ বন্ধ হবে।"
-                : "সিদ্ধান্ত নেওয়ার আগে কারণ লিখুন — এটি অডিট লগে সংরক্ষিত হয়।"}
+                ? "গ্রহণ করলে তথ্যটি সঙ্গে সঙ্গে প্রোফাইলে দেখা যাবে · বাতিল করলে কারণসহ বন্ধ হবে।"
+                : "সিদ্ধান্ত নেওয়ার আগে কারণ লিখুন — এটি অডিট লগে লেখা থাকে।"}
           </p>
           <div className="flex flex-none flex-wrap gap-2.5">
             <button
@@ -339,7 +336,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
                 ready ? "bg-primary text-white hover:bg-primary-hover" : "bg-surface text-muted"
               }`}
             >
-              {changedLabels.length ? "সম্পাদনাসহ গ্রহণ করুন" : "গ্রহণ করুন"}
+              {changedLabels.length ? "এডিটসহ গ্রহণ করুন" : "গ্রহণ করুন"}
             </button>
           </div>
         </div>
@@ -377,16 +374,16 @@ function Outcome({
           </svg>
         )}
       </div>
-      <h2 className="text-[17px] font-semibold leading-[1.6]">{accepted ? "গৃহীত হয়েছে" : "বাতিল করা হয়েছে"}</h2>
+      <h2 className="text-[17px] font-semibold leading-[1.6]">{accepted ? "গ্রহণ হয়েছে" : "বাতিল করা হয়েছে"}</h2>
       <p className="max-w-[520px] text-[12.5px] leading-[1.75] text-muted text-pretty">
         {accepted
-          ? `${code} ${edited.length ? "আপনার সম্পাদনাসহ " : ""}প্রোফাইলে প্রকাশিত হয়েছে এবং স্কোরে গণনা করা হবে।`
-          : `${code} কারণসহ বন্ধ করা হয়েছে — প্রোফাইলে দেখা যাবে না, তবে রেকর্ডে সংরক্ষিত থাকবে।`}
+          ? `${code} ${edited.length ? "আপনার এডিটসহ " : ""}প্রোফাইলে দেখানো হচ্ছে এবং স্কোরে ধরা হবে।`
+          : `${code} কারণসহ বন্ধ করা হয়েছে — প্রোফাইলে দেখা যাবে না, তবে রেকর্ডে রাখা থাকবে।`}
       </p>
       <div className="w-full max-w-[520px] rounded-card border border-line bg-surface px-4 py-3 text-left">
-        <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">আপনার কারণ · অডিট লগে সংরক্ষিত</div>
+        <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">আপনার কারণ · অডিট লগে লেখা আছে</div>
         <p className="mt-1 text-[13px] leading-[1.7] text-pretty">{reason}</p>
-        {edited.length > 0 && <p className="mt-2 text-[11.5px] text-muted">সম্পাদিত: {edited.join(", ")} · মূল জমাও সংরক্ষিত</p>}
+        {edited.length > 0 && <p className="mt-2 text-[11.5px] text-muted">এডিট করা: {edited.join(", ")} · আসল জমাও রাখা আছে</p>}
       </div>
       <div className="mt-2 flex flex-wrap justify-center gap-2.5">
         <button
@@ -400,14 +397,14 @@ function Outcome({
           href="/reviewer/queue"
           className="inline-flex h-[42px] items-center rounded-button border border-line bg-white px-4 text-[13.5px] font-semibold text-muted hover:border-primary hover:text-primary"
         >
-          সারিতে ফিরুন
+          তালিকায় ফিরুন
         </Link>
         {nextCode && (
           <Link
             href={`/reviewer/queue/${nextCode}`}
             className="inline-flex h-[42px] items-center rounded-button bg-primary px-5 text-[13.5px] font-semibold text-white hover:bg-primary-hover"
           >
-            পরবর্তী জমা যাচাই করুন →
+            পরের জমা যাচাই করুন →
           </Link>
         )}
       </div>

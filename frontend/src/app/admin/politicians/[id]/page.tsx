@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SubjectPage } from "./subject-page";
 
-export const metadata: Metadata = { title: "Subject Profile · ALARM" };
+export const metadata: Metadata = { title: "রাজনৈতিক কর্মীর প্রোফাইল · ALARM" };
 
 /** `?add=1` opens the "Add report" form (the header button links there). */
 export default async function SubjectProfilePage({ params, searchParams }: PageProps<"/admin/politicians/[id]">) {

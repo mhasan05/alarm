@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BrandLockup } from "@/components/brand";
 import { ForgotPasswordForm } from "./forgot-form";
 
-export const metadata: Metadata = { title: "পাসওয়ার্ড পুনরুদ্ধার · ALARM" };
+export const metadata: Metadata = { title: "পাসওয়ার্ড ফিরে পান · ALARM" };
 
 export default function ForgotPasswordPage() {
   return (

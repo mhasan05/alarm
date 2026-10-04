@@ -13,13 +13,13 @@ export function VerifyView({ code }: { code: string }) {
   const profile = item ? profileOf(db, item.profileId) : undefined;
   // Reviewers only open submissions from their own coverage areas.
   const inCoverage = !!(reviewer && profile && reviewer.areas.includes(coverageKey(profile)));
-  if (!item || !profile || !inCoverage || !reviewer) return <RecordMissing title="জমাটি পাওয়া যায়নি" backHref="/reviewer/queue" backLabel="সারিতে ফিরুন" />;
+  if (!item || !profile || !inCoverage || !reviewer) return <RecordMissing title="জমাটি পাওয়া যায়নি" backHref="/reviewer/queue" backLabel="তালিকায় ফিরুন" />;
 
   const next = queue.find((q) => q.code !== code);
 
   return (
     <>
-      <PageHeader backHref="/reviewer/queue" crumb="নির্বাহী সম্পাদক পোর্টাল / পর্যালোচনার সারি / যাচাই" title="জমা যাচাই করুন" />
+      <PageHeader backHref="/reviewer/queue" crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের তালিকা / যাচাই" title="জমা যাচাই করুন" />
 
       <div className="flex flex-1 flex-col gap-4 px-4 pt-[22px] pb-9 sm:px-7">
         <Link
@@ -29,7 +29,7 @@ export function VerifyView({ code }: { code: string }) {
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M8.6 2.4 4 7l4.6 4.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          সারিতে ফিরুন
+          তালিকায় ফিরুন
         </Link>
 
         {/* Keyed so moving to the next item starts fresh. */}

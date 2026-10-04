@@ -12,12 +12,12 @@ export function StaffDashboardView() {
   if (!staff) return <RecordMissing title="অ্যাকাউন্ট পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
 
   const nearest = openTasks.filter((t) => t.due.urgency !== "done").sort((a, b) => a.due.days - b.due.days)[0];
-  const lastRejected = subs.find((s) => s.state === "Rejected" || s.state === "Held");
+  const lastRejected = subs.find((s) => s.state === "Rejected");
 
   const stats = [
-    { label: "চলমান কাজ", value: openTasks.length, color: "#0D1F17", note: nearest ? `নিকটতম: ${nearest.due.label}` : "কোনো চলমান কাজ নেই" },
-    { label: "পর্যালোচনাধীন", value: counts.pending, color: "#D97706", note: "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়" },
-    { label: "গৃহীত", value: counts.accepted, color: "#1A7A4A", note: "প্রোফাইলে প্রকাশিত হয়েছে" },
+    { label: "চলতি কাজ", value: openTasks.length, color: "#0D1F17", note: nearest ? `সবচেয়ে কাছের: ${nearest.due.label}` : "কোনো চলতি কাজ নেই" },
+    { label: "যাচাই চলছে", value: counts.pending, color: "#D97706", note: "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়" },
+    { label: "গ্রহণ হয়েছে", value: counts.accepted, color: "#1A7A4A", note: "প্রোফাইলে দেখা যাচ্ছে" },
     { label: "বাতিল", value: counts.rejected, color: "#F42A41", note: "কারণসহ বন্ধ করা হয়েছে" },
   ];
 
@@ -46,7 +46,7 @@ export function StaffDashboardView() {
               <path d="M8 4.6v4.2M8 11.2v.2" stroke="#F42A41" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <p className="min-w-[220px] flex-1 text-[12.5px] leading-[1.75] text-pretty">
-              আপনার {bn(counts.rejected)}টি জমা বাতিল বা স্থগিত হয়েছে — সর্বশেষ: “{lastRejected.title}”। কারণ দেখে পরের জমায় প্রমাণ মজবুত করুন।
+              আপনার {bn(counts.rejected)}টি জমা বাতিল হয়েছে — সবশেষ: “{lastRejected.title}”। কারণ দেখে পরের জমায় প্রমাণ মজবুত করুন।
             </p>
             <Link
               href={`/staff/submissions/${lastRejected.code}`}
@@ -66,7 +66,7 @@ export function StaffDashboardView() {
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-6 pt-10 pb-11 text-center">
               <div className="text-[15px] font-semibold leading-[1.6]">কোনো দায়িত্ব দেওয়া হয়নি</div>
-              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">আপনার এলাকায় এখনও কোনো প্রোফাইল বরাদ্দ হয়নি। প্রধান নির্বাহী সম্পাদক দায়িত্ব দিলে এখানে দেখা যাবে।</p>
+              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">আপনার এলাকায় এখনও কোনো প্রোফাইল দেওয়া হয়নি। প্রধান নির্বাহী সম্পাদক দায়িত্ব দিলে এখানে দেখা যাবে।</p>
             </div>
           ) : (
             <ul className="grid gap-4 px-[18px] pt-4 pb-[18px] sm:grid-cols-2 xl:grid-cols-3">
@@ -77,11 +77,11 @@ export function StaffDashboardView() {
                 const pend = mine.filter((s) => s.state === "Pending").length;
                 const counts = [
                   { value: mine.length, label: "আমার জমা", color: "#0D1F17" },
-                  { value: acc, label: "গৃহীত", color: "#1A7A4A" },
-                  { value: pend, label: "পর্যালোচনাধীন", color: pend ? "#D97706" : "#4A7060" },
+                  { value: acc, label: "গ্রহণ হয়েছে", color: "#1A7A4A" },
+                  { value: pend, label: "যাচাই চলছে", color: pend ? "#D97706" : "#4A7060" },
                 ];
                 return (
-                  <li key={t.id} className={`flex flex-col rounded-card border border-l-[3px] border-line p-4 ${t.open ? "bg-white" : "bg-[#FAFDFC]"}`} style={{ borderLeftColor: due.accent }}>
+                  <li key={t.id} className={`relative flex flex-col rounded-card border border-l-[3px] border-line p-4 ${t.open ? "cursor-pointer bg-white hover:bg-[#FAFDFC]" : "bg-[#FAFDFC]"}`} style={{ borderLeftColor: due.accent }}>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
                       <span className="flex size-[38px] flex-none items-center justify-center rounded-full bg-primary/12 text-[15px] font-semibold text-primary">{t.profile?.initial}</span>
                       <div className="min-w-[200px] flex-1">
@@ -115,7 +115,7 @@ export function StaffDashboardView() {
                       {t.open ? (
                         <Link
                           href={`/staff/submissions/new?profile=${t.profileId}`}
-                          className="inline-flex h-9 flex-none items-center gap-[7px] rounded-button border border-primary bg-primary px-[15px] text-[12.5px] font-semibold text-white hover:bg-primary-hover"
+                          className="inline-flex h-9 flex-none items-center gap-[7px] rounded-button border border-primary bg-primary px-[15px] text-[12.5px] font-semibold text-white after:absolute after:inset-0 after:content-[''] hover:bg-primary-hover"
                         >
                           তথ্য জমা দিন
                         </Link>
