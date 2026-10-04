@@ -14,7 +14,7 @@ export function ReviewerQueueView() {
 
   return (
     <>
-      <PageHeader crumb="পর্যালোচক পোর্টাল / পর্যালোচনার সারি" title="অপেক্ষমাণ কাজ" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / পর্যালোচনার সারি" title="অপেক্ষমাণ কাজ" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {overdue.length > 0 && (
@@ -24,7 +24,7 @@ export function ReviewerQueueView() {
               <path d="M8 4.4V8l2.4 1.6" stroke="#F42A41" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <p className="min-w-[220px] flex-1 text-[12.5px] leading-[1.75] text-pretty">
-              {bn(overdue.length)}টি জমা ৪৮ ঘণ্টার বেশি সময় ধরে অপেক্ষমাণ। সারি খালি না হওয়া পর্যন্ত ওই প্রোফাইলে অ্যাডমিন বিশ্লেষণ শুরু করতে
+              {bn(overdue.length)}টি জমা ৪৮ ঘণ্টার বেশি সময় ধরে অপেক্ষমাণ। সারি খালি না হওয়া পর্যন্ত ওই প্রোফাইলে প্রধান নির্বাহী সম্পাদক বিশ্লেষণ শুরু করতে
               পারবেন না।
             </p>
             <Link
@@ -40,7 +40,7 @@ export function ReviewerQueueView() {
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">পর্যালোচনার অপেক্ষায়</h2>
             <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-              পুরোনো জমা আগে · মাঠকর্মী ও রাজনৈতিক কর্মী — দুই উৎসের তথ্যই একই নিয়মে যাচাই হয়
+              পুরোনো জমা আগে · তদন্ত সম্পাদক ও রাজনৈতিক কর্মী — দুই উৎসের তথ্যই একই নিয়মে যাচাই হয়
             </p>
           </div>
 

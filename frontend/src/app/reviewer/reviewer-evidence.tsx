@@ -68,7 +68,7 @@ export function EvidenceManager({
       ...ok.map((file, i) => ({
         id: `add-${Date.now()}-${i}`,
         title: file.name,
-        meta: "পর্যালোচক যোগ করেছেন",
+        meta: "নির্বাহী সম্পাদক যোগ করেছেন",
         thumb: file.name.split(".").pop()?.toUpperCase() ?? "",
         file,
         url: URL.createObjectURL(file),

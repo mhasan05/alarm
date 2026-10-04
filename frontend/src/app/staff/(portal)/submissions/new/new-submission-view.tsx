@@ -14,7 +14,7 @@ export function NewSubmissionView({ profile }: { profile?: string }) {
 
   return (
     <>
-      <PageHeader backHref="/staff/dashboard" crumb="মাঠকর্মী পোর্টাল / নতুন তথ্য জমা" title="নতুন তথ্য জমা দিন" />
+      <PageHeader backHref="/staff/dashboard" crumb="তদন্ত সম্পাদক পোর্টাল / নতুন তথ্য জমা" title="নতুন তথ্য জমা দিন" />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
@@ -23,7 +23,7 @@ export function NewSubmissionView({ profile }: { profile?: string }) {
             <p className="mt-[3px] text-[12px] leading-[1.65] text-muted text-pretty">জমা দেওয়ার পর তথ্যটি পর্যালোচনার সারিতে যাবে। গ্রহণ করা হলেই সংশ্লিষ্ট প্রোফাইলে প্রকাশিত হবে।</p>
           </div>
           {tasks.length === 0 ? (
-            <p className="px-6 py-10 text-center text-[13px] text-muted">এখন আপনার কোনো চলমান কাজ নেই — অ্যাডমিন দায়িত্ব দিলে এখানে তথ্য জমা দিতে পারবেন।</p>
+            <p className="px-6 py-10 text-center text-[13px] text-muted">এখন আপনার কোনো চলমান কাজ নেই — প্রধান নির্বাহী সম্পাদক দায়িত্ব দিলে এখানে তথ্য জমা দিতে পারবেন।</p>
           ) : (
             // Keyed so switching between locked profiles resets the form.
             <SubmissionForm key={locked?.id ?? "any"} locked={locked} openTasks={tasks} />

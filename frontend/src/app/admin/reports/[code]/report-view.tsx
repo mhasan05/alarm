@@ -28,7 +28,7 @@ export function ReportView({ code, v }: { code: string; v?: string }) {
         backHref="/admin/reports"
         crumb={
           <>
-            অ্যাডমিন পোর্টাল /{" "}
+            প্রধান নির্বাহী সম্পাদক পোর্টাল /{" "}
             <Link href="/admin/reports" className="text-primary hover:text-primary-hover">
               প্রতিবেদন
             </Link>{" "}
@@ -61,7 +61,7 @@ export function ReportView({ code, v }: { code: string; v?: string }) {
 
         {!approved && (
           <p role="status" className="rounded-card border border-l-[3px] border-line border-l-warning bg-white px-5 py-3 text-[13px] text-ink shadow-card print:hidden">
-            Waiting for {reviewer?.name ?? "the reviewer"} (Reviewer) to add a remark and sign. Sharing and PDF unlock after sign-off.
+            Waiting for {reviewer?.name ?? "the executive editor"} (Executive Editor) to add a remark and sign. Sharing and PDF unlock after sign-off.
             {report.adminNote && <span className="mt-1 block text-[12px] text-muted">Your note on the selection: {report.adminNote}</span>}
           </p>
         )}

@@ -29,8 +29,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       items: [
         { href: "/admin/dashboard", label: "ড্যাশবোর্ড" },
         { href: "/admin/politicians", label: "রাজনৈতিক কর্মী" },
-        { href: "/admin/field-staff", label: "মাঠকর্মী" },
-        { href: "/admin/reviewers", label: "পর্যালোচক" },
+        { href: "/admin/field-staff", label: "তদন্ত সম্পাদক" },
+        { href: "/admin/reviewers", label: "নির্বাহী সম্পাদক" },
         { href: "/admin/disputes", label: "অভিযোগ", badge: open, badgeColor: "#F42A41" },
         { href: "/admin/ai-review", label: "এআই বিশ্লেষণ" },
         { href: "/admin/reports", label: "প্রতিবেদন" },
@@ -43,7 +43,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const mobileTabs: MobileTab[] = [
     { href: "/admin/dashboard", label: "ড্যাশবোর্ড", icon: ICONS.dashboard },
     { href: "/admin/politicians", label: "রাজনৈতিক কর্মী", icon: ICONS.politicians },
-    { href: "/admin/field-staff", label: "মাঠকর্মী", icon: ICONS.staff },
+    { href: "/admin/field-staff", label: "তদন্ত সম্পাদক", icon: ICONS.staff },
     { href: "/admin/disputes", label: "অভিযোগ", badge: open, badgeColor: "#F42A41", icon: ICONS.disputes },
     { href: "/admin/reports", label: "প্রতিবেদন", icon: ICONS.reports },
     { href: "/admin/meetings", label: "মিটিং", badge: meetings, badgeColor: "#D97706", icon: MEETING_ICON },
@@ -51,12 +51,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <AppShell
-      portal="অ্যাডমিন পোর্টাল"
+      portal="প্রধান নির্বাহী সম্পাদক পোর্টাল"
       nav={nav}
       mobileTabs={mobileTabs}
       photoKey={admin?.id ?? "admin"}
       settingsHref="/admin/settings?tab=general"
-      user={{ initial: admin?.initials ?? "AD", name: admin?.name ?? "Admin", role: `অ্যাডমিন · ${alarmIdOf(db, admin?.id ?? "")}`, color: "#006A4E" }}
+      user={{ initial: admin?.initials ?? "AD", name: admin?.name ?? "Chief Executive Editor", role: `প্রধান নির্বাহী সম্পাদক · ${alarmIdOf(db, admin?.id ?? "")}`, color: "#006A4E" }}
       footerNote="প্রতিটি সিদ্ধান্ত অ্যাকাউন্ট ও সময়সহ অডিট লগে সংরক্ষিত হয়।"
     >
       {children}

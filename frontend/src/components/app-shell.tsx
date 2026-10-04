@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { ShieldIcon } from "./brand";
+import { Logo } from "./brand";
 import { logout } from "@/lib/auth-client";
 import { ProfileMenu, ProfileProvider, UserAvatar } from "./profile";
 
@@ -120,9 +120,7 @@ export function AppShell({
         } ${appMode ? "max-md:hidden" : ""}`}
       >
         <div className="flex items-center gap-2.5 border-b border-line px-5 pt-5 pb-[18px]">
-          <div className="flex size-8 flex-none items-center justify-center rounded-lg bg-primary text-white">
-            <ShieldIcon className="h-[19px] w-[17px]" />
-          </div>
+          <Logo size={42} priority />
           <div className="flex flex-col gap-0.5">
             <div className="text-[16px] font-bold leading-none tracking-[0.13em] text-primary">ALARM</div>
             <div className="font-bn text-[10px] font-medium leading-normal text-muted">{portal}</div>
@@ -218,14 +216,15 @@ export function AppShell({
                 key={t.href}
                 href={t.href}
                 aria-current={on ? "page" : undefined}
-                className={`relative flex h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-[5px] border-t-2 px-1 ${
+                className={`relative flex h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-1 border-t-2 px-0.5 ${
                   on ? "border-primary text-primary" : "border-transparent text-muted"
                 }`}
               >
                 <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d={t.icon} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                <span className="truncate text-[11.5px] font-semibold leading-normal">{t.label}</span>
+                {/* Long role names wrap onto two lines instead of running into the next tab. */}
+                <span className="line-clamp-2 max-w-full text-center text-[11px] font-semibold leading-[1.2]">{t.label}</span>
                 {hasBadge(t.badge) && (
                   <span
                     className="absolute top-1.5 left-1/2 ml-2 rounded-[9px] px-1.5 text-[10px] font-semibold leading-4 text-white"

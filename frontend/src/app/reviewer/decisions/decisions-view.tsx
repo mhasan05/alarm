@@ -20,7 +20,7 @@ export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
 
   return (
     <>
-      <PageHeader crumb="পর্যালোচক পোর্টাল / সিদ্ধান্তের ইতিহাস" title="আমার সাম্প্রতিক সিদ্ধান্ত" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / সিদ্ধান্তের ইতিহাস" title="আমার সাম্প্রতিক সিদ্ধান্ত" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">

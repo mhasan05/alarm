@@ -25,8 +25,8 @@ export function nameOf(db: Database, id: string): string {
 }
 
 /** Bengali name for team members (used on Bengali screens). */
-/** The person's ALARM ID (KAR-…), or "" for an account without a sign-in yet. */
-export const alarmIdOf = (db: Database, id: string) => db.users.find((u) => u.id === id)?.alarmId ?? "";
+/** The person's ALARM ID. Every account's id is its ALARM ID (KAR- + 6 digits). */
+export const alarmIdOf = (_db: Database, id: string) => id;
 
 export function nameBnOf(db: Database, id: string): string {
   return reviewerOf(db, id)?.nameBn ?? staffOf(db, id)?.nameBn ?? profileOf(db, id)?.name ?? nameOf(db, id);
@@ -34,7 +34,10 @@ export function nameBnOf(db: Database, id: string): string {
 
 export type AccountRole = "admin" | "reviewer" | "staff" | "politician";
 export const roleOfId = (db: Database, id: string): AccountRole | "system" =>
-  id === "system" ? "system" : (userOf(db, id)?.role ?? (id.startsWith("ADM") ? "admin" : id.startsWith("REV") ? "reviewer" : id.startsWith("FS") ? "staff" : "politician"));
+  id === "system"
+    ? "system"
+    : (userOf(db, id)?.role ??
+      (db.admins.some((a) => a.id === id) ? "admin" : db.reviewers.some((r) => r.id === id) ? "reviewer" : db.staff.some((x) => x.id === id) ? "staff" : "politician"));
 
 // ── Coverage ────────────────────────────────────────────────────────────────
 
@@ -196,7 +199,7 @@ export const STATE_EN: Record<SubmissionState, { label: string; cls: string }> =
 };
 
 export const ORIGIN_STYLE = {
-  staff: { label: "মাঠকর্মীর তথ্য", fg: "#D97706", bg: "rgba(217,119,6,0.12)" },
+  staff: { label: "তদন্ত সম্পাদকের তথ্য", fg: "#D97706", bg: "rgba(217,119,6,0.12)" },
   self: { label: "নিজের দেওয়া তথ্য", fg: "#7A3FA8", bg: "rgba(122,63,168,0.12)" },
 } as const;
 

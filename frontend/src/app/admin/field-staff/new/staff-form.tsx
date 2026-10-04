@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ShieldIcon } from "@/components/brand";
+import { Logo } from "@/components/brand";
 import { Field, inputClass, Required, selectClass, UploadBox } from "@/components/form";
 import { createReviewer, createStaff, updateReviewer, updateStaff, type AccountInput } from "@/lib/db/actions";
 import { normalisePhone } from "@/lib/db/format";
@@ -17,8 +17,8 @@ const PHOTO_TYPES = ["image/jpeg", "image/png"];
 const PHOTO_MAX_BYTES = 2 * 1024 * 1024;
 
 const ROLES = {
-  staff: { label: "Field Staff · মাঠকর্মী", tag: "Field Staff", cls: "bg-warning/10 text-warning", note: "Mobile collection only — cannot view or approve reports." },
-  reviewer: { label: "Reviewer · পর্যালোচক", tag: "Reviewer", cls: "bg-role-reviewer/10 text-role-reviewer", note: "Reviews and decides submissions for the chosen area." },
+  staff: { label: "Investigation Editor · তদন্ত সম্পাদক", tag: "Investigation Editor", cls: "bg-warning/10 text-warning", note: "Mobile collection only — cannot view or approve reports." },
+  reviewer: { label: "Executive Editor · নির্বাহী সম্পাদক", tag: "Executive Editor", cls: "bg-role-reviewer/10 text-role-reviewer", note: "Reviews and decides submissions for the chosen area." },
 } as const;
 export type Role = keyof typeof ROLES;
 
@@ -69,7 +69,7 @@ export function StaffForm({
   initialArea,
   initialRole = "staff",
   basePath = "/admin/field-staff",
-  listLabel = "Field Staff",
+  listLabel = "Investigation Editors",
 }: {
   nextId: string;
   admin: string;
@@ -200,7 +200,7 @@ export function StaffForm({
         ? `An activation SMS with a one-time code went to ${phone}. The account stays inactive until ${name.trim()} signs in on the app and the device is registered.`
         : done.kind === "draft"
           ? `${done.id} is saved as an inactive draft. Nothing was sent; activate it from the account page when the details are complete.`
-          : `Changes to ${name.trim()} are saved and logged under ${admin} (Admin).`;
+          : `Changes to ${name.trim()} are saved and logged under ${admin}.`;
     return (
       <section role="status" className="rounded-card border border-line border-l-[3px] border-l-success bg-white px-6 py-6 shadow-card">
         <h2 className="text-[17px] font-semibold text-ink">{title}</h2>
@@ -335,7 +335,7 @@ export function StaffForm({
                 ))}
               </select>
             </Field>
-            <Field id="fs-district" label="জেলা · District" required hint={sel.district ? `${inDistrict.length} staff already in ${sel.district}` : "জেলা বাছাই করলে বর্তমান কর্মী সংখ্যা দেখা যাবে।"}>
+            <Field id="fs-district" label="জেলা · District" required hint={sel.district ? `${inDistrict.length} investigation editors already in ${sel.district}` : "জেলা বাছাই করলে বর্তমান কর্মী সংখ্যা দেখা যাবে।"}>
               <select id="fs-district" value={sel.district} disabled={!sel.division} onChange={(e) => set.district(e.target.value)} className={selectClass}>
                 <option value="">{sel.division ? "জেলা বেছে নিন" : "আগে বিভাগ বেছে নিন"}</option>
                 {options.districts.map((o) => (
@@ -400,7 +400,7 @@ export function StaffForm({
               <div className="flex flex-col gap-[7px]">
                 <div className="font-bn text-[12.5px] font-semibold leading-[1.6]">Password</div>
                 <p className="rounded-input border border-line bg-surface px-3.5 py-3 text-[12.5px] leading-normal text-muted">
-                  Passwords are never shown. Use <strong className="font-semibold text-ink">Reset password</strong> on the staff page to send a new temporary one.
+                  Passwords are never shown. Use <strong className="font-semibold text-ink">Reset password</strong> on the investigation editor&apos;s page to send a new temporary one.
                 </p>
               </div>
             ) : (
@@ -462,7 +462,7 @@ export function StaffForm({
                 <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
                 <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.3" />
               </svg>
-              On save, an activation SMS with a one-time code is sent to the mobile number. The account stays inactive until the staff member signs in on the app and the device is registered.
+              On save, an activation SMS with a one-time code is sent to the mobile number. The account stays inactive until the investigation editor signs in on the app and the device is registered.
             </p>
           )}
         </Card>
@@ -492,9 +492,7 @@ export function StaffForm({
           <div className="mt-3 overflow-hidden rounded-card border border-line" aria-label="Field ID card preview">
             <div className="flex items-center justify-between bg-primary px-4 py-3 text-white">
               <span className="flex items-center gap-2 text-[13px] font-bold tracking-[0.13em]">
-                <span className="flex size-6 items-center justify-center rounded bg-white/15">
-                  <ShieldIcon className="h-3.5 w-3" />
-                </span>
+                <Logo size={28} />
                 ALARM
               </span>
               <span className="text-[10.5px] font-semibold tracking-[0.05em] uppercase">{ROLES[role].tag}</span>
@@ -528,7 +526,7 @@ export function StaffForm({
         <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
           <h2 className="text-[15px] font-semibold text-ink">District Load</h2>
           <p className="mt-0.5 font-bn text-[12px] text-muted">
-            নির্বাচিত জেলার মাঠকর্মী{sel.district && ` · ${sel.district}`}
+            নির্বাচিত জেলার তদন্ত সম্পাদক{sel.district && ` · ${sel.district}`}
           </p>
           {sel.district ? (
             <>
@@ -536,7 +534,7 @@ export function StaffForm({
                 {[
                   { k: "Staff in district", v: inDistrict.length, bar: inDistrict.length / maxBar, c: "bg-primary" },
                   { k: "Open assignments", v: openInDistrict, bar: openInDistrict / maxBar, c: "bg-role-reviewer" },
-                  { k: "Average per staff", v: avgNow.toFixed(1), bar: Math.min(avgNow / 7, 1), c: avgNow >= 4 ? "bg-warning" : "bg-success" },
+                  { k: "Average per editor", v: avgNow.toFixed(1), bar: Math.min(avgNow / 7, 1), c: avgNow >= 4 ? "bg-warning" : "bg-success" },
                 ].map((r) => (
                   <div key={r.k}>
                     <div className="flex justify-between text-[13px]">
@@ -551,14 +549,14 @@ export function StaffForm({
               </dl>
               <p className="mt-4 border-t border-line pt-3 text-[12px] leading-relaxed text-muted text-pretty">
                 {inDistrict.length === 0
-                  ? `No staff cover ${sel.district} yet — this will be the first.`
+                  ? `No investigation editors cover ${sel.district} yet — this will be the first.`
                   : editing
                     ? `Keeping ${editing.name} here holds the district average at ${avgAfter.toFixed(1)} open assignments each.`
-                    : `Adding one more staff member brings the district average down to ${avgAfter.toFixed(1)} open assignments each.`}
+                    : `Adding one more investigation editor brings the district average down to ${avgAfter.toFixed(1)} open assignments each.`}
               </p>
             </>
           ) : (
-            <p className="mt-3 text-[12.5px] text-muted">Choose a district to see how many staff it has and their caseload.</p>
+            <p className="mt-3 text-[12.5px] text-muted">Choose a district to see how many investigation editors it has and their caseload.</p>
           )}
         </section>
         )}

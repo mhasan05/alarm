@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Field, inputClass, Required, selectClass } from "@/components/form";
 import { createProfile } from "@/lib/db/actions";
-import { alarmIdOf } from "@/lib/db/selectors";
-import { getDb } from "@/lib/db/store";
 import { bn, normalisePhone, phoneIntl } from "@/lib/db/format";
 import { MIN_PASSWORD_SCORE, passwordBand, passwordScore } from "@/lib/password";
+import { locateArea } from "@/lib/geo";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
 
 const POSTS = [
@@ -67,7 +66,7 @@ function Card({ num, title, sub, children }: { num: string; title: string; sub: 
   );
 }
 
-type Done = { id: string; alarmId: string; name: string; phone: string; password: string };
+type Done = { id: string; name: string; phone: string; password: string };
 
 export function PoliticianForm({
   nextId,
@@ -76,6 +75,10 @@ export function PoliticianForm({
   takenPhones,
   parties,
   onAddAnother,
+  allowedAreas,
+  listHref = "/admin/politicians",
+  listLabel = "Back to the list",
+  profileHref = (id: string) => `/admin/politicians/${id}`,
 }: {
   nextId: string;
   admin: string;
@@ -85,6 +88,12 @@ export function PoliticianForm({
   parties: string[];
   /** Starts a fresh, empty form. */
   onAddAnother: () => void;
+  /** Restrict the area to these "district · thana" keys (a নির্বাহী সম্পাদক's coverage). */
+  allowedAreas?: string[];
+  listHref?: string;
+  listLabel?: string;
+  /** Where "Open profile" goes after saving; null hides the button. */
+  profileHref?: ((id: string) => string) | null;
 }) {
   const geo = useGeoCascade();
   const [name, setName] = useState("");
@@ -160,7 +169,7 @@ export function PoliticianForm({
       },
       adminId,
     );
-    setDone({ id, alarmId: alarmIdOf(getDb(), id), name: name.trim(), phone: normalised, password });
+    setDone({ id, name: name.trim(), phone: normalised, password });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -188,7 +197,7 @@ export function PoliticianForm({
           <dl className="mt-4 grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-3">
             <div className="bg-surface/60 px-4 py-3">
               <dt className="text-[11.5px] text-muted">ALARM ID · আইডি</dt>
-              <dd className="mt-0.5 font-mono text-[15px] font-semibold text-ink">{done.alarmId}</dd>
+              <dd className="mt-0.5 font-mono text-[15px] font-semibold text-ink">{done.id}</dd>
             </div>
             <div className="bg-surface/60 px-4 py-3">
               <dt className="text-[11.5px] text-muted">Mobile · মোবাইল নম্বর</dt>
@@ -200,9 +209,11 @@ export function PoliticianForm({
             </div>
           </dl>
           <div className="mt-5 flex flex-wrap gap-2.5">
-            <Link href={`/admin/politicians/${done.id}`} className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
-              Open profile
-            </Link>
+            {profileHref && (
+              <Link href={profileHref(done.id)} className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
+                Open profile
+              </Link>
+            )}
             <button
               type="button"
               onClick={onAddAnother}
@@ -210,8 +221,8 @@ export function PoliticianForm({
             >
               Add another
             </button>
-            <Link href="/admin/politicians" className="inline-flex h-10 items-center px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
-              Back to the list
+            <Link href={listHref} className="inline-flex h-10 items-center px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
+              {listLabel}
             </Link>
           </div>
         </div>
@@ -304,6 +315,33 @@ export function PoliticianForm({
             {complete ? `${[sel.ward, areaLabel].filter(Boolean).join(", ")} · ${sel.seat}` : show("area") || "এখনও কোনো এলাকা বাছাই করা হয়নি"}
           </p>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allowedAreas ? (
+              <Field id="pf-division" label="আপনার দায়িত্বের এলাকা" required hint="শুধু আপনার দায়িত্বপ্রাপ্ত এলাকায় অ্যাকাউন্ট তৈরি করা যায়।">
+                <select
+                  id="pf-division"
+                  value={sel.district && sel.area ? `${sel.district} · ${sel.area}` : ""}
+                  onChange={(e) => {
+                    const [district, thana] = e.target.value.split(" · ");
+                    const loc = e.target.value ? locateArea(district, thana) : {};
+                    set.division(loc.division ?? "");
+                    if (loc.division) {
+                      set.district(district);
+                      set.upazila(loc.upazila ?? "");
+                      set.area(thana);
+                    }
+                  }}
+                  className={`${selectClass} ${!complete && show("area") ? "border-danger!" : ""}`}
+                >
+                  <option value="">{allowedAreas.length ? "এলাকা বেছে নিন" : "কোনো এলাকা নির্ধারিত নেই"}</option>
+                  {allowedAreas.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : (
+              <>
             <Field id="pf-division" label="বিভাগ" required>
               <select id="pf-division" value={sel.division} onChange={(e) => set.division(e.target.value)} className={`${selectClass} ${!sel.division && show("area") ? "border-danger!" : ""}`}>
                 <option value="">বিভাগ বেছে নিন</option>
@@ -336,6 +374,8 @@ export function PoliticianForm({
                 ))}
               </select>
             </Field>
+              </>
+            )}
             <Field id="pf-ward" label="ওয়ার্ড" hint="খালি রাখলে পুরো এলাকা ধরা হবে।">
               <select id="pf-ward" value={sel.ward} disabled={!sel.area} onChange={(e) => set.ward(e.target.value)} className={selectClass}>
                 <option value="">সব ওয়ার্ড</option>
@@ -417,8 +457,8 @@ export function PoliticianForm({
         </Card>
 
         <div className="flex flex-wrap items-center gap-3 rounded-card border border-line bg-white px-5 py-4 shadow-card">
-          <p className="min-w-[200px] flex-1 text-[12px] leading-normal text-muted">Account creation is logged under {admin} (Admin).</p>
-          <Link href="/admin/politicians" className="px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
+          <p className="min-w-[200px] flex-1 text-[12px] leading-normal text-muted">Account creation is logged under {admin}.</p>
+          <Link href={listHref} className="px-2 text-[13.5px] font-semibold text-muted hover:text-ink">
             Cancel
           </Link>
           <button type="submit" className="h-10 cursor-pointer rounded-button bg-primary px-5 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
@@ -443,7 +483,7 @@ export function PoliticianForm({
           </div>
           <dl className="border-t border-line px-5 py-2 font-bn">
             {[
-              ["প্রোফাইল আইডি", `${nextId} · তৈরির পর`],
+              ["ALARM আইডি", `${nextId} · তৈরির পর`],
               ["নির্বাচনী এলাকা", sel.seat || "—"],
               ["এলাকা", areaLabel || "—"],
               ["মোবাইল", phoneOk(phone) ? phoneIntl(normalisePhone(phone)) : "—"],
@@ -460,7 +500,7 @@ export function PoliticianForm({
           <ol className="mt-3 flex flex-col gap-2.5 text-[12.5px] leading-[1.7] text-muted">
             {[
               "অ্যাকাউন্ট সক্রিয় হবে এবং অডিট শুরু হবে।",
-              "এলাকার মাঠকর্মী ও পর্যালোচক প্রোফাইলটি দেখতে পাবেন।",
+              "এলাকার তদন্ত সম্পাদক ও নির্বাহী সম্পাদক প্রোফাইলটি দেখতে পাবেন।",
               "রাজনৈতিক কর্মী লগইন করে নিজের প্রোফাইল দেখতে ও কার্যক্রম যোগ করতে পারবেন।",
             ].map((t, i) => (
               <li key={t} className="flex gap-2.5">

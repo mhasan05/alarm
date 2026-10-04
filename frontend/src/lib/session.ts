@@ -37,9 +37,9 @@ export const PORTAL: Record<Role, string> = {
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
-  admin: "অ্যাডমিন",
-  reviewer: "পর্যালোচক",
-  staff: "মাঠকর্মী",
+  admin: "প্রধান নির্বাহী সম্পাদক",
+  reviewer: "নির্বাহী সম্পাদক",
+  staff: "তদন্ত সম্পাদক",
   politician: "রাজনৈতিক কর্মী",
 };
 

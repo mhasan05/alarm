@@ -77,7 +77,7 @@ export function SubmissionForm({ locked, openTasks }: { locked: Task | null; ope
         </div>
         <h2 className="text-[17px] font-semibold leading-[1.6]">পর্যালোচনার জন্য জমা হয়েছে · {code}</h2>
         <p className="max-w-[500px] text-[12.5px] leading-[1.75] text-muted text-pretty">
-          {target.name} সম্পর্কে “{title.trim()}” পর্যালোচনার সারিতে গেছে। পর্যালোচক গ্রহণ করলেই প্রোফাইলে প্রকাশিত হবে।
+          {target.name} সম্পর্কে “{title.trim()}” পর্যালোচনার সারিতে গেছে। নির্বাহী সম্পাদক গ্রহণ করলেই প্রোফাইলে প্রকাশিত হবে।
         </p>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1 text-[12px] font-semibold text-warning">
           <span className="size-1.5 rounded-full bg-warning" />
@@ -149,11 +149,11 @@ export function SubmissionForm({ locked, openTasks }: { locked: Task | null; ope
                   <rect x="1.4" y="6.1" width="10.2" height="7.6" rx="1.6" stroke="currentColor" strokeWidth="1.3" />
                   <path d="M4 6.1V4.2a2.5 2.5 0 0 1 5 0v1.9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
                 </svg>
-                অ্যাডমিন নির্ধারিত
+                প্রধান নির্বাহী সম্পাদক নির্ধারিত
               </span>
             </div>
             <p className="text-[11.5px] leading-[1.65] text-muted text-pretty">
-              মাঠকর্মী এখান থেকে রাজনৈতিক কর্মী পরিবর্তন করতে পারেন না। অন্য প্রোফাইলে তথ্য দিতে হলে “ড্যাশবোর্ড” থেকে সেই কাজটি খুলুন।
+              তদন্ত সম্পাদক এখান থেকে রাজনৈতিক কর্মী পরিবর্তন করতে পারেন না। অন্য প্রোফাইলে তথ্য দিতে হলে “ড্যাশবোর্ড” থেকে সেই কাজটি খুলুন।
             </p>
           </>
         ) : (
@@ -173,7 +173,7 @@ export function SubmissionForm({ locked, openTasks }: { locked: Task | null; ope
               ))}
             </select>
             <p className="text-[11.5px] leading-[1.65] text-muted text-pretty">
-              কেবল অ্যাডমিন আপনাকে যে প্রোফাইলগুলো দিয়েছেন সেগুলোই এখানে আছে — অন্য কারও নাম যোগ করা যায় না।
+              কেবল প্রধান নির্বাহী সম্পাদক আপনাকে যে প্রোফাইলগুলো দিয়েছেন সেগুলোই এখানে আছে — অন্য কারও নাম যোগ করা যায় না।
             </p>
           </>
         )}
@@ -235,7 +235,7 @@ export function SubmissionForm({ locked, openTasks }: { locked: Task | null; ope
         <textarea
           id="sf-source"
           rows={4}
-          placeholder="নথির নাম ও তারিখ, দপ্তরের নাম, অথবা প্রত্যক্ষদর্শীর পরিচয় লিখুন। প্রমাণ ছাড়া তথ্য পর্যালোচক বাতিল করবেন।"
+          placeholder="নথির নাম ও তারিখ, দপ্তরের নাম, অথবা প্রত্যক্ষদর্শীর পরিচয় লিখুন। প্রমাণ ছাড়া তথ্য নির্বাহী সম্পাদক বাতিল করবেন।"
           value={source}
           onChange={(e) => setSource(e.target.value)}
           aria-invalid={attempted && !sourceOk}
@@ -276,7 +276,7 @@ export function SubmissionForm({ locked, openTasks }: { locked: Task | null; ope
         <EvidenceList items={evidence.items} error={evidence.error} onRemove={evidence.remove} />
         {!evidence.items.length && (
           <p className={`text-[11.5px] leading-[1.65] text-pretty ${attempted ? "text-danger" : "text-warning"}`}>
-            প্রমাণ ছাড়া জমা দেওয়া যাবে না — পর্যালোচক এমন তথ্য বাতিল করবেন।
+            প্রমাণ ছাড়া জমা দেওয়া যাবে না — নির্বাহী সম্পাদক এমন তথ্য বাতিল করবেন।
           </p>
         )}
       </div>

@@ -50,7 +50,7 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
     const rows = db.profiles.map((p) => ({ p, st: analysisStatus(db, p.id) }));
     return (
       <>
-        <PageHeader crumb="অ্যাডমিন পোর্টাল / এআই বিশ্লেষণ" title={<>AI Analysis · <span className="font-bn">এআই বিশ্লেষণ</span></>} />
+        <PageHeader crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / এআই বিশ্লেষণ" title={<>AI Analysis · <span className="font-bn">এআই বিশ্লেষণ</span></>} />
         <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
           <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
             <div className="border-b border-line px-5 py-4">
@@ -115,19 +115,19 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
   );
 
   if (!p || !analysis) return gate("neutral", "প্রোফাইলটি পাওয়া যায়নি", "ঠিকানাটি ভুল অথবা প্রোফাইলটি আর নেই।", [{ label: "প্রোফাইল বেছে নিন", href: "/admin/ai-review" }]);
-  if (generatedFor === profileId) return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Admin"} adminId={adminId} onGenerated={() => {}} />;
+  if (generatedFor === profileId) return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Chief Executive Editor"} adminId={adminId} onGenerated={() => {}} />;
   if (st.pending)
     return gate(
       "warning",
       "বিশ্লেষণ শুরু করা যাবে না",
-      `এই প্রোফাইলে ${new Intl.NumberFormat("bn-BD").format(st.pending)}টি জমা এখনও পর্যালোচকের কাছে আছে। সারি খালি হলে বিশ্লেষণ চালু হবে।`,
+      `এই প্রোফাইলে ${new Intl.NumberFormat("bn-BD").format(st.pending)}টি জমা এখনও নির্বাহী সম্পাদকের কাছে আছে। সারি খালি হলে বিশ্লেষণ চালু হবে।`,
       [
         { label: "প্রোফাইলের জমাগুলো দেখুন", href: back },
         { label: "অন্য প্রোফাইল", href: "/admin/ai-review", kind: "secondary" },
       ],
     );
   if (!st.accepted)
-    return gate("neutral", "বিশ্লেষণের জন্য কোনো তথ্য নেই", "এই প্রোফাইলে এখনও কোনো গৃহীত জমা নেই। মাঠকর্মী নিয়োগ দিন এবং পর্যালোচক সিদ্ধান্ত দিলে বিশ্লেষণ চালু হবে।", [
+    return gate("neutral", "বিশ্লেষণের জন্য কোনো তথ্য নেই", "এই প্রোফাইলে এখনও কোনো গৃহীত জমা নেই। তদন্ত সম্পাদক নিয়োগ দিন এবং নির্বাহী সম্পাদক সিদ্ধান্ত দিলে বিশ্লেষণ চালু হবে।", [
       { label: "প্রোফাইলে ফিরুন", href: back },
     ]);
   if (!st.ready && st.report)
@@ -141,5 +141,5 @@ export function AiReviewPage({ profileId }: { profileId?: string }) {
       ],
     );
 
-  return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Admin"} adminId={adminId} onGenerated={() => setGeneratedFor(profileId)} />;
+  return <AiReviewView key={profileId} analysis={analysis} admin={admin?.name ?? "Chief Executive Editor"} adminId={adminId} onGenerated={() => setGeneratedFor(profileId)} />;
 }

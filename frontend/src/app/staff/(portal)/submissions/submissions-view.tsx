@@ -17,7 +17,7 @@ const matches = (s: Submission, f: Filter) =>
 export function staffNote(s: Submission) {
   if (s.state === "Pending") return `পর্যালোচনার সারিতে অপেক্ষমাণ · ${bn(s.evidence.length)}টি প্রমাণ সংযুক্ত`;
   if (s.state === "Accepted") return "গৃহীত — প্রোফাইলে প্রকাশিত হয়েছে।";
-  if (s.state === "Withdrawn") return "গৃহীত হয়েছিল, পরে অভিযোগের ভিত্তিতে অ্যাডমিন প্রত্যাহার করেছেন।";
+  if (s.state === "Withdrawn") return "গৃহীত হয়েছিল, পরে অভিযোগের ভিত্তিতে প্রধান নির্বাহী সম্পাদক প্রত্যাহার করেছেন।";
   return `${s.state === "Held" ? "স্থগিত" : "বাতিল"} — ${s.reason ?? ""}`;
 }
 
@@ -27,14 +27,14 @@ export function StaffSubmissionsView({ filter }: { filter: Filter }) {
 
   return (
     <>
-      <PageHeader crumb="মাঠকর্মী পোর্টাল / আমার জমা" title="আমার জমা দেওয়া তথ্য" action={<NewSubmissionButton />} />
+      <PageHeader crumb="তদন্ত সম্পাদক পোর্টাল / আমার জমা" title="আমার জমা দেওয়া তথ্য" action={<NewSubmissionButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
             <div className="min-w-[180px] flex-1">
               <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার জমা দেওয়া তথ্য</h2>
-              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted">পর্যালোচকের সিদ্ধান্তসহ সব জমা</p>
+              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted">নির্বাহী সম্পাদকের সিদ্ধান্তসহ সব জমা</p>
             </div>
             <nav aria-label="অবস্থা অনুযায়ী ফিল্টার" className="flex flex-wrap gap-2">
               {FILTERS.map((f) => {

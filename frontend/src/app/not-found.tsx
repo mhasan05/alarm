@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShieldIcon } from "@/components/brand";
+import { Logo } from "@/components/brand";
 import { StateCard } from "@/components/state-card";
 
 export const metadata: Metadata = { title: "পাতা পাওয়া যায়নি · ALARM" };
@@ -10,9 +10,7 @@ export default function NotFound() {
     <div className="flex min-h-[80vh] flex-1 items-center justify-center bg-surface px-4 py-10">
       <div className="w-full max-w-md overflow-hidden rounded-card border border-line bg-white shadow-card">
         <div className="flex items-center gap-2.5 border-b border-line px-5 py-3.5">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-white">
-            <ShieldIcon className="h-[15px] w-[13px]" />
-          </span>
+          <Logo size={34} />
           <span className="text-[14px] font-bold tracking-[0.13em] text-primary">ALARM</span>
         </div>
         <StateCard

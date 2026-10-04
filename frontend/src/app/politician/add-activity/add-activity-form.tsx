@@ -211,7 +211,7 @@ export function AddActivityForm() {
             </svg>
           }
           title="ছবি বা নথি সংযুক্ত করুন"
-          note="প্রমাণ ছাড়া তথ্য পর্যালোচক বাতিল করতে পারেন"
+          note="প্রমাণ ছাড়া তথ্য নির্বাহী সম্পাদক বাতিল করতে পারেন"
         />
         <div className="flex min-w-0 flex-[1_1_250px] flex-col justify-center gap-[9px] rounded-card border border-l-[3px] border-line border-l-warning p-[15px]">
           <div className="flex items-center gap-2">
@@ -219,7 +219,7 @@ export function AddActivityForm() {
             <span className="text-[12.5px] font-semibold leading-[1.6]">পর্যালোচনার অপেক্ষায় জমা হবে</span>
           </div>
           <p className="text-[11.5px] leading-[1.7] text-muted text-pretty">
-            জমা দেওয়ার পর এটি “নিজের দেওয়া তথ্য” হিসেবে চিহ্নিত থাকবে। পর্যালোচক গ্রহণ না করা পর্যন্ত প্রোফাইল স্কোরে যোগ হবে না।
+            জমা দেওয়ার পর এটি “নিজের দেওয়া তথ্য” হিসেবে চিহ্নিত থাকবে। নির্বাহী সম্পাদক গ্রহণ না করা পর্যন্ত প্রোফাইল স্কোরে যোগ হবে না।
           </p>
         </div>
       </div>

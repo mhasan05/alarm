@@ -168,7 +168,7 @@ export function ProfileHero({ profile, summary }: { profile: Profile; summary: P
             />
             <Detail
               label="ALARM আইডি"
-              value={profile.audit.code}
+              value={profile.id}
               icon={
                 <>
                   <rect x="3" y="4.5" width="14" height="11" rx="1.6" />

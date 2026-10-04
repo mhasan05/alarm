@@ -9,8 +9,8 @@ type Person = { id: string; name: string; sub: string; group: Group };
 
 const GROUPS: { key: Group; label: string }[] = [
   { key: "politician", label: "রাজনৈতিক কর্মী" },
-  { key: "staff", label: "মাঠকর্মী" },
-  { key: "reviewer", label: "পর্যালোচক" },
+  { key: "staff", label: "তদন্ত সম্পাদক" },
+  { key: "reviewer", label: "নির্বাহী সম্পাদক" },
 ];
 
 /** Everyone who can be invited: active accounts with a sign-in. */

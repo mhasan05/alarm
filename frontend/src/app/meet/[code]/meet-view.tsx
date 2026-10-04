@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
-import { ShieldIcon } from "@/components/brand";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Logo } from "@/components/brand";
 import { HandIcon, MeetingStatusChip, MicIcon, ShareLink, meetingWhen } from "@/components/meetings/meeting-bits";
 import { audioTransport } from "@/lib/audio-room";
 import { useMe } from "@/lib/auth-client";
@@ -34,7 +34,35 @@ import { alarmIdOf, roleOfId } from "@/lib/db/selectors";
 import { useDb } from "@/lib/db/store";
 import type { Database, Meeting } from "@/lib/db/types";
 import { HOME } from "@/lib/session";
+import { useMounted, useNow } from "@/lib/use-client";
 import { useMicrophone, type MicState } from "@/lib/use-microphone";
+
+// The ALARM ID someone joined with is remembered for this tab (sessionStorage), read as an
+// external store so it renders the same on the server and needs no effect.
+const idListeners = new Set<() => void>();
+function saveId(code: string, id: string | null) {
+  try {
+    if (id) sessionStorage.setItem(idKey(code), id);
+    else sessionStorage.removeItem(idKey(code));
+  } catch {}
+  idListeners.forEach((l) => l());
+}
+function useSavedId(code: string) {
+  return useSyncExternalStore(
+    (l) => {
+      idListeners.add(l);
+      return () => idListeners.delete(l);
+    },
+    () => {
+      try {
+        return sessionStorage.getItem(idKey(code));
+      } catch {
+        return null;
+      }
+    },
+    () => null,
+  );
+}
 
 /** Seconds → "১২:০৫" or "১:০২:০৫". */
 function clock(totalSec: number) {
@@ -61,35 +89,15 @@ export function MeetView({ code }: { code: string }) {
   const session = useMe();
   const m = meetingByCode(db, code);
   // Without a sign-in, people join with their ALARM ID; it's remembered for this tab only.
-  const [guest, setGuest] = useState<MeetingIdentity | null>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem(idKey(code));
-      if (saved) {
-        const r = identifyForMeeting(db, saved);
-        if (r.ok) setGuest(r.identity);
-      }
-    } catch {}
-    setReady(true);
-    // Only on first load; later changes come from the form.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  const ready = useMounted();
+  const saved = useSavedId(code);
+  // Re-checked on every render, so a suspension takes effect straight away.
+  const remembered = saved ? identifyForMeeting(db, saved) : null;
+  const guest = remembered?.ok ? remembered.identity : null;
   const me: MeetingIdentity | null = session ? { userId: session.userId, role: session.role } : guest;
-  const identify = (id: MeetingIdentity | null) => {
-    try {
-      if (id) sessionStorage.setItem(idKey(code), alarmIdOf(db, id.userId));
-      else sessionStorage.removeItem(idKey(code));
-    } catch {}
-    setGuest(id);
-  };
+  const identify = (id: MeetingIdentity | null) => saveId(code, id ? alarmIdOf(db, id.userId) : null);
   // Time-dependent values start at 0 so the server and first client render match.
-  const [now, setNow] = useState(0);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  const now = useNow(1000);
 
   const home = session ? HOME[session.role] : "/";
 
@@ -97,9 +105,7 @@ export function MeetView({ code }: { code: string }) {
     <div lang="bn" className="flex min-h-screen flex-col bg-surface font-bn text-ink">
       <header className="flex h-14 flex-none items-center gap-3 border-b border-line bg-white px-4 sm:px-6">
         <Link href={home} className="flex items-center gap-2" aria-label="নিজের পোর্টালে ফিরুন">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
-            <ShieldIcon className="h-4 w-[15px]" />
-          </span>
+          <Logo size={38} priority />
           <span className="font-sans text-[16px] font-bold tracking-[0.13em] text-primary">ALARM</span>
         </Link>
         <span className="text-line">|</span>
@@ -171,7 +177,7 @@ function IdForm({ db, m, onIdentify }: { db: Database; m: Meeting; onIdentify: (
             <label htmlFor="alarm-id" className="block text-[13.5px] font-semibold">
               আপনার ALARM আইডি
             </label>
-            <p className="mt-0.5 text-[12px] leading-[1.6] text-muted">লগইন লাগবে না — শুধু আইডি দিন। আপনার এলাকা মিটিংয়ের অন্তর্ভুক্ত হলে সরাসরি যোগ দিতে পারবেন, না হলে অ্যাডমিনের কাছে অনুরোধ পাঠাতে পারবেন।</p>
+            <p className="mt-0.5 text-[12px] leading-[1.6] text-muted">লগইন লাগবে না — শুধু আইডি দিন। আপনার এলাকা মিটিংয়ের অন্তর্ভুক্ত হলে সরাসরি যোগ দিতে পারবেন, না হলে প্রধান নির্বাহী সম্পাদকের কাছে অনুরোধ পাঠাতে পারবেন।</p>
             <input
               id="alarm-id"
               value={value}
@@ -179,7 +185,7 @@ function IdForm({ db, m, onIdentify }: { db: Database; m: Meeting; onIdentify: (
                 setValue(e.target.value.toUpperCase());
                 setError(null);
               }}
-              placeholder="যেমন KAR-2026-0143"
+              placeholder="যেমন KAR-123456"
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
@@ -222,12 +228,11 @@ function MeetingFlow({ db, m, me, now, home }: { db: Database; m: Meeting; me: M
   const stopMic = mic.stop;
   useEffect(() => {
     if (!kicked) return;
-    setInRoom(false);
     stopMic();
     audioTransport.disconnect();
   }, [kicked, stopMic]);
 
-  if (m.status === "cancelled") return <Notice tone="neutral" title="মিটিংটি বাতিল করা হয়েছে" body={`“${m.title}” — অ্যাডমিন মিটিংটি বাতিল করেছেন।`} home={home} />;
+  if (m.status === "cancelled") return <Notice tone="neutral" title="মিটিংটি বাতিল করা হয়েছে" body={`“${m.title}” — প্রধান নির্বাহী সম্পাদক মিটিংটি বাতিল করেছেন।`} home={home} />;
   if (m.status === "ended") {
     const mins = m.startedAt && m.endedAt ? Math.round((new Date(m.endedAt).getTime() - new Date(m.startedAt).getTime()) / 60_000) : 0;
     return (
@@ -239,11 +244,11 @@ function MeetingFlow({ db, m, me, now, home }: { db: Database; m: Meeting; me: M
       />
     );
   }
-  if (access === "removed") return <Notice tone="danger" title="আপনাকে মিটিং থেকে সরানো হয়েছে" body="অ্যাডমিন আপনাকে এই মিটিং থেকে সরিয়ে দিয়েছেন। প্রয়োজনে অ্যাডমিনের সাথে যোগাযোগ করুন।" home={home} />;
-  if (access === "declined") return <Notice tone="danger" title="যোগ দেওয়ার অনুরোধ গৃহীত হয়নি" body="অ্যাডমিন আপনার অনুরোধ অনুমোদন করেননি। প্রয়োজনে অ্যাডমিনের সাথে যোগাযোগ করুন।" home={home} />;
+  if (access === "removed") return <Notice tone="danger" title="আপনাকে মিটিং থেকে সরানো হয়েছে" body="প্রধান নির্বাহী সম্পাদক আপনাকে এই মিটিং থেকে সরিয়ে দিয়েছেন। প্রয়োজনে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
+  if (access === "declined") return <Notice tone="danger" title="যোগ দেওয়ার অনুরোধ গৃহীত হয়নি" body="প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেননি। প্রয়োজনে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" home={home} />;
   if (access === "outside" || access === "pending") return <RequestCard m={m} me={me} pending={access === "pending"} />;
 
-  if (inRoom && mine && canEnter(access)) return <Room db={db} m={m} me={me} now={now} mic={mic} onLeave={() => setInRoom(false)} />;
+  if (inRoom && !kicked && mine && canEnter(access)) return <Room db={db} m={m} me={me} now={now} mic={mic} onLeave={() => setInRoom(false)} />;
 
   return (
     <Lobby
@@ -297,7 +302,7 @@ function RequestCard({ m, me, pending }: { m: Meeting; me: Me; pending: boolean 
   const [note, setNote] = useState("");
   if (pending)
     return (
-      <Notice tone="wait" title="অ্যাডমিনের অনুমোদনের অপেক্ষায়" body={`“${m.title}” — আপনার অনুরোধ পাঠানো হয়েছে। অনুমোদন হলে এই পাতা নিজে থেকেই মিটিংয়ে যোগ দেওয়ার জন্য খুলে যাবে।`}>
+      <Notice tone="wait" title="প্রধান নির্বাহী সম্পাদকের অনুমোদনের অপেক্ষায়" body={`“${m.title}” — আপনার অনুরোধ পাঠানো হয়েছে। অনুমোদন হলে এই পাতা নিজে থেকেই মিটিংয়ে যোগ দেওয়ার জন্য খুলে যাবে।`}>
         <p className="mt-3 text-[12px] text-muted">{meetingWhen(m)}</p>
       </Notice>
     );
@@ -320,11 +325,11 @@ function RequestCard({ m, me, pending }: { m: Meeting; me: Me; pending: boolean 
         >
           <p className="flex gap-2.5 rounded-card border border-l-[3px] border-line border-l-warning bg-warning/5 px-4 py-3 text-[12.5px] leading-[1.75] text-ink">
             <span>
-              <span className="font-semibold">আপনি এই মিটিংয়ের এলাকার বাইরে।</span> মিটিংটি শুধু <span className="font-semibold">{areaLabel(m.area)}</span>-এর জন্য। যোগ দিতে চাইলে অ্যাডমিনের কাছে অনুরোধ পাঠান — অনুমোদন দিলে যোগ দিতে পারবেন।
+              <span className="font-semibold">আপনি এই মিটিংয়ের এলাকার বাইরে।</span> মিটিংটি শুধু <span className="font-semibold">{areaLabel(m.area)}</span>-এর জন্য। যোগ দিতে চাইলে প্রধান নির্বাহী সম্পাদকের কাছে অনুরোধ পাঠান — অনুমোদন দিলে যোগ দিতে পারবেন।
             </span>
           </p>
           <label htmlFor="join-note" className="mt-4 block text-[12.5px] font-semibold">
-            অ্যাডমিনের জন্য বার্তা <span className="font-normal text-muted">(ঐচ্ছিক)</span>
+            প্রধান নির্বাহী সম্পাদকের জন্য বার্তা <span className="font-normal text-muted">(ঐচ্ছিক)</span>
           </label>
           <textarea
             id="join-note"
@@ -362,7 +367,7 @@ function LevelMeter({ level, state }: { level: number; state: MicState }) {
 
 type Mic = ReturnType<typeof useMicrophone>;
 
-function Lobby({ db, m, me, now, access, mic, onEnter }: { db: Database; m: Meeting; me: Me; now: number; access: string; mic: Mic; onEnter: (muted: boolean) => void }) {
+function Lobby({ m, me, now, access, mic, onEnter }: { db: Database; m: Meeting; me: Me; now: number; access: string; mic: Mic; onEnter: (muted: boolean) => void }) {
   const [joinMuted, setJoinMuted] = useState(true);
   const [busy, setBusy] = useState(false);
   const host = me.role === "admin";
@@ -391,7 +396,7 @@ function Lobby({ db, m, me, now, access, mic, onEnter }: { db: Database; m: Meet
         <dl className="grid gap-px bg-line sm:grid-cols-3">
           {[
             ["এলাকা", areaLabel(m.area)],
-            ["আয়োজক", "অ্যাডমিন"],
+            ["আয়োজক", "প্রধান নির্বাহী সম্পাদক"],
             [live ? "এখন যুক্ত" : "অবস্থা", live ? `${bn(inside)} জন` : now && new Date(m.scheduledAt).getTime() > now ? untilText(new Date(m.scheduledAt).getTime() - now) : "শুরুর অপেক্ষায়"],
           ].map(([k, v]) => (
             <div key={k} className="bg-white px-5 py-3.5">
@@ -415,7 +420,7 @@ function Lobby({ db, m, me, now, access, mic, onEnter }: { db: Database; m: Meet
       <section className="self-start rounded-card border border-line bg-white px-5 py-5 shadow-card">
         <h2 className="text-[15px] font-semibold">যোগ দেওয়ার আগে</h2>
         <p className="mt-0.5 text-[12px] text-muted">
-          {access === "approved" ? "অ্যাডমিন আপনার অনুরোধ অনুমোদন করেছেন।" : access === "invited" ? "আপনি এই মিটিংয়ে আমন্ত্রিত।" : access === "area" ? "আপনার এলাকা এই মিটিংয়ের অন্তর্ভুক্ত।" : "আপনি এই মিটিংয়ের আয়োজক।"}
+          {access === "approved" ? "প্রধান নির্বাহী সম্পাদক আপনার অনুরোধ অনুমোদন করেছেন।" : access === "invited" ? "আপনি এই মিটিংয়ে আমন্ত্রিত।" : access === "area" ? "আপনার এলাকা এই মিটিংয়ের অন্তর্ভুক্ত।" : "আপনি এই মিটিংয়ের আয়োজক।"}
         </p>
 
         <div className="mt-4 rounded-card border border-line bg-surface/60 px-4 py-4">
@@ -455,7 +460,7 @@ function Lobby({ db, m, me, now, access, mic, onEnter }: { db: Database; m: Meet
 
         {waitingStart ? (
           <p className="mt-5 rounded-button bg-role-reviewer/8 px-4 py-3 text-center text-[12.5px] leading-[1.7] text-ink">
-            মিটিং এখনও শুরু হয়নি। অ্যাডমিন শুরু করলে এখান থেকেই যোগ দিতে পারবেন — পাতাটি খোলা রাখুন।
+            মিটিং এখনও শুরু হয়নি। প্রধান নির্বাহী সম্পাদক শুরু করলে এখান থেকেই যোগ দিতে পারবেন — পাতাটি খোলা রাখুন।
           </p>
         ) : (
           <button
@@ -483,7 +488,7 @@ function Lobby({ db, m, me, now, access, mic, onEnter }: { db: Database; m: Meet
 
 function Room({ db, m, me, now, mic, onLeave }: { db: Database; m: Meeting; me: Me; now: number; mic: Mic; onLeave: () => void }) {
   const host = me.role === "admin";
-  const people = activePresence(m, now || Date.now());
+  const people = activePresence(m, now);
   const mine = m.presence.find((p) => p.userId === me.userId)!;
   const names = participantNames(db, me.userId, me.role, people.map((p) => p.userId));
   const requests = pendingRequests(m);

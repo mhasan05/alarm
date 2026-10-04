@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PoliticiansPage } from "./politicians-page";
 import type { Tab } from "./politicians-view";
 
-export const metadata: Metadata = { title: "রাজনৈতিক কর্মী · অ্যাডমিন · ALARM" };
+export const metadata: Metadata = { title: "রাজনৈতিক কর্মী · প্রধান নির্বাহী সম্পাদক · ALARM" };
 
 const TABS: Tab[] = ["directory", "suspended"];
 

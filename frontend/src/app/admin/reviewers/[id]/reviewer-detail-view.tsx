@@ -6,7 +6,7 @@ import { AccountActions, StaffStatusBadge, type AccountStatus } from "@/componen
 import { RecordMissing } from "@/components/record-missing";
 import { resetPassword, setReviewerStatus } from "@/lib/db/actions";
 import { enDate, phoneMasked } from "@/lib/db/format";
-import { alarmIdOf, decisionsBy, nameOf, STATE_EN } from "@/lib/db/selectors";
+import { decisionsBy, nameOf, STATE_EN } from "@/lib/db/selectors";
 import type { ReviewerStatus, SubmissionState } from "@/lib/db/types";
 import { useAdmin } from "../../use-admin";
 import { reviewerRows } from "../rows";
@@ -24,7 +24,7 @@ const card = "rounded-card border border-line bg-white shadow-card";
 export function ReviewerDetailView({ id }: { id: string }) {
   const { db, adminId } = useAdmin();
   const r = reviewerRows(db).find((x) => x.id === id);
-  if (!r) return <RecordMissing title="পর্যালোচক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="পর্যালোচক তালিকায় ফিরুন" />;
+  if (!r) return <RecordMissing title="নির্বাহী সম্পাদক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="নির্বাহী সম্পাদক তালিকায় ফিরুন" />;
 
   const decisions = decisionsBy(db, r.id);
   const reports = db.reports.filter((rep) => rep.reviewerId === r.id);
@@ -41,8 +41,7 @@ export function ReviewerDetailView({ id }: { id: string }) {
   ];
 
   const facts = [
-    { k: "ALARM ID", v: alarmIdOf(db, r.id) || "Not issued — no sign-in yet" },
-    { k: "REVIEWER ID", v: r.id },
+    { k: "ALARM ID", v: r.id },
     { k: "MOBILE", v: phoneMasked(r.phone) },
     { k: "EMAIL", v: r.email },
     { k: "NID", v: `${r.nid} · গোপনকৃত` },
@@ -65,7 +64,7 @@ export function ReviewerDetailView({ id }: { id: string }) {
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {r.name}
             <StaffStatusBadge status={r.status as AccountStatus} />
-            <span className="rounded-md bg-role-reviewer/10 px-2 py-0.5 text-[12px] font-medium text-role-reviewer">Reviewer</span>
+            <span className="rounded-md bg-role-reviewer/10 px-2 py-0.5 text-[12px] font-medium text-role-reviewer">Executive Editor</span>
             <span className="block w-full font-bn text-[12.5px] font-normal text-muted max-md:hidden">
               {r.nameBn} · {r.areas.length} coverage area{r.areas.length === 1 ? "" : "s"}
             </span>
@@ -124,7 +123,7 @@ export function ReviewerDetailView({ id }: { id: string }) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-[15px] font-semibold text-ink">Coverage Areas</h2>
-              <p className="mt-0.5 font-bn text-[12px] text-muted">দায়িত্বের এলাকা · submissions from here reach this reviewer</p>
+              <p className="mt-0.5 font-bn text-[12px] text-muted">দায়িত্বের এলাকা · submissions from here reach this executive editor</p>
             </div>
             <Link href="/admin/settings?tab=coverage" className="text-[13px] font-semibold text-primary hover:text-primary-hover">
               Change coverage →

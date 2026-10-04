@@ -17,14 +17,14 @@ export function PoliticiansPage({ initialTab }: { initialTab: Tab }) {
   const stats = [
     { label: "PROFILES", value: String(db.profiles.length), color: "#0D1F17", note: `মোট প্রোফাইল · ${active} active accounts` },
     { label: "SUSPENDED", value: String(suspended), color: "#F42A41", note: "স্থগিত · sign-in blocked", href: "/admin/politicians?tab=suspended" },
-    { label: "REPORTS PENDING REVIEW", value: String(underReview), color: "#D97706", note: "পর্যালোচনাধীন · reviewer queues", href: "/admin/reviewers" },
-    { label: "OPEN DISPUTES", value: String(disputes), color: "#F42A41", note: "অসঙ্গতির অভিযোগ · awaiting admin action", href: "/admin/disputes" },
+    { label: "REPORTS PENDING REVIEW", value: String(underReview), color: "#D97706", note: "পর্যালোচনাধীন · executive editor queues", href: "/admin/reviewers" },
+    { label: "OPEN DISPUTES", value: String(disputes), color: "#F42A41", note: "অসঙ্গতির অভিযোগ · awaiting chief executive editor", href: "/admin/disputes" },
   ];
 
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / রাজনৈতিক কর্মী"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / রাজনৈতিক কর্মী"
         title={
           <>
             Political Activists · <span className="font-bn">রাজনৈতিক কর্মী</span>
@@ -48,7 +48,7 @@ export function PoliticiansPage({ initialTab }: { initialTab: Tab }) {
         {/* Keyed so a tab change from a link (e.g. the dashboard) resets the view. */}
         <PoliticiansView key={initialTab} initialTab={initialTab} />
         <p className="text-[11.5px] leading-normal text-muted text-pretty">
-          Profiles are internal. A political activist signs in only to their own profile; staff and reviewers never see their login details.
+          Profiles are internal. A political activist signs in only to their own profile; investigation and executive editors never see their login details.
         </p>
       </div>
     </>

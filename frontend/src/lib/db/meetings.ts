@@ -86,7 +86,7 @@ export const inMeetingArea = (db: Database, m: Meeting, userId: string) => isNat
 /** Active accounts whose area falls inside `area` (for the admin's preview). */
 export function areaMembers(db: Database, area: MeetingArea) {
   return db.users
-    .filter((u) => u.role !== "admin" && identifyForMeeting(db, u.alarmId).ok)
+    .filter((u) => u.role !== "admin" && identifyForMeeting(db, u.id).ok)
     .filter((u) => isNationwide(area) || placesOf(db, u.id).some((p) => within(area, p)));
 }
 
@@ -118,7 +118,7 @@ export const meetingsFor = (db: Database, userId: string) =>
       ((m.status === "live" || m.status === "scheduled") && inMeetingArea(db, m, userId)),
   );
 
-const ROLE_BN: Record<AccountRole, string> = { admin: "অ্যাডমিন", reviewer: "পর্যালোচক", staff: "মাঠকর্মী", politician: "রাজনৈতিক কর্মী" };
+const ROLE_BN: Record<AccountRole, string> = { admin: "প্রধান নির্বাহী সম্পাদক", reviewer: "নির্বাহী সম্পাদক", staff: "তদন্ত সম্পাদক", politician: "রাজনৈতিক কর্মী" };
 export const roleLabel = (db: Database, userId: string) => {
   const r = roleOfId(db, userId);
   return r === "system" ? "" : ROLE_BN[r];
@@ -126,7 +126,7 @@ export const roleLabel = (db: Database, userId: string) => {
 
 /**
  * The name a viewer sees for a participant, following the visibility rules: field staff never see
- * reviewer names, reviewers see "মাঠকর্মী" instead of staff names, and political activists see
+ * reviewer names, reviewers see "তদন্ত সম্পাদক" instead of staff names, and political activists see
  * neither. Hidden names become the role label, numbered when there are several.
  */
 export function participantNames(db: Database, viewerId: string, viewerRole: AccountRole, userIds: string[]): Map<string, string> {
@@ -160,7 +160,7 @@ export function participantNames(db: Database, viewerId: string, viewerRole: Acc
 export type MeetingIdentity = { userId: string; role: AccountRole };
 export type IdentifyResult = { ok: true; identity: MeetingIdentity } | { ok: false; error: string; needsLogin?: boolean };
 
-/** "kar 2026 0143" → "KAR20260143", so IDs match however they're typed. */
+/** "kar 123456" → "KAR123456", so IDs match however they're typed. */
 const squash = (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
 /**
@@ -169,17 +169,17 @@ const squash = (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, "");
  */
 export function identifyForMeeting(db: Database, input: string): IdentifyResult {
   const id = squash(input);
-  if (!id) return { ok: false, error: "আপনার ALARM আইডি লিখুন — যেমন KAR-2026-0143।" };
-  const user = db.users.find((u) => squash(u.alarmId) === id);
+  if (!id) return { ok: false, error: "আপনার ALARM আইডি লিখুন — যেমন KAR-123456।" };
+  const user = db.users.find((u) => squash(u.id) === id);
   if (!user) return { ok: false, error: "এই আইডি পাওয়া যায়নি। আইডিটি আবার দেখে লিখুন।" };
-  if (user.role === "admin") return { ok: false, needsLogin: true, error: "অ্যাডমিন হিসেবে মিটিং পরিচালনা করতে লগইন করুন।" };
+  if (user.role === "admin") return { ok: false, needsLogin: true, error: "প্রধান নির্বাহী সম্পাদক হিসেবে মিটিং পরিচালনা করতে লগইন করুন।" };
   const status =
     user.role === "politician"
       ? db.profiles.find((p) => p.id === user.subjectId)?.account
       : user.role === "staff"
         ? db.staff.find((x) => x.id === user.subjectId)?.status
         : db.reviewers.find((x) => x.id === user.subjectId)?.status;
-  if (status === "Suspended" || status === "Deactivated" || status === undefined) return { ok: false, error: "এই অ্যাকাউন্টটি সক্রিয় নেই। অ্যাডমিনের সাথে যোগাযোগ করুন।" };
+  if (status === "Suspended" || status === "Deactivated" || status === undefined) return { ok: false, error: "এই অ্যাকাউন্টটি সক্রিয় নেই। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" };
   return { ok: true, identity: { userId: user.id, role: user.role } };
 }
 

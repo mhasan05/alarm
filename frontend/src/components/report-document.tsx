@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ShieldIcon } from "@/components/brand";
+import { Logo } from "@/components/brand";
 import { bn, bnDate } from "@/lib/db/format";
 import type { FinalReport, ReportFinding, ReportVersion } from "@/lib/db/types";
 
@@ -64,7 +64,7 @@ function FindingItem({ f, tone }: { f: ReportFinding; tone: "pos" | "neg" }) {
         </div>
         {f.remark && (
           <p className="mt-2 font-bn text-[12.5px] leading-relaxed text-muted">
-            <strong className="font-semibold text-ink">পর্যালোচকের মন্তব্য:</strong> {f.remark}
+            <strong className="font-semibold text-ink">নির্বাহী সম্পাদকের মন্তব্য:</strong> {f.remark}
           </p>
         )}
       </div>
@@ -103,9 +103,7 @@ export function ReportDocument({
         <article className="overflow-hidden rounded-card border border-line bg-white shadow-card print:rounded-none print:border-0 print:shadow-none">
           <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-primary px-5 py-5 sm:px-9">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 flex-none items-center justify-center rounded-lg bg-primary text-white">
-                <ShieldIcon className="h-[22px] w-5" />
-              </div>
+              <Logo size={52} />
               <div>
                 <div className="text-[18px] font-bold leading-none tracking-[0.13em] text-primary">ALARM</div>
                 <div className="mt-1 text-[11px] text-muted">AI-Powered Audit &amp; Accountability System</div>
@@ -163,7 +161,7 @@ export function ReportDocument({
                 {[
                   ["অডিটের উদ্দেশ্য", report.purpose],
                   ["অনুরোধকারী", report.requester],
-                  ["পর্যালোচক", reviewerName],
+                  ["নির্বাহী সম্পাদক", reviewerName],
                 ].map(([k, val]) => (
                   <div key={k}>
                     <dt className="text-[11px] text-muted">{k}</dt>
@@ -229,12 +227,12 @@ export function ReportDocument({
               </ol>
             </Section>
 
-            <Section num="০৫" title="পর্যালোচকের মন্তব্য">
+            <Section num="০৫" title="নির্বাহী সম্পাদকের মন্তব্য">
               <div className="mt-3 rounded-card border border-line px-5 py-4">
                 {report.remark ? (
                   <p className="font-bn text-[13.5px] leading-[1.85] text-ink">{report.remark}</p>
                 ) : (
-                  <p className="font-bn text-[13px] text-muted">পর্যালোচক এখনও মন্তব্য যোগ করেননি — অনুমোদনের সময় যোগ হবে।</p>
+                  <p className="font-bn text-[13px] text-muted">নির্বাহী সম্পাদক এখনও মন্তব্য যোগ করেননি — অনুমোদনের সময় যোগ হবে।</p>
                 )}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-4">
                   <div className="flex items-center gap-3">
@@ -244,7 +242,7 @@ export function ReportDocument({
                     <div>
                       <div className="font-bn text-[14px] font-semibold text-ink">{reviewerName}</div>
                       <div className="font-bn text-[12px] text-muted">
-                        পর্যালোচক · {report.approval ? `অনুমোদিত ${bnDate(report.approval.at)}` : "অনুমোদনের অপেক্ষায়"}
+                        নির্বাহী সম্পাদক · {report.approval ? `অনুমোদিত ${bnDate(report.approval.at)}` : "অনুমোদনের অপেক্ষায়"}
                       </div>
                     </div>
                   </div>

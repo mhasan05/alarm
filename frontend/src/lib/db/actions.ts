@@ -35,8 +35,17 @@ import type {
 
 const log = (db: Database, actor: string, action: string, target: string) => db.audit.unshift({ at: nowIso(), actor, action, target });
 
-/** Next ALARM ID. Audit file codes share the series, so a political activist's ID is their audit code. */
-const nextAlarmId = (db: Database) => nextCode([...db.users.map((u) => u.alarmId), ...db.profiles.map((p) => p.audit.code)], "KAR-2026", 4);
+/** A new ALARM ID: KAR- + 6 random digits, unique across every account. It is the account's primary key. */
+function newAlarmId(db: Database) {
+  const taken = new Set([...db.users.map((u) => u.id), ...db.admins.map((a) => a.id), ...db.reviewers.map((r) => r.id), ...db.staff.map((x) => x.id), ...db.profiles.map((p) => p.id)]);
+  const rnd = new Uint32Array(1);
+  let id = "";
+  do {
+    crypto.getRandomValues(rnd);
+    id = `KAR-${String(100000 + (rnd[0] % 900000))}`;
+  } while (taken.has(id));
+  return id;
+}
 
 const evidenceId = (db: Database) =>
   nextCode(
@@ -213,9 +222,8 @@ const maskNid = (nid: string) => {
 export function createProfile(input: ProfileInput, actorId: string): string {
   let id = "";
   update((db) => {
-    id = nextCode(db.profiles.map((p) => p.id), "PRF", 3);
+    id = newAlarmId(db);
     const at = nowIso();
-    const alarmId = nextAlarmId(db);
     const { password, nid, ...rest } = input;
     db.profiles.push({
       ...rest,
@@ -225,9 +233,9 @@ export function createProfile(input: ProfileInput, actorId: string): string {
       nid: maskNid(nid),
       registeredAt: at,
       account: "Active",
-      audit: { code: alarmId, opened: at },
+      audit: { code: nextCode(db.profiles.map((p) => p.audit.code), "AUD-2026", 4), opened: at },
     });
-    db.users.push({ id, role: "politician", phone: input.phone, password, subjectId: id, alarmId });
+    db.users.push({ id, role: "politician", phone: input.phone, password, subjectId: id });
     log(db, actorId, "Created political activist account", id);
   });
   return id;
@@ -277,6 +285,18 @@ export function changePassword(userId: string, current: string, next: string): s
   return "";
 }
 
+/** Set a new password after the phone was verified by OTP. Returns an error message, or "" on success. */
+export function resetPasswordWithOtp(phone: string, next: string): string {
+  const user = getDb().users.find((u) => u.phone === phone);
+  if (!user) return "এই মোবাইল নম্বরে কোনো অ্যাকাউন্ট নেই।";
+  update((db) => {
+    const u = db.users.find((x) => x.phone === phone);
+    if (u) u.password = next;
+    log(db, user.id, "Reset password with OTP", user.id);
+  });
+  return "";
+}
+
 // ── Team accounts ───────────────────────────────────────────────────────────
 
 export type AccountInput = {
@@ -307,7 +327,7 @@ const initialsOf = (name: string) =>
 export function createStaff(input: AccountInput, actorId: string, draft = false): string {
   let id = "";
   update((db) => {
-    id = nextCode(db.staff.map((s) => s.id), "FS", 3);
+    id = newAlarmId(db);
     const staff: Staff = {
       id,
       name: input.name.trim(),
@@ -329,8 +349,8 @@ export function createStaff(input: AccountInput, actorId: string, draft = false)
       note: draft ? "Draft — the account is not active and no invite was sent." : "Invite sent — the account activates when they sign in on the app.",
     };
     db.staff.push(staff);
-    if (!draft) db.users.push({ id, role: "staff", phone: input.phone, password: input.password, subjectId: id, alarmId: nextAlarmId(db) });
-    log(db, actorId, draft ? "Saved staff draft" : "Created staff account", id);
+    if (!draft) db.users.push({ id, role: "staff", phone: input.phone, password: input.password, subjectId: id });
+    log(db, actorId, draft ? "Saved investigation editor draft" : "Created investigation editor account", id);
   });
   return id;
 }
@@ -345,14 +365,14 @@ export function updateStaff(id: string, input: Partial<AccountInput>, actorId: s
     if (input.name) s.initials = initialsOf(input.name);
     const u = db.users.find((x) => x.id === id);
     if (u && input.phone) u.phone = input.phone;
-    log(db, actorId, "Updated staff profile", id);
+    log(db, actorId, "Updated investigation editor profile", id);
   });
 }
 
 export function createReviewer(input: AccountInput, actorId: string, draft = false): string {
   let id = "";
   update((db) => {
-    id = nextCode(db.reviewers.map((r) => r.id), "REV", 3);
+    id = newAlarmId(db);
     const reviewer: Reviewer = {
       id,
       name: input.name.trim(),
@@ -368,8 +388,8 @@ export function createReviewer(input: AccountInput, actorId: string, draft = fal
       note: draft ? "Draft — the account is not active and no invite was sent." : undefined,
     };
     db.reviewers.push(reviewer);
-    if (!draft) db.users.push({ id, role: "reviewer", phone: input.phone, password: input.password, subjectId: id, alarmId: nextAlarmId(db) });
-    log(db, actorId, draft ? "Saved reviewer draft" : "Created reviewer account", id);
+    if (!draft) db.users.push({ id, role: "reviewer", phone: input.phone, password: input.password, subjectId: id });
+    log(db, actorId, draft ? "Saved executive editor draft" : "Created executive editor account", id);
   });
   return id;
 }
@@ -388,7 +408,7 @@ export function updateReviewer(id: string, input: Partial<AccountInput>, actorId
     if (key && !r.areas.includes(key)) r.areas.unshift(key);
     const u = db.users.find((x) => x.id === id);
     if (u && input.phone) u.phone = input.phone;
-    log(db, actorId, "Updated reviewer profile", id);
+    log(db, actorId, "Updated executive editor profile", id);
   });
 }
 
@@ -397,7 +417,7 @@ export function setCoverage(reviewerId: string, areas: string[], actorId: string
     const r = db.reviewers.find((x) => x.id === reviewerId);
     if (!r) return;
     r.areas = areas;
-    log(db, actorId, "Assigned reviewer coverage", reviewerId);
+    log(db, actorId, "Assigned executive editor coverage", reviewerId);
   });
 }
 
@@ -405,7 +425,7 @@ export function assign(input: Omit<Assignment, "id" | "open">, actorId: string) 
   update((db) => {
     const id = nextCode(db.assignments.map((a) => a.id), "ASG", 2);
     db.assignments.push({ ...input, id, open: true });
-    log(db, actorId, "Assigned field staff", `${input.staffId} → ${input.profileId}`);
+    log(db, actorId, "Assigned investigation editor", `${input.staffId} → ${input.profileId}`);
   });
 }
 
@@ -457,7 +477,7 @@ export function generateReport(profileId: string, actorId: string, keptSubmissio
       const dispute = db.disputes.find((d) => d.submissionCode === s.code);
       const remark =
         dispute?.state === "Open"
-          ? `ব্যক্তি অভিযোগ (${dispute.code}) দাখিল করেছেন; অ্যাডমিনের সিদ্ধান্তের অপেক্ষায়। ততক্ষণ সিদ্ধান্তটি অপরিবর্তিত।`
+          ? `ব্যক্তি অভিযোগ (${dispute.code}) দাখিল করেছেন; প্রধান নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়। ততক্ষণ সিদ্ধান্তটি অপরিবর্তিত।`
           : dispute?.state === "Response"
             ? `ব্যক্তির বক্তব্য (${dispute.code}): ${dispute.claim}`
             : s.category === "নেতিবাচক"
@@ -497,14 +517,14 @@ export function generateReport(profileId: string, actorId: string, keptSubmissio
       ],
       subject: { name: p.name, father: existing?.subject.father ?? "—", nid: p.nid, job: "রাজনৈতিক কর্মী", address: p.office || `${p.thana}, ${p.district}` },
       purpose: existing?.purpose ?? "রাজনৈতিক কর্মীর কার্যক্রম নিরীক্ষা",
-      requester: existing?.requester ?? "অ্যাডমিন কর্তৃক শুরু",
+      requester: existing?.requester ?? "প্রধান নির্বাহী সম্পাদক কর্তৃক শুরু",
       reviewerId: reviewer?.id ?? "",
       confidence: { pct: confidence, label: confidence >= 80 ? "উচ্চ" : confidence >= 65 ? "মাঝারি–উচ্চ" : "মাঝারি" },
-      summary: `ব্যক্তির ${p.post} হিসেবে কার্যকাল মাঠকর্মীদের সংগৃহীত ও পর্যালোচক কর্তৃক গৃহীত তথ্য এবং পাবলিক রেকর্ডের বিপরীতে যাচাই করা হয়েছে। {pos}টি ইতিবাচক এবং {neg}টি নেতিবাচক সিদ্ধান্ত এই সংস্করণে রাখা হয়েছে। যে দাবিগুলো নিশ্চিত করা যায়নি সেগুলো অ্যাডমিন প্রতিবেদনে রাখেননি; সেগুলো অডিট রেকর্ডে ব্যাখ্যাসহ সংরক্ষিত আছে।`,
-      summaryNote: "এই সারসংক্ষেপ এআই বিশ্লেষণ স্তর তৈরি করেছে। পর্যালোচকের অনুমোদনের পর এটি চূড়ান্ত হবে।",
+      summary: `ব্যক্তির ${p.post} হিসেবে কার্যকাল তদন্ত সম্পাদকদের সংগৃহীত ও নির্বাহী সম্পাদক কর্তৃক গৃহীত তথ্য এবং পাবলিক রেকর্ডের বিপরীতে যাচাই করা হয়েছে। {pos}টি ইতিবাচক এবং {neg}টি নেতিবাচক সিদ্ধান্ত এই সংস্করণে রাখা হয়েছে। যে দাবিগুলো নিশ্চিত করা যায়নি সেগুলো প্রধান নির্বাহী সম্পাদক প্রতিবেদনে রাখেননি; সেগুলো অডিট রেকর্ডে ব্যাখ্যাসহ সংরক্ষিত আছে।`,
+      summaryNote: "এই সারসংক্ষেপ এআই বিশ্লেষণ স্তর তৈরি করেছে। নির্বাহী সম্পাদকের অনুমোদনের পর এটি চূড়ান্ত হবে।",
       positive,
       negative,
-      negativeIntro: "পর্যালোচক কর্তৃক গৃহীত এবং অ্যাডমিন কর্তৃক প্রতিবেদনে রাখা সিদ্ধান্ত।",
+      negativeIntro: "নির্বাহী সম্পাদক কর্তৃক গৃহীত এবং প্রধান নির্বাহী সম্পাদক কর্তৃক প্রতিবেদনে রাখা সিদ্ধান্ত।",
       sources,
       remark: "",
       adminNote: note.trim() || undefined,

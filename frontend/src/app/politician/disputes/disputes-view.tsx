@@ -58,7 +58,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
             <div>
               <div className="text-[13px] font-semibold leading-[1.6]">অভিযোগ ({filed.code}) জমা হয়েছে</div>
               <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                {filedReport?.title} — অ্যাডমিন রিপোর্টটি পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন, সাধারণত {new Intl.NumberFormat("bn-BD").format(days)} কর্মদিবসের মধ্যে।
+                {filedReport?.title} — প্রধান নির্বাহী সম্পাদক রিপোর্টটি পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন, সাধারণত {new Intl.NumberFormat("bn-BD").format(days)} কর্মদিবসের মধ্যে।
               </p>
             </div>
           </div>
@@ -73,7 +73,7 @@ export function DisputesView({ report, submitted }: { report?: string; submitted
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার অভিযোগসমূহ</h2>
-            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">অ্যাডমিন প্রতিটি অভিযোগ পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন</p>
+            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">প্রধান নির্বাহী সম্পাদক প্রতিটি অভিযোগ পুনরায় যাচাই করে সিদ্ধান্ত জানাবেন</p>
           </div>
 
           {disputes.length === 0 ? (

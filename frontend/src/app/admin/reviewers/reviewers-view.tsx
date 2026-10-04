@@ -23,7 +23,7 @@ const rateColor = (n: number) => (n < 60 ? "text-warning" : "text-ink");
 /** Saves the reviewer roster as a CSV file. */
 export function ExportReviewers({ reviewers }: { reviewers: Reviewer[] }) {
   const exportCsv = () => {
-    const head = ["Reviewer ID", "Name", "Email", "Phone", "Status", "Coverage", "In queue", "Oldest (days)", "Decided this month", "Accept rate %", "Avg decision (h)"];
+    const head = ["ALARM ID", "Name", "Email", "Phone", "Status", "Coverage", "In queue", "Oldest (days)", "Decided this month", "Accept rate %", "Avg decision (h)"];
     const rows = reviewers.map((r) => [r.id, r.name, r.email, r.phone, r.status, r.areas.join("; "), r.queue, r.oldest, r.decidedMonth, r.acceptRate, r.avgHours]);
     const csv = [head, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
@@ -67,26 +67,26 @@ export function ReviewersView({ reviewers, initialTab }: { reviewers: Reviewer[]
     <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line px-5 py-4">
         <div>
-          <h2 className="text-[15px] font-semibold text-ink">Reviewer Roster</h2>
-          <p className="mt-0.5 font-bn text-[12px] text-muted">পর্যালোচক তালিকা</p>
+          <h2 className="text-[15px] font-semibold text-ink">Executive Editor Roster</h2>
+          <p className="mt-0.5 font-bn text-[12px] text-muted">নির্বাহী সম্পাদক তালিকা</p>
         </div>
         <label className="flex h-10 min-w-0 flex-[1_1_240px] items-center gap-2 rounded-input border border-line px-3 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(0,106,78,0.10)]">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="flex-none text-muted">
             <circle cx="7" cy="7" r="4.8" stroke="currentColor" strokeWidth="1.4" />
             <path d="m10.6 10.6 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
-          <span className="sr-only">Search reviewers</span>
+          <span className="sr-only">Search executive editors</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name, reviewer ID or area…"
+            placeholder="Search name, ALARM ID or area…"
             className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-placeholder"
           />
         </label>
       </div>
 
-      <div role="tablist" aria-label="Reviewer lists" className="flex flex-wrap gap-2 border-b border-line px-5 py-3.5">
+      <div role="tablist" aria-label="Executive Editor lists" className="flex flex-wrap gap-2 border-b border-line px-5 py-3.5">
         {(Object.keys(TAB_LABEL) as Tab[]).map((t) => {
           const on = tab === t;
           return (
@@ -169,8 +169,8 @@ export function ReviewersView({ reviewers, initialTab }: { reviewers: Reviewer[]
             {shown.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-5 py-12 text-center">
-                  <p className="text-[14px] font-semibold text-ink">{q ? "No reviewer matches this search" : "Nobody in this list"}</p>
-                  <p className="mt-1 text-[12.5px] text-muted">{q ? "Try a name, an ID like REV-004, or a district." : "Change the filter to see more reviewers."}</p>
+                  <p className="text-[14px] font-semibold text-ink">{q ? "No executive editor matches this search" : "Nobody in this list"}</p>
+                  <p className="mt-1 text-[12.5px] text-muted">{q ? "Try a name, an ALARM ID like KAR-736204, or a district." : "Change the filter to see more executive editors."}</p>
                 </td>
               </tr>
             )}

@@ -90,7 +90,7 @@ export function SubjectView({ profileId, initialAdding = false }: { profileId: s
   const stats = [
     { label: "TOTAL REPORTS", value: String(all.length), color: "#0D1F17", note: "মোট রিপোর্ট · this profile" },
     { label: "ACCEPTED", value: String(acc.length), color: "#1A7A4A", note: "গৃহীত · counted in the score" },
-    { label: "PENDING", value: String(counts.Pending), color: "#D97706", note: "পর্যালোচনাধীন · awaiting reviewer" },
+    { label: "PENDING", value: String(counts.Pending), color: "#D97706", note: "পর্যালোচনাধীন · awaiting executive editor" },
     { label: "REJECTED", value: String(counts.Rejected), color: "#F42A41", note: "বাতিল · kept with its reason" },
     {
       label: "REPORT VERSIONS",
@@ -259,7 +259,7 @@ export function SubjectView({ profileId, initialAdding = false }: { profileId: s
           <div className="flex flex-col items-center gap-2 px-6 pt-10 pb-11 text-center">
             <div className="text-[15px] font-semibold">No reports on this profile yet</div>
             <p className="max-w-[460px] text-[12.5px] leading-[1.75] text-muted text-pretty">
-              এই প্রোফাইলে এখনও কোনো জমা আসেনি। মাঠকর্মী নিয়োগ দিন অথবা নিজেই একটি রিপোর্ট যোগ করুন।
+              এই প্রোফাইলে এখনও কোনো জমা আসেনি। তদন্ত সম্পাদক নিয়োগ দিন অথবা নিজেই একটি রিপোর্ট যোগ করুন।
             </p>
           </div>
         ) : shown.length === 0 ? (
@@ -334,7 +334,7 @@ export function SubjectView({ profileId, initialAdding = false }: { profileId: s
                             autoFocus
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder={deciding.to === "Accepted" ? "গ্রহণের কারণ — কোন প্রমাণে সমর্থিত" : "বাতিলের কারণ — মাঠকর্মী এটি দেখবেন"}
+                            placeholder={deciding.to === "Accepted" ? "গ্রহণের কারণ — কোন প্রমাণে সমর্থিত" : "বাতিলের কারণ — তদন্ত সম্পাদক এটি দেখবেন"}
                             className={`${inputClass} h-9 text-[13px]`}
                           />
                         </label>
@@ -415,7 +415,7 @@ function AddReportForm({ reviewer, onClose, onSubmit }: { reviewer: string; onCl
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-[15px]">
         <div className="min-w-[200px] flex-1">
           <h2 className="text-[14.5px] font-semibold">Add report to this profile</h2>
-          <p className="mt-0.5 text-[12px] text-muted">নতুন রিপোর্ট যোগ করুন · goes to the reviewer before it counts</p>
+          <p className="mt-0.5 text-[12px] text-muted">নতুন রিপোর্ট যোগ করুন · goes to the executive editor before it counts</p>
         </div>
         <button
           type="button"
@@ -438,7 +438,7 @@ function AddReportForm({ reviewer, onClose, onSubmit }: { reviewer: string; onCl
             title: title.trim(),
             source: text.length > 90 ? `${text.slice(0, 88)}…` : text,
             body: text,
-            evidence: filesToEvidence(evidence.items, `অ্যাডমিনের সংযোজন · ${bnDate(nowIso())}`),
+            evidence: filesToEvidence(evidence.items, `প্রধান নির্বাহী সম্পাদকের সংযোজন · ${bnDate(nowIso())}`),
           });
         }}
       >
@@ -489,7 +489,7 @@ function AddReportForm({ reviewer, onClose, onSubmit }: { reviewer: string; onCl
           <textarea
             id="np-src"
             rows={3}
-            placeholder="নথির নাম, তারিখ, অফিস বা প্রত্যক্ষদর্শীর পরিচয় লিখুন। প্রমাণ ছাড়া রিপোর্ট পর্যালোচক বাতিল করবেন।"
+            placeholder="নথির নাম, তারিখ, অফিস বা প্রত্যক্ষদর্শীর পরিচয় লিখুন। প্রমাণ ছাড়া রিপোর্ট নির্বাহী সম্পাদক বাতিল করবেন।"
             value={source}
             onChange={(e) => setSource(e.target.value)}
             className={`${inputClass} h-auto! resize-y py-[11px] leading-[1.7] ${attempted && !source.trim() ? "border-danger!" : ""}`}
@@ -513,13 +513,13 @@ function AddReportForm({ reviewer, onClose, onSubmit }: { reviewer: string; onCl
               <span className="size-[7px] rounded-full bg-warning" />
               <span className="text-[12.5px] font-semibold">Submits as Pending review</span>
             </div>
-            <p className="text-[11.5px] leading-[1.6] text-muted text-pretty">পর্যালোচক গ্রহণ না করা পর্যন্ত এটি প্রোফাইল স্কোরে যোগ হবে না।</p>
+            <p className="text-[11.5px] leading-[1.6] text-muted text-pretty">নির্বাহী সম্পাদক গ্রহণ না করা পর্যন্ত এটি প্রোফাইল স্কোরে যোগ হবে না।</p>
           </div>
         </div>
         <EvidenceList items={evidence.items} error={evidence.error} onRemove={evidence.remove} />
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <p className={`min-w-[180px] flex-1 text-[11.5px] leading-normal text-pretty ${ready ? "text-muted" : attempted ? "text-danger" : "text-warning"}`}>
-            {ready ? `Submits as ${category} · goes to ${reviewer} (Reviewer).` : "Enter a report title and its source before submitting."}
+            {ready ? `Submits as ${category} · goes to ${reviewer} (Executive Editor).` : "Enter a report title and its source before submitting."}
           </p>
           <div className="flex flex-none gap-2.5">
             <button type="button" onClick={onClose} className="h-10 cursor-pointer rounded-button px-4 text-[13.5px] font-semibold text-muted hover:bg-surface hover:text-ink">

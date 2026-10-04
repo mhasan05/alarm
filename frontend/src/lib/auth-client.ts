@@ -39,8 +39,8 @@ export function login(phoneInput: string, password: string, next?: string | null
         : user.role === "reviewer"
           ? db.reviewers.find((r) => r.id === user.subjectId)?.status
           : "Active";
-  if (status === "Suspended") return { ok: false, blocked: true, error: "এই অ্যাকাউন্ট স্থগিত আছে। অ্যাডমিনের সাথে যোগাযোগ করুন।" };
-  if (status === "Deactivated" || status === undefined) return { ok: false, blocked: true, error: "এই অ্যাকাউন্ট সক্রিয় নেই। অ্যাডমিনের সাথে যোগাযোগ করুন।" };
+  if (status === "Suspended") return { ok: false, blocked: true, error: "এই অ্যাকাউন্ট স্থগিত আছে। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" };
+  if (status === "Deactivated" || status === undefined) return { ok: false, blocked: true, error: "এই অ্যাকাউন্ট সক্রিয় নেই। প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।" };
 
   const session: Session = { userId: user.id, role: user.role };
   writeCookie(serializeSession(session), SESSION_MAX_AGE);

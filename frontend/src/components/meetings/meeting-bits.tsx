@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useOrigin } from "@/lib/use-client";
 import { bnDate, bnTime } from "@/lib/db/format";
 import type { Meeting, MeetingStatus } from "@/lib/db/types";
 
@@ -26,9 +27,8 @@ export const meetingWhen = (m: Meeting) => `${bnDate(m.scheduledAt)} · ${bnTime
 
 export function ShareLink({ code, compact = false }: { code: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
-  // The origin is read after mount so the server and first client render match.
-  const [origin, setOrigin] = useState("");
-  useEffect(() => setOrigin(window.location.origin), []);
+  // "" on the server, so the server and first client render match.
+  const origin = useOrigin();
   const link = `${origin}/meet/${code}`;
   const copy = async () => {
     try {

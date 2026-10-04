@@ -41,10 +41,10 @@ export function StaffShell({ children }: { children: ReactNode }) {
       mobileTabs={mobileTabs}
       photoKey={me?.userId ?? "staff"}
       settingsHref="/staff/settings"
-      portal="মাঠকর্মী পোর্টাল"
+      portal="তদন্ত সম্পাদক পোর্টাল"
       nav={nav}
-      user={{ initial: staff?.nameBn.slice(0, 2) ?? "মা", name: staff?.nameBn ?? "মাঠকর্মী", role: `মাঠকর্মী · ${alarmIdOf(db, staff?.id ?? "")}`, color: "#D97706" }}
-      footerNote="আপনার জমা দেওয়া তথ্য পর্যালোচক গ্রহণ না করা পর্যন্ত কারও প্রোফাইলে দেখা যায় না।"
+      user={{ initial: staff?.nameBn.slice(0, 2) ?? "মা", name: staff?.nameBn ?? "তদন্ত সম্পাদক", role: `তদন্ত সম্পাদক · ${alarmIdOf(db, staff?.id ?? "")}`, color: "#D97706" }}
+      footerNote="আপনার জমা দেওয়া তথ্য নির্বাহী সম্পাদক গ্রহণ না করা পর্যন্ত কারও প্রোফাইলে দেখা যায় না।"
     >
       {/* Portal content is Bengali; tell assistive tech so it is read correctly. */}
       <div lang="bn" className="contents">

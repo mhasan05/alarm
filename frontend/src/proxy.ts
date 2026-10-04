@@ -9,7 +9,7 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const session = parseSession(request.cookies.get(SESSION_COOKIE)?.value);
 
-  if (pathname === "/login" && session) {
+  if ((pathname === "/login" || pathname === "/forgot-password") && session) {
     return NextResponse.redirect(new URL(HOME[session.role], request.url));
   }
 
@@ -33,5 +33,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Skip Next internals and static files.
-  matcher: ["/((?!_next/|icon.svg|robots.txt|.*\\.(?:png|jpg|svg|ico|webmanifest|js|css)$).*)"],
+  matcher: ["/((?!_next/|icon.png|apple-icon.png|logo.png|robots.txt|.*\\.(?:png|jpg|svg|ico|webmanifest|js|css)$).*)"],
 };

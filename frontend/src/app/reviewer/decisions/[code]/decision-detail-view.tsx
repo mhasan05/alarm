@@ -23,7 +23,7 @@ export function DecisionDetailView({ code }: { code: string }) {
 
   return (
     <>
-      <PageHeader backHref="/reviewer/decisions" crumb="পর্যালোচক পোর্টাল / সিদ্ধান্তের ইতিহাস / বিস্তারিত" title="সিদ্ধান্তের বিস্তারিত" action={<StartReviewButton />} />
+      <PageHeader backHref="/reviewer/decisions" crumb="নির্বাহী সম্পাদক পোর্টাল / সিদ্ধান্তের ইতিহাস / বিস্তারিত" title="সিদ্ধান্তের বিস্তারিত" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-4 px-4 pt-[22px] pb-9 sm:px-7">
         <Link
@@ -76,14 +76,14 @@ export function DecisionDetailView({ code }: { code: string }) {
               <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted">আপনার সিদ্ধান্তের কারণ</div>
               <p className="mt-[7px] text-[13px] leading-[1.8] text-pretty">{h.reason}</p>
               <p className="mt-[9px] text-[11.5px] leading-[1.65] text-muted">
-                {reviewer.nameBn} · পর্যালোচক · {bnDate(h.decidedAt!)}
+                {reviewer.nameBn} · নির্বাহী সম্পাদক · {bnDate(h.decidedAt!)}
               </p>
             </div>
           </div>
 
           <div className="border-t border-line bg-[#FAFDFC] px-[22px] py-[15px] text-[11.5px] leading-[1.7] text-muted text-pretty">
             {h.state === "Withdrawn"
-              ? "এই তথ্যটি গৃহীত হয়েছিল, পরে রাজনৈতিক কর্মীর অভিযোগের ভিত্তিতে অ্যাডমিন প্রোফাইল থেকে প্রত্যাহার করেছেন।"
+              ? "এই তথ্যটি গৃহীত হয়েছিল, পরে রাজনৈতিক কর্মীর অভিযোগের ভিত্তিতে প্রধান নির্বাহী সম্পাদক প্রোফাইল থেকে প্রত্যাহার করেছেন।"
               : accepted
                 ? "এই তথ্যটি প্রোফাইলে প্রকাশিত এবং স্কোরে গণনা করা হয়েছে। রাজনৈতিক কর্মী চাইলে এর বিরুদ্ধে অভিযোগ জানাতে পারেন।"
                 : "বাতিল হওয়া তথ্য প্রোফাইলে দেখা যায় না, তবে রেকর্ডে সংরক্ষিত থাকে। একই তথ্য আবার জমা দেওয়া যাবে না।"}

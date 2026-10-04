@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
-import { nextCode, reviewerOf } from "@/lib/db/selectors";
+import { reviewerOf } from "@/lib/db/selectors";
 import { useAdmin } from "../../use-admin";
 import { staffRows } from "../../field-staff/roster";
 import { StaffForm } from "../../field-staff/new/staff-form";
@@ -12,8 +12,9 @@ import { StaffForm } from "../../field-staff/new/staff-form";
 export function AddReviewerPage({ edit }: { edit?: string }) {
   const { db, admin, adminId } = useAdmin();
   const editing = edit ? reviewerOf(db, edit) : undefined;
-  if (edit && !editing) return <RecordMissing title="পর্যালোচক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="পর্যালোচক তালিকায় ফিরুন" />;
-  const nextId = nextCode(db.reviewers.map((r) => r.id), "REV", 3);
+  if (edit && !editing) return <RecordMissing title="নির্বাহী সম্পাদক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="নির্বাহী সম্পাদক তালিকায় ফিরুন" />;
+  // The ALARM ID (KAR- + 6 random digits) is issued when the account is saved.
+  const nextId = "KAR-••••••";
   const takenPhones = db.users.filter((u) => u.id !== editing?.id).map((u) => u.phone);
 
   return (
@@ -23,7 +24,7 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
         crumb={
           <>
             <Link href="/admin/reviewers" className="text-primary hover:text-primary-hover">
-              পর্যালোচক
+              নির্বাহী সম্পাদক
             </Link>{" "}
             /{" "}
             {editing ? (
@@ -34,7 +35,7 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
                 / Edit
               </>
             ) : (
-              "নতুন পর্যালোচক"
+              "নতুন নির্বাহী সম্পাদক"
             )}
           </>
         }
@@ -46,11 +47,11 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
               </>
             ) : (
               <>
-                Add Reviewer · <span className="font-bn">নতুন পর্যালোচক</span>
+                Add Executive Editor · <span className="font-bn">নতুন নির্বাহী সম্পাদক</span>
               </>
             )}
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {editing ? `${editing.name} · ${editing.id}` : "Creates a reviewer account. The chosen area becomes their first coverage area."}
+              {editing ? `${editing.name} · ${editing.id}` : "Creates an executive editor account. The chosen area becomes their first coverage area."}
             </span>
           </>
         }
@@ -59,14 +60,14 @@ export function AddReviewerPage({ edit }: { edit?: string }) {
         <StaffForm
           key={editing?.id ?? "new"}
           nextId={nextId}
-          admin={admin?.name ?? "Admin"}
+          admin={admin?.name ?? "Chief Executive Editor"}
           adminId={adminId}
           takenPhones={takenPhones}
           roster={staffRows(db)}
           editing={editing && { id: editing.id, name: editing.name, phone: editing.phone, joined: editing.joined }}
           initialRole="reviewer"
           basePath="/admin/reviewers"
-          listLabel="Reviewers"
+          listLabel="Executive Editors"
         />
       </div>
     </>

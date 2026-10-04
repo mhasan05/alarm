@@ -33,7 +33,7 @@ export function ReportsPage({ initialTab }: { initialTab: Tab }) {
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / প্রতিবেদন"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / প্রতিবেদন"
         title={
           <>
             Reports · <span className="font-bn">প্রতিবেদন</span>

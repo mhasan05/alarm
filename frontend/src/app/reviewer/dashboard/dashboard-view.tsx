@@ -39,7 +39,7 @@ export function ReviewerDashboardView() {
 
   return (
     <>
-      <PageHeader crumb="পর্যালোচক পোর্টাল / ড্যাশবোর্ড" title="পর্যালোচনার সারসংক্ষেপ" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / ড্যাশবোর্ড" title="পর্যালোচনার সারসংক্ষেপ" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <StatTiles stats={stats} />
@@ -90,7 +90,7 @@ export function ReviewerDashboardView() {
         <div className="flex flex-wrap items-stretch gap-5">
           <ChartCard title="প্রোফাইলভিত্তিক সারি" sub="কোন প্রোফাইলে কতটি জমা অপেক্ষমাণ" className="flex-[1_1_320px]">
             <ul className="mt-4 flex flex-col gap-3.5">
-              {profiles.length === 0 && <li className="text-[12.5px] text-muted">কোনো এলাকা নির্ধারিত হয়নি — অ্যাডমিনের সাথে যোগাযোগ করুন।</li>}
+              {profiles.length === 0 && <li className="text-[12.5px] text-muted">কোনো এলাকা নির্ধারিত হয়নি — প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।</li>}
               {profiles.map((p) => {
                 const n = p.pending;
                 return (

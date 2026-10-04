@@ -141,10 +141,10 @@ export function ReportArticle({
 /** How a dispute reads to the politician. */
 export function disputeView(d: Dispute, workingDays: number): { state: string; outcome: string; fg: string; bg: string; outcomeFg: string } {
   const map: Record<DisputeState, { state: string; outcome: string; fg: string; outcomeFg: string }> = {
-    Open: { state: "অ্যাডমিন যাচাই করছেন", outcome: `সিদ্ধান্তের অপেক্ষায় · সাধারণত ${new Intl.NumberFormat("bn-BD").format(workingDays)} কর্মদিবস`, fg: "#D97706", outcomeFg: "#D97706" },
-    Kept: { state: "রিপোর্ট বহাল", outcome: "অ্যাডমিন রিপোর্টটি বহাল রেখেছেন", fg: "#4A7060", outcomeFg: "#4A7060" },
-    Response: { state: "আংশিক গৃহীত", outcome: "অ্যাডমিন রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন, তথ্যটি বহাল রয়েছে", fg: "#1D6FC0", outcomeFg: "#4A7060" },
-    Removed: { state: "গৃহীত", outcome: "অ্যাডমিন রিপোর্টটি প্রত্যাহার করেছেন · প্রোফাইল থেকে সরানো হয়েছে", fg: "#1A7A4A", outcomeFg: "#1A7A4A" },
+    Open: { state: "প্রধান নির্বাহী সম্পাদক যাচাই করছেন", outcome: `সিদ্ধান্তের অপেক্ষায় · সাধারণত ${new Intl.NumberFormat("bn-BD").format(workingDays)} কর্মদিবস`, fg: "#D97706", outcomeFg: "#D97706" },
+    Kept: { state: "রিপোর্ট বহাল", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টটি বহাল রেখেছেন", fg: "#4A7060", outcomeFg: "#4A7060" },
+    Response: { state: "আংশিক গৃহীত", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন, তথ্যটি বহাল রয়েছে", fg: "#1D6FC0", outcomeFg: "#4A7060" },
+    Removed: { state: "গৃহীত", outcome: "প্রধান নির্বাহী সম্পাদক রিপোর্টটি প্রত্যাহার করেছেন · প্রোফাইল থেকে সরানো হয়েছে", fg: "#1A7A4A", outcomeFg: "#1A7A4A" },
   };
   const v = map[d.state];
   return { ...v, bg: `${v.fg}1A` };

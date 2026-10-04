@@ -30,7 +30,7 @@ export function MeetingsView({ tab }: { tab: "upcoming" | "past" }) {
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / মিটিং"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / মিটিং"
         title={
           <>
             Meetings · <span className="font-bn">মিটিং</span>

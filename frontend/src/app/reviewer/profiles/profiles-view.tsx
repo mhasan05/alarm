@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { bn } from "@/lib/db/format";
-import { StartReviewButton } from "../start-review-button";
 import { useReviewer } from "../use-reviewer";
 
 export function ReviewerProfilesView() {
@@ -17,7 +17,12 @@ export function ReviewerProfilesView() {
 
   return (
     <>
-      <PageHeader crumb="পর্যালোচক পোর্টাল / আমার প্রোফাইল" title="আমার দায়িত্বের প্রোফাইল" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / আমার প্রোফাইল" title="আমার দায়িত্বের প্রোফাইল" action={
+          <Link href="/reviewer/politicians/new" className="inline-flex h-10 items-center rounded-button bg-primary px-4 text-[13.5px] font-semibold text-white hover:bg-primary-hover">
+            + নতুন রাজনৈতিক কর্মী
+          </Link>
+        }
+      />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="rounded-card border border-l-[3px] border-line border-l-primary bg-white px-5 py-[18px] shadow-card">
@@ -31,11 +36,11 @@ export function ReviewerProfilesView() {
                 <rect x="1.4" y="6.1" width="10.2" height="7.6" rx="1.6" stroke="currentColor" strokeWidth="1.3" />
                 <path d="M4 6.1V4.2a2.5 2.5 0 0 1 5 0v1.9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
-              অ্যাডমিন নির্ধারিত
+              প্রধান নির্বাহী সম্পাদক নির্ধারিত
             </span>
           </div>
           <dl className="mt-3.5 grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-x-[22px] gap-y-3.5">
-            {JURISDICTION.length === 0 && <p className="text-[12.5px] text-muted">কোনো এলাকা নির্ধারিত হয়নি — অ্যাডমিনের সাথে যোগাযোগ করুন।</p>}
+            {JURISDICTION.length === 0 && <p className="text-[12.5px] text-muted">কোনো এলাকা নির্ধারিত হয়নি — প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।</p>}
             {JURISDICTION.map(([label, value]) => (
               <div key={label} className="min-w-0">
                 <dt className="text-[10px] font-semibold tracking-[0.05em] text-muted">{label}</dt>
@@ -44,7 +49,7 @@ export function ReviewerProfilesView() {
             ))}
           </dl>
           <p className="mt-3.5 border-t border-[#E3EEEA] pt-[13px] text-[11.5px] leading-[1.7] text-muted text-pretty">
-            এই এলাকার সব রাজনৈতিক কর্মীর জমা আপনার সারিতে আসে। এলাকা পরিবর্তন করতে পারেন কেবল অ্যাডমিন।
+            এই এলাকার সব রাজনৈতিক কর্মীর জমা আপনার সারিতে আসে। এলাকা পরিবর্তন করতে পারেন কেবল প্রধান নির্বাহী সম্পাদক।
           </p>
         </section>
 
@@ -52,7 +57,7 @@ export function ReviewerProfilesView() {
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার দায়িত্বের প্রোফাইল</h2>
             <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-              আপনার এলাকার {bn(rows.length)}টি প্রোফাইল · এলাকা অনুযায়ী অ্যাডমিন এই দায়িত্ব দিয়েছেন
+              আপনার এলাকার {bn(rows.length)}টি প্রোফাইল · এলাকা অনুযায়ী প্রধান নির্বাহী সম্পাদক এই দায়িত্ব দিয়েছেন
             </p>
           </div>
 
@@ -104,7 +109,7 @@ export function ReviewerProfilesView() {
             </table>
           </div>
           <p className="px-5 py-[13px] text-[11.5px] leading-[1.7] text-muted text-pretty">
-            সারি খালি না হওয়া পর্যন্ত অ্যাডমিন ওই প্রোফাইলে এআই বিশ্লেষণ শুরু করতে পারেন না।
+            সারি খালি না হওয়া পর্যন্ত প্রধান নির্বাহী সম্পাদক ওই প্রোফাইলে এআই বিশ্লেষণ শুরু করতে পারেন না।
           </p>
         </section>
       </div>

@@ -42,7 +42,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
 
   return (
     <>
-      <PageHeader backHref="/staff/submissions" crumb="মাঠকর্মী পোর্টাল / আমার জমা / বিস্তারিত" title="জমার বিস্তারিত" action={<NewSubmissionButton />} />
+      <PageHeader backHref="/staff/submissions" crumb="তদন্ত সম্পাদক পোর্টাল / আমার জমা / বিস্তারিত" title="জমার বিস্তারিত" action={<NewSubmissionButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <Link
@@ -123,7 +123,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
               <p className="text-[13px] leading-[1.75] text-muted text-pretty">
                 {revisit
                   ? `পুনরায় পরিদর্শনের অনুরোধ: ${sub.reason ?? ""} — আরও প্রমাণ সংগ্রহ করে নতুন তথ্য হিসেবে জমা দিন।`
-                  : "পর্যালোচকের সিদ্ধান্তের অপেক্ষায়। সিদ্ধান্ত হলে কারণসহ এখানে দেখা যাবে — গ্রহণ করা হলে সংশ্লিষ্ট প্রোফাইলে প্রকাশিত হবে।"}
+                  : "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়। সিদ্ধান্ত হলে কারণসহ এখানে দেখা যাবে — গ্রহণ করা হলে সংশ্লিষ্ট প্রোফাইলে প্রকাশিত হবে।"}
               </p>
             ) : (
               <>
@@ -140,7 +140,7 @@ export function StaffSubmissionDetailView({ code }: { code: string }) {
                   </p>
                 </div>
                 {sub.state === "Withdrawn" && (
-                  <p className="text-[12.5px] leading-[1.7] text-muted">রাজনৈতিক কর্মীর অভিযোগের পর অ্যাডমিন এই তথ্যটি প্রোফাইল থেকে প্রত্যাহার করেছেন।</p>
+                  <p className="text-[12.5px] leading-[1.7] text-muted">রাজনৈতিক কর্মীর অভিযোগের পর প্রধান নির্বাহী সম্পাদক এই তথ্যটি প্রোফাইল থেকে প্রত্যাহার করেছেন।</p>
                 )}
               </>
             )}

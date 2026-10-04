@@ -8,7 +8,7 @@ import { inputClass, selectClass } from "@/components/form";
 import { RecordMissing } from "@/components/record-missing";
 import { assign, resetPassword, setStaffStatus } from "@/lib/db/actions";
 import { bn, enDate, enDayMonth, phoneMasked } from "@/lib/db/format";
-import { alarmIdOf, coverageKey, profileOf, staffAssignments, staffOf, staffSubmissions, STATE_EN } from "@/lib/db/selectors";
+import { coverageKey, profileOf, staffAssignments, staffOf, staffSubmissions, STATE_EN } from "@/lib/db/selectors";
 import type { StaffStatus, SubmissionState } from "@/lib/db/types";
 import { useAdmin } from "../../use-admin";
 
@@ -29,7 +29,7 @@ export function FieldStaffDetailView({ id }: { id: string }) {
   const [form, setForm] = useState({ profileId: "", due: "", brief: "" });
   const [formError, setFormError] = useState("");
   const staff = staffOf(db, id);
-  if (!staff) return <RecordMissing title="মাঠকর্মী পাওয়া যায়নি" backHref="/admin/field-staff" backLabel="মাঠকর্মী তালিকায় ফিরুন" />;
+  if (!staff) return <RecordMissing title="তদন্ত সম্পাদক পাওয়া যায়নি" backHref="/admin/field-staff" backLabel="তদন্ত সম্পাদক তালিকায় ফিরুন" />;
 
   // Every submission this person filed, newest first.
   const reports = staffSubmissions(db, staff.id);
@@ -68,13 +68,12 @@ export function FieldStaffDetailView({ id }: { id: string }) {
     },
     { label: "COMPLETED", value: p.completed, color: "#1A7A4A", note: "সম্পন্ন · closed audits" },
     { label: "TOTAL SUBMISSIONS", value: reports.length, color: "#0D1F17", note: `মোট জমা · ${items} evidence items` },
-    { label: "IN REVIEW", value: inReview, color: "#D97706", note: "পর্যালোচনাধীন · awaiting reviewer" },
+    { label: "IN REVIEW", value: inReview, color: "#D97706", note: "পর্যালোচনাধীন · awaiting executive editor" },
     { label: "ACCEPTED", value: accepted, color: "#1A7A4A", note: `গৃহীত · ${held} held or rejected` },
   ];
 
   const facts = [
-    { k: "ALARM ID", v: alarmIdOf(db, s.id) || "Not issued — no sign-in yet" },
-    { k: "STAFF ID", v: s.id },
+    { k: "ALARM ID", v: s.id },
     { k: "MOBILE", v: phoneMasked(s.phone) },
     { k: "NID", v: `${p.nid} · গোপনকৃত` },
     { k: "JOINED", v: enDate(s.joined) },
@@ -98,7 +97,7 @@ export function FieldStaffDetailView({ id }: { id: string }) {
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {s.name}
             <StaffStatusBadge status={s.status} />
-            <span className="rounded-md bg-warning/10 px-2 py-0.5 text-[12px] font-medium text-warning">Field Staff</span>
+            <span className="rounded-md bg-warning/10 px-2 py-0.5 text-[12px] font-medium text-warning">Investigation Editor</span>
             <span className="block w-full font-bn text-[12.5px] font-normal text-muted max-md:hidden">
               {p.seat} · {p.wards}
             </span>

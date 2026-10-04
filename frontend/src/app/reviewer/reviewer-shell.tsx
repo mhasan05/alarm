@@ -22,6 +22,7 @@ export function ReviewerShell({ children }: { children: ReactNode }) {
         { href: "/reviewer/queue", label: "পর্যালোচনার সারি", badge: pending, badgeColor: "#D97706" },
         { href: "/reviewer/reports", label: "প্রতিবেদন অনুমোদন", badge: reports, badgeColor: "#1D6FC0" },
         { href: "/reviewer/profiles", label: "আমার প্রোফাইল" },
+        { href: "/reviewer/politicians/new", label: "নতুন রাজনৈতিক কর্মী" },
         { href: "/reviewer/decisions", label: "সিদ্ধান্তের ইতিহাস" },
         { href: "/reviewer/meetings", label: "মিটিং", badge: meetings, badgeColor: "#F42A41" },
       ],
@@ -38,12 +39,12 @@ export function ReviewerShell({ children }: { children: ReactNode }) {
 
   return (
     <AppShell
-      portal="পর্যালোচক পোর্টাল"
+      portal="নির্বাহী সম্পাদক পোর্টাল"
       nav={nav}
       mobileTabs={mobileTabs}
       photoKey={me?.userId ?? "reviewer"}
       settingsHref="/reviewer/settings"
-      user={{ initial: reviewer?.nameBn.slice(0, 2) ?? "প", name: reviewer?.nameBn ?? "পর্যালোচক", role: `পর্যালোচক · ${alarmIdOf(db, reviewer?.id ?? "")}`, color: "#1D6FC0" }}
+      user={{ initial: reviewer?.nameBn.slice(0, 2) ?? "প", name: reviewer?.nameBn ?? "নির্বাহী সম্পাদক", role: `নির্বাহী সম্পাদক · ${alarmIdOf(db, reviewer?.id ?? "")}`, color: "#1D6FC0" }}
       footerNote="গ্রহণ করলে তথ্যটি সঙ্গে সঙ্গে প্রোফাইলে প্রকাশিত হয় · বাতিল করলে কারণসহ বন্ধ হয়ে যায়।"
     >
       {/* Portal content is Bengali; tell assistive tech so it is read correctly. */}

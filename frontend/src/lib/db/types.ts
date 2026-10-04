@@ -210,6 +210,7 @@ export type AuditEntry = {
 };
 
 export type User = {
+  /** The person's ALARM ID — KAR- + 6 digits, unique across every account. The primary key everywhere. */
   id: string;
   role: Role;
   /** Login phone, digits only (01XXXXXXXXX). */
@@ -218,8 +219,6 @@ export type User = {
   password: string;
   /** Profile / staff / reviewer / admin record this account belongs to. */
   subjectId: string;
-  /** The person's ALARM ID (KAR-…), unique across every account. Shown in their portal; used to join meetings. */
-  alarmId: string;
 };
 
 export type Party = { name: string; kind: "Party" | "Organisation" };

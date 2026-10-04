@@ -23,9 +23,9 @@ function accountsOf(db: Database): Account[] {
     return a ? enRelative(a.at) : "—";
   };
   return [
-    ...db.admins.map((a) => ({ id: a.id, name: a.name, initials: a.initials, email: a.email, role: "Admin" as const, suspended: false, lastActive: last(a.id) })),
-    ...db.reviewers.filter((r) => r.status !== "Deactivated").map((r) => ({ id: r.id, name: r.name, initials: r.initials, email: r.email, role: "Reviewer" as const, suspended: r.status === "Suspended", lastActive: last(r.id) })),
-    ...db.staff.filter((x) => x.status !== "Deactivated").map((x) => ({ id: x.id, name: x.name, initials: x.initials, email: x.email, role: "Field Staff" as const, suspended: x.status === "Suspended", lastActive: last(x.id) })),
+    ...db.admins.map((a) => ({ id: a.id, name: a.name, initials: a.initials, email: a.email, role: "Chief Executive Editor" as const, suspended: false, lastActive: last(a.id) })),
+    ...db.reviewers.filter((r) => r.status !== "Deactivated").map((r) => ({ id: r.id, name: r.name, initials: r.initials, email: r.email, role: "Executive Editor" as const, suspended: r.status === "Suspended", lastActive: last(r.id) })),
+    ...db.staff.filter((x) => x.status !== "Deactivated").map((x) => ({ id: x.id, name: x.name, initials: x.initials, email: x.email, role: "Investigation Editor" as const, suspended: x.status === "Suspended", lastActive: last(x.id) })),
   ];
 }
 
@@ -33,7 +33,7 @@ export const SECTIONS = {
   general: { label: "General", sub: "সাধারণ" },
   users: { label: "User Management", sub: "ব্যবহারকারী ব্যবস্থাপনা" },
   roles: { label: "Roles & Permissions", sub: "ভূমিকা ও অনুমতি" },
-  coverage: { label: "Reviewer Coverage", sub: "পর্যালোচকের এলাকা" },
+  coverage: { label: "Executive Editor Coverage", sub: "নির্বাহী সম্পাদকের এলাকা" },
   parties: { label: "Parties & Organisations", sub: "দল ও সংগঠন" },
   rules: { label: "Audit Configuration", sub: "নিরীক্ষার নিয়ম" },
   notifications: { label: "Notification Settings", sub: "বিজ্ঞপ্তি" },
@@ -44,9 +44,9 @@ export type Section = keyof typeof SECTIONS;
 
 
 const ROLE_STYLE: Record<UserRole, string> = {
-  Admin: "bg-primary/10 text-primary",
-  Reviewer: "bg-role-reviewer/10 text-role-reviewer",
-  "Field Staff": "bg-warning/10 text-warning",
+  "Chief Executive Editor": "bg-primary/10 text-primary",
+  "Executive Editor": "bg-role-reviewer/10 text-role-reviewer",
+  "Investigation Editor": "bg-warning/10 text-warning",
 };
 
 const today = () => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Dhaka" }).format(new Date());
@@ -205,7 +205,7 @@ function General({ admin, adminId }: { admin: string; adminId: string }) {
           <div className="min-w-[160px] flex-1">
             <h2 className="text-[16px] font-semibold text-ink">{admin}</h2>
             <p className="text-[12px] text-muted">
-              Admin · {adminId} · {email}
+              Chief Executive Editor · {adminId} · {email}
             </p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-[11.5px] font-semibold text-success">
@@ -261,11 +261,11 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
   const s = useStaged<Account[]>(ACCOUNTS, (draft) => {
     const kept = new Map(draft.map((a) => [a.id, a]));
     for (const a of ACCOUNTS) {
-      if (a.role === "Admin") continue;
+      if (a.role === "Chief Executive Editor") continue;
       const next = kept.get(a.id);
-      const set = a.role === "Reviewer" ? setReviewerStatus : setStaffStatus;
+      const set = a.role === "Executive Editor" ? setReviewerStatus : setStaffStatus;
       if (!next) set(a.id, adminId, "Deactivated" as never);
-      else if (next.suspended !== a.suspended) set(a.id, adminId, (next.suspended ? "Suspended" : a.role === "Reviewer" ? "Active" : "On duty") as never);
+      else if (next.suspended !== a.suspended) set(a.id, adminId, (next.suspended ? "Suspended" : a.role === "Executive Editor" ? "Active" : "On duty") as never);
     }
   });
   const [query, setQuery] = useState("");
@@ -329,9 +329,9 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
               className={`${selectClass} h-10 font-sans`}
             >
               <option value="all">All roles</option>
-              <option>Admin</option>
-              <option>Reviewer</option>
-              <option>Field Staff</option>
+              <option>Chief Executive Editor</option>
+              <option>Executive Editor</option>
+              <option>Investigation Editor</option>
             </select>
           </label>
         </div>
@@ -352,8 +352,8 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
               {shown.map((a) => {
                 const you = a.id === adminId;
                 const changed = original.get(a.id)?.suspended !== a.suspended;
-                const staff = a.role === "Field Staff";
-                const base = staff ? "/admin/field-staff" : a.role === "Reviewer" ? "/admin/reviewers" : null;
+                const staff = a.role === "Investigation Editor";
+                const base = staff ? "/admin/field-staff" : a.role === "Executive Editor" ? "/admin/reviewers" : null;
                 return (
                   <tr key={a.id} className="border-b border-line last:border-b-0">
                     <td className="px-5 py-3 align-middle">
@@ -483,12 +483,12 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
 
 // ── Roles & Permissions ──────────────────────────────────────────────────────
 
-const ROLE_KEY: Record<UserRole, "admin" | "reviewer" | "staff"> = { Admin: "admin", Reviewer: "reviewer", "Field Staff": "staff" };
+const ROLE_KEY: Record<UserRole, "admin" | "reviewer" | "staff"> = { "Chief Executive Editor": "admin", "Executive Editor": "reviewer", "Investigation Editor": "staff" };
 
 function Roles({ admin, adminId }: { admin: string; adminId: string }) {
   const db = useDb();
   const s = useStaged(db.settings.permissions, (v) => saveSettings({ permissions: v }, adminId, "roles & permissions"));
-  const roles: UserRole[] = ["Admin", "Reviewer", "Field Staff"];
+  const roles: UserRole[] = ["Chief Executive Editor", "Executive Editor", "Investigation Editor"];
   const PERMISSIONS = PERMISSION_META;
   return (
     <>
@@ -532,7 +532,7 @@ function Roles({ admin, adminId }: { admin: string; adminId: string }) {
           </table>
         </div>
         <p className="border-t border-line px-5 py-3 text-[12px] text-muted">
-          Field staff never see reviewer names, and reviewers see a source label instead of staff names — these follow from the permissions above.
+          Investigation editors never see executive editor names, and executive editors see a source label instead of investigation editor names — these follow from the permissions above.
         </p>
       </section>
       <SaveBar section="roles" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
@@ -555,7 +555,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="coverage" extra={`${COVERAGE.length} reviewers`} />
+        <Head section="coverage" extra={`${COVERAGE.length} executive editors`} />
         <ul>
           {COVERAGE.map((c, i) => (
             <li key={c.id} className="border-b border-line px-5 py-4 last:border-b-0">
@@ -581,7 +581,7 @@ function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
                     </button>
                   </li>
                 ))}
-                {s.draft[i].length === 0 && <li className="text-[12.5px] text-danger">No area — this reviewer will get no submissions.</li>}
+                {s.draft[i].length === 0 && <li className="text-[12.5px] text-danger">No area — this executive editor will get no submissions.</li>}
               </ul>
               <form
                 className="mt-2.5 flex max-w-md gap-2"
@@ -756,7 +756,7 @@ function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
   return (
     <>
       <section className={card}>
-        <Head section="notifications" extra="sent to admins" />
+        <Head section="notifications" extra="sent to the chief executive editor" />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[520px] text-left">
             <thead>
@@ -797,7 +797,7 @@ function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
 
 // ── Security & Audit Log ─────────────────────────────────────────────────────
 
-const ROLE_LABEL = { admin: "Admin", reviewer: "Reviewer", staff: "Field Staff", politician: "Political Activist", system: "System" } as const;
+const ROLE_LABEL = { admin: "Chief Executive Editor", reviewer: "Executive Editor", staff: "Investigation Editor", politician: "Political Activist", system: "System" } as const;
 
 function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
   const db = useDb();
@@ -805,7 +805,7 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
     saveSettings({ security: { twoFactor: v.twoFactor, timeout: Number(v.timeout) } }, adminId, "security"),
   );
   const [who, setWho] = useState<"all" | string>("all");
-  const roles = ["Admin", "Reviewer", "Field Staff", "Political Activist", "System"];
+  const roles = ["Chief Executive Editor", "Executive Editor", "Investigation Editor", "Political Activist", "System"];
   const all = db.audit.map((e) => ({ when: enDateTime(e.at), actor: nameOf(db, e.actor), role: ROLE_LABEL[roleOfId(db, e.actor)], action: e.action, target: e.target }));
   const rows = all.filter((e) => who === "all" || e.role === who).slice(0, 200);
 
@@ -828,7 +828,7 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
         <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2">
           <div className="flex items-start justify-between gap-4 rounded-card border border-line px-4 py-3.5">
             <div>
-              <div className="text-[13.5px] font-semibold text-ink">Two-step sign-in for admins and reviewers</div>
+              <div className="text-[13.5px] font-semibold text-ink">Two-step sign-in for chief executive and executive editors</div>
               <p className="mt-0.5 text-[12px] text-muted">An SMS code is required on every new device.</p>
             </div>
             <button
@@ -888,7 +888,7 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
             </thead>
             <tbody>
               {rows.map((e, i) => {
-                const href = auditHref(e.target);
+                const href = auditHref(e.target, db);
                 return (
                   <tr key={i} className="border-b border-line last:border-b-0">
                     <td className="whitespace-nowrap px-5 py-3 text-[12.5px] text-muted">{e.when}</td>
@@ -927,7 +927,7 @@ function SystemInfo() {
   const [done, setDone] = useState(false);
   const rows: [string, string][] = [
     ["Version", "ALARM v1.0 · web"],
-    ["Portals", "Admin · Reviewer · Field Staff · Political Activist"],
+    ["Portals", "Chief Executive Editor · Executive Editor · Investigation Editor · Political Activist"],
     ["Languages", "বাংলা · English"],
   ];
   return (

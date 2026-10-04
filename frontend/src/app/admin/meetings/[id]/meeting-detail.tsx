@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { AreaPicker, areaFromGeo } from "@/components/meetings/area-picker";
 import { InvitePicker } from "@/components/meetings/invite-picker";
@@ -11,6 +11,7 @@ import { bn, bnDate, bnTime } from "@/lib/db/format";
 import { activePresence, areaLabel, areaMembers, cancelMeeting, decideJoin, endMeeting, meetingById, pendingRequests, roleLabel, setInvitees, updateMeeting } from "@/lib/db/meetings";
 import { alarmIdOf, nameBnOf } from "@/lib/db/selectors";
 import type { Database, Meeting } from "@/lib/db/types";
+import { useNow } from "@/lib/use-client";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
 import { useAdmin } from "../../use-admin";
 
@@ -21,12 +22,7 @@ export function MeetingDetail({ id, created }: { id: string; created: boolean })
   const [draft, setDraft] = useState<string[]>([]);
   const [confirm, setConfirm] = useState<"cancel" | "end" | null>(null);
   const [editingArea, setEditingArea] = useState(false);
-  const [now, setNow] = useState(0);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), 5000);
-    return () => clearInterval(t);
-  }, []);
+  const now = useNow(5000);
 
   if (!m) return <RecordMissing title="মিটিং পাওয়া যায়নি" backHref="/admin/meetings" backLabel="মিটিং তালিকায় ফিরুন" />;
 

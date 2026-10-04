@@ -13,10 +13,10 @@ export function ReviewerSettings() {
 
   return (
     <>
-      <PageHeader backHref="/reviewer/dashboard" crumb="পর্যালোচক পোর্টাল / সেটিংস" title="সেটিংস" />
+      <PageHeader backHref="/reviewer/dashboard" crumb="নির্বাহী সম্পাদক পোর্টাল / সেটিংস" title="সেটিংস" />
       <SettingsView
         name={r.nameBn}
-        role={`পর্যালোচক · ${r.id}`}
+        role={`নির্বাহী সম্পাদক · ${r.id}`}
         status={r.status === "On leave" ? "ছুটিতে" : "সক্রিয় অ্যাকাউন্ট"}
         statusTone={r.status === "On leave" ? "warning" : "success"}
         facts={[
@@ -30,7 +30,6 @@ export function ReviewerSettings() {
             icon: "person",
             rows: [
               ["পূর্ণ নাম", r.nameBn],
-              ["কর্মী নম্বর", r.id],
               ["মোবাইল নম্বর", phoneBn(r.phone)],
               ["ইমেইল", r.email],
             ],
@@ -44,7 +43,7 @@ export function ReviewerSettings() {
             title: "অ্যাকাউন্ট",
             icon: "account",
             rows: [
-              ["ভূমিকা", "পর্যালোচক"],
+              ["ভূমিকা", "নির্বাহী সম্পাদক"],
               ["যোগদানের তারিখ", bnDate(r.joined)],
             ],
           },

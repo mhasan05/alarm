@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ReviewersPage } from "./reviewers-page";
 import type { Tab } from "./reviewers-view";
 
-export const metadata: Metadata = { title: "পর্যালোচক · অ্যাডমিন · ALARM" };
+export const metadata: Metadata = { title: "নির্বাহী সম্পাদক · প্রধান নির্বাহী সম্পাদক · ALARM" };
 
 const TABS: Tab[] = ["all", "active", "unavailable"];
 

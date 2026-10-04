@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { inputClass } from "@/components/form";
@@ -15,7 +16,6 @@ export function LoginForm({ next, demo = [], notice }: { next?: string; demo?: D
   const [show, setShow] = useState(false);
   const [error, setError] = useState<{ text: string; field?: "phone" | "password"; blocked?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [forgot, setForgot] = useState(false);
 
   const signIn = (p: string, pw: string) => {
     setBusy(true);
@@ -97,15 +97,10 @@ export function LoginForm({ next, demo = [], notice }: { next?: string; demo?: D
             </button>
           </div>
           <div className="mt-px flex justify-end">
-            <button type="button" onClick={() => setForgot((f) => !f)} aria-expanded={forgot} className="cursor-pointer text-[12.5px] text-muted hover:text-primary">
+            <Link href="/forgot-password" className="text-[12.5px] text-muted hover:text-primary">
               পাসওয়ার্ড ভুলে গেছেন?
-            </button>
+            </Link>
           </div>
-          {forgot && (
-            <p className="rounded-button bg-surface px-3 py-2 font-bn text-[12px] leading-relaxed text-ink">
-              পাসওয়ার্ড ভুলে গেলে অ্যাডমিনের সাথে যোগাযোগ করুন — তিনি আপনার মোবাইলে একটি অস্থায়ী পাসওয়ার্ড পাঠাবেন, যা প্রথম লগইনে বদলাতে হবে।
-            </p>
-          )}
         </div>
 
         {error && (

@@ -222,7 +222,7 @@ function DisputeCard({
           style={out ? { color: out.fg, background: out.bg } : { color: "#D97706", background: "rgba(217,119,6,0.10)" }}
         >
           <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-          {out ? out.label : "অ্যাডমিনের সিদ্ধান্তের অপেক্ষায়"}
+          {out ? out.label : "প্রধান নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়"}
         </span>
       </div>
 
@@ -279,7 +279,7 @@ function DisputeCard({
             </div>
             <p className="mt-1.5 font-bn text-[13.5px] leading-[1.7] text-ink">{d.decision.reason}</p>
             <p className="mt-1 text-[12px] text-muted">
-              {out.button} · {d.decision.by} (Admin) · <span className="font-bn">{d.decision.when}</span>
+              {out.button} · {d.decision.by} (Chief Executive Editor) · <span className="font-bn">{d.decision.when}</span>
             </p>
             <p className="mt-2 text-[12px] text-muted">{out.notice}</p>
             {justDecided && (
@@ -307,7 +307,7 @@ function DisputeCard({
               }}
               aria-invalid={error}
               aria-describedby={`${reasonId}-hint`}
-              placeholder="সিদ্ধান্তের কারণ লিখুন — রাজনৈতিক কর্মী ও পর্যালোচক উভয়ে এটি দেখতে পাবেন।"
+              placeholder="সিদ্ধান্তের কারণ লিখুন — রাজনৈতিক কর্মী ও নির্বাহী সম্পাদক উভয়ে এটি দেখতে পাবেন।"
               className={`${inputClass} h-auto resize-y py-2.5 font-bn ${error ? "border-danger!" : ""}`}
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

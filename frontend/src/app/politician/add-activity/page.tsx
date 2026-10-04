@@ -14,7 +14,7 @@ export default function AddActivityPage() {
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">নিজের কার্যক্রম যোগ করুন</h2>
             <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-              আপনার জমা দেওয়া তথ্য মাঠকর্মীর তথ্যের মতো একই পর্যালোচনার সারিতে যাবে। পর্যালোচক গ্রহণ করলেই প্রোফাইলে দেখা যাবে।
+              আপনার জমা দেওয়া তথ্য তদন্ত সম্পাদকের তথ্যের মতো একই পর্যালোচনার সারিতে যাবে। নির্বাহী সম্পাদক গ্রহণ করলেই প্রোফাইলে দেখা যাবে।
             </p>
           </div>
           <AddActivityForm />

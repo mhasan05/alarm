@@ -4,12 +4,16 @@ import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
 import { SettingsView } from "@/components/settings-view";
 import { bnDate, phoneBn } from "@/lib/db/format";
-import { alarmIdOf } from "@/lib/db/selectors";
+import { alarmIdOf, roleOfId } from "@/lib/db/selectors";
 import { usePolitician } from "../use-politician";
 
 export function PoliticianSettings() {
   const { db, profile: P } = usePolitician();
   if (!P) return <RecordMissing title="প্রোফাইল পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
+
+  // Who opened the account — shown by role only, never by name.
+  const creator = db.audit.find((e) => e.action === "Created political activist account" && e.target === P.id)?.actor;
+  const createdBy = creator && roleOfId(db, creator) === "reviewer" ? "এলাকার নির্বাহী সম্পাদক" : "প্রধান নির্বাহী সম্পাদক";
 
   return (
     <>
@@ -64,7 +68,7 @@ export function PoliticianSettings() {
             icon: "account",
             rows: [
               ["অ্যাকাউন্ট তৈরির তারিখ", bnDate(P.registeredAt)],
-              ["অ্যাকাউন্ট তৈরি করেছেন", "অ্যাডমিন"],
+              ["অ্যাকাউন্ট তৈরি করেছেন", createdBy],
             ],
           },
         ]}

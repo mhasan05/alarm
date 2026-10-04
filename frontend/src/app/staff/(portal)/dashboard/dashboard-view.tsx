@@ -16,14 +16,14 @@ export function StaffDashboardView() {
 
   const stats = [
     { label: "চলমান কাজ", value: openTasks.length, color: "#0D1F17", note: nearest ? `নিকটতম: ${nearest.due.label}` : "কোনো চলমান কাজ নেই" },
-    { label: "পর্যালোচনাধীন", value: counts.pending, color: "#D97706", note: "পর্যালোচকের সিদ্ধান্তের অপেক্ষায়" },
+    { label: "পর্যালোচনাধীন", value: counts.pending, color: "#D97706", note: "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়" },
     { label: "গৃহীত", value: counts.accepted, color: "#1A7A4A", note: "প্রোফাইলে প্রকাশিত হয়েছে" },
     { label: "বাতিল", value: counts.rejected, color: "#F42A41", note: "কারণসহ বন্ধ করা হয়েছে" },
   ];
 
   return (
     <>
-      <PageHeader crumb="মাঠকর্মী পোর্টাল / ড্যাশবোর্ড" title="ড্যাশবোর্ড" action={<NewSubmissionButton />} />
+      <PageHeader crumb="তদন্ত সম্পাদক পোর্টাল / ড্যাশবোর্ড" title="ড্যাশবোর্ড" action={<NewSubmissionButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {/* Compact 2×2 tiles on phones (mobile design), full cards from md up. */}
@@ -60,13 +60,13 @@ export function StaffDashboardView() {
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">আমার কাজের তালিকা</h2>
-            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">{bn(openTasks.length)}টি প্রোফাইলে সংগ্রহ চলছে · অ্যাডমিন আপনাকে এই কাজগুলো দিয়েছেন</p>
+            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">{bn(openTasks.length)}টি প্রোফাইলে সংগ্রহ চলছে · প্রধান নির্বাহী সম্পাদক আপনাকে এই কাজগুলো দিয়েছেন</p>
           </div>
 
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-6 pt-10 pb-11 text-center">
               <div className="text-[15px] font-semibold leading-[1.6]">কোনো দায়িত্ব দেওয়া হয়নি</div>
-              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">আপনার এলাকায় এখনও কোনো প্রোফাইল বরাদ্দ হয়নি। অ্যাডমিন দায়িত্ব দিলে এখানে দেখা যাবে।</p>
+              <p className="max-w-[420px] text-[12.5px] leading-[1.8] text-muted text-pretty">আপনার এলাকায় এখনও কোনো প্রোফাইল বরাদ্দ হয়নি। প্রধান নির্বাহী সম্পাদক দায়িত্ব দিলে এখানে দেখা যাবে।</p>
             </div>
           ) : (
             <ul className="grid gap-4 px-[18px] pt-4 pb-[18px] sm:grid-cols-2 xl:grid-cols-3">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DisputesPage } from "./disputes-page";
 import type { Tab } from "./disputes-view";
 
-export const metadata: Metadata = { title: "অভিযোগ · অ্যাডমিন · ALARM" };
+export const metadata: Metadata = { title: "অভিযোগ · প্রধান নির্বাহী সম্পাদক · ALARM" };
 
 const TABS: Tab[] = ["open", "resolved", "all"];
 

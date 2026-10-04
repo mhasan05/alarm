@@ -52,7 +52,7 @@ export function MyMeetings({ portal }: { portal: string }) {
           <div className="flex flex-wrap items-start gap-3">
             <div className="min-w-[200px] flex-1">
               <h2 className="text-[14.5px] font-semibold">লিংক পেয়েছেন?</h2>
-              <p className="mt-0.5 text-[12px] text-muted">অ্যাডমিনের পাঠানো মিটিং লিংক বা কোড এখানে দিন। আমন্ত্রিত না হলে যোগ দেওয়ার অনুরোধ পাঠাতে পারবেন।</p>
+              <p className="mt-0.5 text-[12px] text-muted">প্রধান নির্বাহী সম্পাদকের পাঠানো মিটিং লিংক বা কোড এখানে দিন। আমন্ত্রিত না হলে যোগ দেওয়ার অনুরোধ পাঠাতে পারবেন।</p>
             </div>
             <div className="rounded-card border border-line bg-surface/60 px-3.5 py-2 text-right">
               <div className="text-[11px] text-muted">আপনার ALARM আইডি</div>
@@ -95,7 +95,7 @@ export function MyMeetings({ portal }: { portal: string }) {
             <p className="mt-0.5 text-[12px] text-muted">আপনার এলাকার মিটিং, যেখানে আপনি আমন্ত্রিত বা যোগ দেওয়ার অনুরোধ করেছেন</p>
           </div>
           {mine.length === 0 ? (
-            <p className="px-6 py-12 text-center text-[13px] text-muted">এখনও কোনো মিটিং নেই। অ্যাডমিন আমন্ত্রণ জানালে এখানে দেখা যাবে।</p>
+            <p className="px-6 py-12 text-center text-[13px] text-muted">এখনও কোনো মিটিং নেই। প্রধান নির্বাহী সম্পাদক আমন্ত্রণ জানালে এখানে দেখা যাবে।</p>
           ) : (
             <ul className="grid gap-4 px-[18px] pt-4 pb-[18px] sm:grid-cols-2 xl:grid-cols-3">
               {mine.map((m) => {
@@ -122,7 +122,7 @@ export function MyMeetings({ portal }: { portal: string }) {
                       <div className="mt-0.5 text-[12px] text-muted">এলাকা: {areaLabel(m.area)}</div>
                       <div aria-hidden="true" className="min-h-[12px] flex-1" />
                       <div className="flex items-center gap-2 border-t border-[#E3EEEA] pt-2.5">
-                        <span className="flex-1 text-[11.5px] text-muted">অডিও মিটিং · আয়োজক অ্যাডমিন</span>
+                        <span className="flex-1 text-[11.5px] text-muted">অডিও মিটিং · আয়োজক প্রধান নির্বাহী সম্পাদক</span>
                         {action && (
                           <Link href={`/meet/${m.code}`} className={`inline-flex h-8 flex-none items-center rounded-button px-3 text-[12px] font-semibold ${action.cls}`}>
                             {action.label}

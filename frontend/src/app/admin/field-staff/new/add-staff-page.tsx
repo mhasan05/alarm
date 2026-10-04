@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
 import { RecordMissing } from "@/components/record-missing";
 import { GEO, locateArea } from "@/lib/geo";
-import { nextCode, staffOf } from "@/lib/db/selectors";
+import { staffOf } from "@/lib/db/selectors";
 import { useAdmin } from "../../use-admin";
 import { staffRows } from "../roster";
 import { StaffForm } from "./staff-form";
@@ -12,7 +12,7 @@ import { StaffForm } from "./staff-form";
 export function AddStaffPage({ edit }: { edit?: string }) {
   const { db, admin, adminId } = useAdmin();
   const editing = edit ? staffOf(db, edit) : undefined;
-  if (edit && !editing) return <RecordMissing title="মাঠকর্মী পাওয়া যায়নি" backHref="/admin/field-staff" backLabel="মাঠকর্মী তালিকায় ফিরুন" />;
+  if (edit && !editing) return <RecordMissing title="তদন্ত সম্পাদক পাওয়া যায়নি" backHref="/admin/field-staff" backLabel="তদন্ত সম্পাদক তালিকায় ফিরুন" />;
 
   // Pre-fill the saved area; the seat comes from the staff record when the area has several seats.
   const initialArea = editing ? locateArea(editing.district, editing.thana) : undefined;
@@ -20,7 +20,8 @@ export function AddStaffPage({ edit }: { edit?: string }) {
     const seats = GEO[initialArea.division!][initialArea.district!][initialArea.upazila].seats;
     if (seats.includes(editing.seat)) initialArea.seat = editing.seat;
   }
-  const nextId = nextCode(db.staff.map((s) => s.id), "FS", 3);
+  // The ALARM ID (KAR- + 6 random digits) is issued when the account is saved.
+  const nextId = "KAR-••••••";
   const takenPhones = db.users.filter((u) => u.id !== editing?.id).map((u) => u.phone);
 
   return (
@@ -30,7 +31,7 @@ export function AddStaffPage({ edit }: { edit?: string }) {
         crumb={
           <>
             <Link href="/admin/field-staff" className="text-primary hover:text-primary-hover">
-              মাঠকর্মী
+              তদন্ত সম্পাদক
             </Link>{" "}
             /{" "}
             {editing ? (
@@ -53,11 +54,11 @@ export function AddStaffPage({ edit }: { edit?: string }) {
               </>
             ) : (
               <>
-                Add Field Staff · <span className="font-bn">নতুন মাঠকর্মী</span>
+                Add Investigation Editor · <span className="font-bn">নতুন তদন্ত সম্পাদক</span>
               </>
             )}
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              {editing ? `${editing.name} · ${editing.id}` : "Creates a mobile collection account. Staff ID is issued automatically on save."}
+              {editing ? `${editing.name} · ${editing.id}` : "Creates a mobile collection account. ALARM ID (KAR-) is issued automatically on save."}
             </span>
           </>
         }
@@ -66,7 +67,7 @@ export function AddStaffPage({ edit }: { edit?: string }) {
         <StaffForm
           key={editing?.id ?? "new"}
           nextId={nextId}
-          admin={admin?.name ?? "Admin"}
+          admin={admin?.name ?? "Chief Executive Editor"}
           adminId={adminId}
           takenPhones={takenPhones}
           roster={staffRows(db)}

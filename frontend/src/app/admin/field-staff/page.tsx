@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { FieldStaffPage } from "./field-staff-page";
 import type { Tab } from "./roster-view";
 
-export const metadata: Metadata = { title: "মাঠকর্মী · অ্যাডমিন · ALARM" };
+export const metadata: Metadata = { title: "তদন্ত সম্পাদক · প্রধান নির্বাহী সম্পাদক · ALARM" };
 
 const TABS: Tab[] = ["all", "available", "unavailable"];
 

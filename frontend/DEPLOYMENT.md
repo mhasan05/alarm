@@ -294,17 +294,18 @@ sudo visudo -c        # must say: parsed OK
 
 **Logins** (password for every account: `Alarm@2026`):
 
-| Role | Mobile |
-|---|---|
-| Admin | 01711000001 |
-| Reviewer | 01755432198 |
-| Field Staff | 01712440918 |
-| Political Activist | 01711448290 |
+| Role | Mobile | ALARM ID |
+|---|---|---|
+| প্রধান নির্বাহী সম্পাদক (Chief Executive Editor) | 01711000001 | KAR-482915 |
+| নির্বাহী সম্পাদক (Executive Editor) | 01755432198 | KAR-736204 |
+| তদন্ত সম্পাদক (Investigation Editor) | 01712440918 | KAR-615283 |
+| রাজনৈতিক কর্মী (Political Activist) | 01711448290 | KAR-702438 |
 
 With demo mode on, the login page also has one-click demo buttons.
 
-- **Meetings:** open a meeting link and enter an ALARM ID, e.g. `KAR-2026-0147` (in the area of the sample Dhaka meeting).
-- **Data stays in each browser.** Until the backend is connected, whatever someone creates or changes is saved only in their own browser; every other person or device starts from the same sample data. **Admin → Settings → System Info → Reset demo data** restores it.
+- **Meetings:** open a meeting link and enter an ALARM ID, e.g. `KAR-814369` (inside the area of the sample Dhaka meeting, so they join directly). An ID from outside the area, e.g. `KAR-702438`, gets the "request to join" screen instead. The প্রধান নির্বাহী সম্পাদক's own ID needs a sign-in.
+- **Data stays in each browser.** Until the backend is connected, whatever someone creates or changes is saved only in their own browser; every other person or device starts from the same sample data. **প্রধান নির্বাহী সম্পাদক portal → Settings → System Info → Reset demo data** restores it.
+- **Forgot password:** until the SMS service is connected, the reset screen shows the one-time code on screen.
 - **Not indexed by search engines** — the site tells Google not to list it, which suits a client preview.
 
 ---

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { enRelative } from "@/lib/db/format";
-import { nameOf } from "@/lib/db/selectors";
+import { nameOf, roleOfId } from "@/lib/db/selectors";
 import { useAdmin } from "../use-admin";
 import { isAvailable, staffRows } from "./roster";
 import { ExportRoster, RosterView, type Tab } from "./roster-view";
@@ -36,7 +36,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
     .slice(0, 5)
     .map((a) => ({
       dot: ACTION_DOT[a.action] ?? "#1D6FC0",
-      text: `${nameOf(db, a.actor)}${a.actor.startsWith("FS") ? ` (${a.actor})` : ""} — ${a.action} · ${a.target}`,
+      text: `${nameOf(db, a.actor)}${roleOfId(db, a.actor) === "staff" ? ` (${a.actor})` : ""} — ${a.action} · ${a.target}`,
       time: enRelative(a.at),
       staff: staffIds.has(a.actor) ? a.actor : a.target,
     }));
@@ -64,10 +64,10 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / মাঠকর্মী"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / তদন্ত সম্পাদক"
         title={
           <>
-            Field Staff · <span className="font-bn">মাঠকর্মী</span>
+            Investigation Editors · <span className="font-bn">তদন্ত সম্পাদক</span>
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
               {active.length} active across {districts.length} districts · {available} on duty right now
             </span>
@@ -108,7 +108,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
             value={String(active.length)}
             label={
               <>
-                Active Field Staff · <span className="font-bn">সক্রিয়</span>
+                Active Investigation Editors · <span className="font-bn">সক্রিয়</span>
               </>
             }
             note={`${suspended} suspended · ${onLeave} on leave`}
@@ -129,7 +129,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 Open assignments · <span className="font-bn">চলমান</span>
               </>
             }
-            note={`Across ${active.length} active staff`}
+            note={`Across ${active.length} active editors`}
           />
           <Tile
             tone="bg-success/10 text-success"
@@ -143,7 +143,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
             chipCls="bg-success/10 text-success"
             value={evidence.toLocaleString("en-US")}
             label="Evidence items this month"
-            note={`From ${FIELD_STAFF.filter((s) => s.evidenceMonth > 0).length} staff members`}
+            note={`From ${FIELD_STAFF.filter((s) => s.evidenceMonth > 0).length} editors`}
           />
           <Tile
             tone="bg-danger/10 text-danger"
@@ -161,7 +161,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                 Due within 48 hours · <span className="font-bn">জরুরি</span>
               </>
             }
-            note={`Across ${dueStaff} staff members`}
+            note={`Across ${dueStaff} editors`}
           />
         </div>
 
@@ -178,12 +178,12 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="font-bn text-[13.5px] font-semibold text-ink">{name}</span>
                       <span className="text-[12px] text-muted">
-                        {d.staff} staff · {d.open} open
+                        {d.staff} editors · {d.open} open
                       </span>
                     </div>
                     <div
                       role="meter"
-                      aria-label={`${name}: ${d.staff} staff`}
+                      aria-label={`${name}: ${d.staff} investigation editors`}
                       aria-valuenow={d.staff}
                       aria-valuemin={0}
                       aria-valuemax={maxStaff}
@@ -200,7 +200,7 @@ export function FieldStaffPage({ initialTab }: { initialTab: Tab }) {
                     ⚠
                   </span>
                   <span>
-                    <span className="font-bn">{thin.join(", ")}</span> {thin.length === 1 ? "has" : "have"} one staff member each. Urgent requests in those districts
+                    <span className="font-bn">{thin.join(", ")}</span> {thin.length === 1 ? "has" : "have"} one investigation editor each. Urgent requests in those districts
                     cannot be reassigned if that person is unavailable.
                   </span>
                 </p>

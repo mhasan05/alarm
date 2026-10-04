@@ -5,11 +5,11 @@ import type { Dispute, Submission } from "@/lib/db/types";
 
 /** One-line status under a report; empty for a normally published one. */
 export function reportFootNote(r: Submission, dispute?: Dispute) {
-  if (r.state === "Rejected" || r.state === "Held") return "পর্যালোচক বাতিল করেছেন — এটি প্রোফাইলে দেখা যায় না, তবে রেকর্ডে সংরক্ষিত।";
-  if (r.state === "Withdrawn") return "অভিযোগের পর অ্যাডমিন রিপোর্টটি প্রত্যাহার করেছেন — প্রোফাইল ও স্কোর থেকে সরানো হয়েছে।";
-  if (r.state === "Pending") return "পর্যালোচকের সিদ্ধান্তের অপেক্ষায় · স্কোরে যোগ হয়নি";
-  if (dispute?.state === "Open") return "আপনি এই তথ্যের বিরুদ্ধে অভিযোগ জানিয়েছেন — অ্যাডমিন যাচাই করছেন।";
-  if (dispute?.state === "Response") return "অ্যাডমিন রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন।";
+  if (r.state === "Rejected" || r.state === "Held") return "নির্বাহী সম্পাদক বাতিল করেছেন — এটি প্রোফাইলে দেখা যায় না, তবে রেকর্ডে সংরক্ষিত।";
+  if (r.state === "Withdrawn") return "অভিযোগের পর প্রধান নির্বাহী সম্পাদক রিপোর্টটি প্রত্যাহার করেছেন — প্রোফাইল ও স্কোর থেকে সরানো হয়েছে।";
+  if (r.state === "Pending") return "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায় · স্কোরে যোগ হয়নি";
+  if (dispute?.state === "Open") return "আপনি এই তথ্যের বিরুদ্ধে অভিযোগ জানিয়েছেন — প্রধান নির্বাহী সম্পাদক যাচাই করছেন।";
+  if (dispute?.state === "Response") return "প্রধান নির্বাহী সম্পাদক রিপোর্টে আপনার বক্তব্য যুক্ত করেছেন।";
   return "";
 }
 

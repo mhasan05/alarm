@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ShieldIcon } from "@/components/brand";
+import { Logo } from "@/components/brand";
 import { MeetingJoin } from "@/components/home/meeting-join";
 import { getSession } from "@/lib/auth-server";
 import { HOME, ROLE_LABEL } from "@/lib/session";
@@ -16,22 +16,23 @@ const NAV = [
 ];
 
 const STEPS = [
-  { title: "দায়িত্ব বণ্টন", body: "অ্যাডমিন প্রোফাইল খোলেন এবং নির্বাচনী এলাকা অনুযায়ী মাঠকর্মী ও পর্যালোচককে দায়িত্ব দেন।" },
-  { title: "তথ্য সংগ্রহ", body: "মাঠকর্মী কার্যক্রমের তথ্য, ছবি ও নথি সংগ্রহ করে পর্যালোচনার জন্য জমা দেন।" },
-  { title: "যাচাই", body: "পর্যালোচক প্রমাণ মিলিয়ে তথ্য গ্রহণ বা কারণসহ বাতিল করেন।" },
-  { title: "আপত্তি ও শুনানি", body: "রাজনৈতিক কর্মী আপত্তি জানালে অ্যাডমিন কারণসহ লিখিত সিদ্ধান্ত দেন।" },
-  { title: "প্রতিবেদন", body: "যাচাইকৃত তথ্য থেকে প্রতিবেদন তৈরি হয়; পর্যালোচকের স্বাক্ষরে চূড়ান্ত হয়।" },
+  { title: "দায়িত্ব বণ্টন", body: "প্রধান নির্বাহী সম্পাদক প্রোফাইল খোলেন এবং নির্বাচনী এলাকা অনুযায়ী তদন্ত সম্পাদক ও নির্বাহী সম্পাদককে দায়িত্ব দেন।" },
+  { title: "তথ্য সংগ্রহ", body: "তদন্ত সম্পাদক কার্যক্রমের তথ্য, ছবি ও নথি সংগ্রহ করে পর্যালোচনার জন্য জমা দেন।" },
+  { title: "যাচাই", body: "নির্বাহী সম্পাদক প্রমাণ মিলিয়ে তথ্য গ্রহণ বা কারণসহ বাতিল করেন।" },
+  { title: "আপত্তি ও শুনানি", body: "রাজনৈতিক কর্মী আপত্তি জানালে প্রধান নির্বাহী সম্পাদক কারণসহ লিখিত সিদ্ধান্ত দেন।" },
+  { title: "প্রতিবেদন", body: "যাচাইকৃত তথ্য থেকে প্রতিবেদন তৈরি হয়; নির্বাহী সম্পাদকের স্বাক্ষরে চূড়ান্ত হয়।" },
 ];
 
+// Ranked: ১ প্রধান নির্বাহী সম্পাদক · ২ নির্বাহী সম্পাদক · ৩ তদন্ত সম্পাদক · ৪ রাজনৈতিক কর্মী.
 const ROLES = [
-  { name: "অ্যাডমিন", color: "#006A4E", points: ["অ্যাকাউন্ট তৈরি ও দায়িত্ব বণ্টন", "অভিযোগ নিষ্পত্তি ও মিটিং পরিচালনা", "প্রতিবেদন তদারকি"] },
-  { name: "মাঠকর্মী", color: "#D97706", points: ["নির্ধারিত এলাকায় তথ্য সংগ্রহ", "প্রমাণসহ জমা দেওয়া", "জমার অবস্থা দেখা"] },
-  { name: "পর্যালোচক", color: "#1D6FC0", points: ["জমা যাচাই ও সিদ্ধান্ত", "প্রয়োজনে তথ্য সংশোধন", "প্রতিবেদনে স্বাক্ষর"] },
+  { name: "প্রধান নির্বাহী সম্পাদক", color: "#006A4E", points: ["অ্যাকাউন্ট তৈরি ও দায়িত্ব বণ্টন", "অভিযোগ নিষ্পত্তি ও মিটিং পরিচালনা", "প্রতিবেদন তদারকি"] },
+  { name: "নির্বাহী সম্পাদক", color: "#1D6FC0", points: ["জমা যাচাই ও সিদ্ধান্ত", "প্রয়োজনে তথ্য সংশোধন", "প্রতিবেদনে স্বাক্ষর"] },
+  { name: "তদন্ত সম্পাদক", color: "#D97706", points: ["নির্ধারিত এলাকায় তথ্য সংগ্রহ", "প্রমাণসহ জমা দেওয়া", "জমার অবস্থা দেখা"] },
   { name: "রাজনৈতিক কর্মী", color: "#7A3FA8", points: ["নিজের প্রোফাইল দেখা", "নিজের কার্যক্রম যোগ করা", "আপত্তি জানানো"] },
 ];
 
 const PRINCIPLES: { title: string; body: string; icon: ReactNode }[] = [
-  { title: "যাচাই ছাড়া প্রকাশ নয়", body: "পর্যালোচকের সিদ্ধান্ত ছাড়া কোনো তথ্য প্রোফাইলে যায় না।", icon: <path d="M4 10.5 8 14.5 16 6" strokeLinecap="round" strokeLinejoin="round" /> },
+  { title: "যাচাই ছাড়া প্রকাশ নয়", body: "নির্বাহী সম্পাদকের সিদ্ধান্ত ছাড়া কোনো তথ্য প্রোফাইলে যায় না।", icon: <path d="M4 10.5 8 14.5 16 6" strokeLinecap="round" strokeLinejoin="round" /> },
   {
     title: "দায়িত্বের পৃথকীকরণ",
     body: "যিনি তথ্য সংগ্রহ করেন, তিনি সিদ্ধান্ত দেন না।",
@@ -66,7 +67,7 @@ const PRINCIPLES: { title: string; body: string; icon: ReactNode }[] = [
   },
   {
     title: "মানুষের স্বাক্ষরে চূড়ান্ত",
-    body: "প্রতিবেদন চূড়ান্ত হয় পর্যালোচকের স্বাক্ষরে।",
+    body: "প্রতিবেদন চূড়ান্ত হয় নির্বাহী সম্পাদকের স্বাক্ষরে।",
     icon: <path d="M3.5 15.5c2-3 3.4-.2 5-2.2s1.6-5.3 3.6-4.4-.6 5.4 1.6 5.6c1.2.1 1.9-1 2.8-1.9M3.5 17.5h13" strokeLinecap="round" strokeLinejoin="round" />,
   },
 ];
@@ -74,23 +75,23 @@ const PRINCIPLES: { title: string; body: string; icon: ReactNode }[] = [
 const FAQ = [
   {
     q: "কীভাবে অ্যাকাউন্ট পাব?",
-    a: "এই প্ল্যাটফর্মে নিজে নিবন্ধনের সুযোগ নেই। আপনার প্রতিষ্ঠানের অ্যাডমিন অ্যাকাউন্ট তৈরি করে মোবাইল নম্বর, প্রাথমিক পাসওয়ার্ড ও ALARM আইডি জানিয়ে দেন।",
+    a: "এই প্ল্যাটফর্মে নিজে নিবন্ধনের সুযোগ নেই। প্রধান নির্বাহী সম্পাদক অথবা আপনার এলাকার নির্বাহী সম্পাদক অ্যাকাউন্ট তৈরি করে মোবাইল নম্বর, প্রাথমিক পাসওয়ার্ড ও ALARM আইডি জানিয়ে দেন।",
   },
   {
     q: "ALARM আইডি কোথায় পাব?",
-    a: "আপনার আইডি KAR দিয়ে শুরু। লগইন করলে পোর্টালের বাম পাশে নামের নিচে ও সেটিংস পাতায় দেখা যায়। মিটিংয়ে যোগ দিতে এই আইডি লাগে।",
+    a: "আপনার আইডি KAR- এবং ৬টি সংখ্যা (যেমন KAR-123456)। লগইন করলে পোর্টালের বাম পাশে নামের নিচে ও সেটিংস পাতায় দেখা যায়। মিটিংয়ে যোগ দিতে এই আইডি লাগে।",
   },
   {
     q: "আমার প্রোফাইল কে দেখতে পারেন?",
-    a: "প্রোফাইল জনসাধারণের জন্য উন্মুক্ত নয়। শুধু অ্যাডমিন, আপনার এলাকার পর্যালোচক ও দায়িত্বপ্রাপ্ত মাঠকর্মী এটি দেখতে পারেন।",
+    a: "প্রোফাইল জনসাধারণের জন্য উন্মুক্ত নয়। শুধু প্রধান নির্বাহী সম্পাদক, আপনার এলাকার নির্বাহী সম্পাদক ও দায়িত্বপ্রাপ্ত তদন্ত সম্পাদক এটি দেখতে পারেন।",
   },
   {
     q: "কোনো তথ্য ভুল মনে হলে কী করব?",
-    a: "প্রকাশিত কার্যক্রম খুলে “অভিযোগ জানান” বেছে নিন, কারণ লিখুন এবং প্রয়োজনে প্রমাণ দিন। অ্যাডমিন কারণসহ সিদ্ধান্ত জানাবেন।",
+    a: "প্রকাশিত কার্যক্রম খুলে “অভিযোগ জানান” বেছে নিন, কারণ লিখুন এবং প্রয়োজনে প্রমাণ দিন। প্রধান নির্বাহী সম্পাদক কারণসহ সিদ্ধান্ত জানাবেন।",
   },
   {
     q: "পাসওয়ার্ড ভুলে গেলে কী করব?",
-    a: "আপনার প্রতিষ্ঠানের অ্যাডমিনের সঙ্গে যোগাযোগ করুন। পরিচয় নিশ্চিত করে তিনি পাসওয়ার্ড রিসেট করে দেবেন।",
+    a: "লগইন করা অবস্থায় সেটিংস থেকে পুরোনো পাসওয়ার্ড দিয়ে নতুন পাসওয়ার্ড তৈরি করতে পারবেন। পাসওয়ার্ড ভুলে গেলে লগইন পাতার “পাসওয়ার্ড ভুলে গেছেন?” থেকে মোবাইল নম্বর ও ওটিপি দিয়ে নতুন পাসওয়ার্ড তৈরি করুন।",
   },
 ];
 
@@ -107,9 +108,7 @@ export default async function HomePage() {
       <header className="sticky top-0 z-30 border-b border-line bg-white">
         <div className="mx-auto flex h-16 max-w-[1160px] items-center gap-6 px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5" aria-label="ALARM হোম">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
-              <ShieldIcon />
-            </span>
+            <Logo size={46} priority />
             <span className="flex flex-col gap-1">
               <span className="font-sans text-[18px] font-bold leading-none tracking-[0.13em] text-primary">ALARM</span>
               <span className="hidden text-[10.5px] leading-none text-muted sm:block">অডিট ও জবাবদিহিতা প্ল্যাটফর্ম</span>
@@ -139,7 +138,7 @@ export default async function HomePage() {
                 মাঠ পর্যায়ের প্রমাণ সংগ্রহ, স্বাধীন যাচাই ও লিখিত শুনানির মাধ্যমে প্রতিটি তথ্য যাচাই করা হয়। প্রতিটি সিদ্ধান্ত সংরক্ষিত থাকে অডিট লগে।
               </p>
               <ul className="mt-6 flex flex-col gap-2.5 text-[14px] text-ink">
-                {["যাচাই ছাড়া কোনো তথ্য প্রকাশিত হয় না", "প্রকাশিত তথ্যে আপত্তি জানানোর সুযোগ", "সব অ্যাকাউন্ট অ্যাডমিন তৈরি করেন — নিজে নিবন্ধন নেই"].map((t) => (
+                {["যাচাই ছাড়া কোনো তথ্য প্রকাশিত হয় না", "প্রকাশিত তথ্যে আপত্তি জানানোর সুযোগ", "সকল নিবন্ধন প্রধান নির্বাহী সম্পাদক/নির্বাহী সম্পাদক কর্তৃক নিবন্ধিত করতে হবে।"].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
                     <span className="flex size-5 flex-none items-center justify-center rounded-full bg-primary/10 text-primary">
                       <Check />
@@ -237,7 +236,7 @@ export default async function HomePage() {
         {/* FAQ */}
         <section id="faq" className="scroll-mt-20 border-t border-line bg-white">
           <div className="mx-auto grid max-w-[1160px] gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:py-20">
-            <SectionHead title="প্রশ্নোত্তর" body="আরও কিছু জানার থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সঙ্গে যোগাযোগ করুন।" />
+            <SectionHead title="প্রশ্নোত্তর" body="আরও কিছু জানার থাকলে আপনার প্রতিষ্ঠানের প্রধান নির্বাহী সম্পাদকের সঙ্গে যোগাযোগ করুন।" />
             <div className="flex flex-col gap-3">
               {FAQ.map((f) => (
                 <details key={f.q} className="group rounded-card border border-line bg-white open:shadow-card">
@@ -258,9 +257,7 @@ export default async function HomePage() {
       <footer className="border-t border-line bg-white">
         <div className="mx-auto flex max-w-[1160px] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-6 sm:px-6">
           <span className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-white">
-              <ShieldIcon className="h-3.5 w-3" />
-            </span>
+            <Logo size={34} />
             <span className="font-sans text-[14px] font-bold tracking-[0.12em] text-primary">ALARM</span>
           </span>
           <nav aria-label="ফুটার" className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-muted">

@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Only a non-secret demo flag; keep it in git so a fresh clone runs the same way.
+!.env.development
 
 # vercel
 .vercel

@@ -11,19 +11,19 @@ import { URGENCY_STYLE, useStaff } from "../use-staff";
 const DO = [
   "প্রতিটি তথ্যের সাথে ছবি, নথি বা প্রত্যক্ষদর্শীর বক্তব্য সংযুক্ত করুন — প্রমাণ ছাড়া তথ্য বাতিল হয়।",
   "জমা দেওয়ার আগে শ্রেণি — ইতিবাচক না নেতিবাচক — ঠিকভাবে বেছে নিন।",
-  "উৎসের নাম, তারিখ ও নথির নম্বর স্পষ্ট করে লিখুন, যাতে পর্যালোচক মিলিয়ে দেখতে পারেন।",
+  "উৎসের নাম, তারিখ ও নথির নম্বর স্পষ্ট করে লিখুন, যাতে নির্বাহী সম্পাদক মিলিয়ে দেখতে পারেন।",
 ];
 
 const DONT = [
   "নিজের এলাকার বাইরের প্রোফাইল নিয়ে তথ্য জমা দেবেন না।",
-  "বেনামি পোস্ট বা শোনা কথা জমা দেবেন না — পর্যালোচক এগুলো বাতিল করবেন।",
+  "বেনামি পোস্ট বা শোনা কথা জমা দেবেন না — নির্বাহী সম্পাদক এগুলো বাতিল করবেন।",
   "জমা দেওয়ার পর তথ্য সম্পাদনা করা যায় না — ভুল হলে নতুন করে জমা দিন।",
 ];
 
 // Staff see what happens to a submission, never who reviews it.
 const AFTER = [
   { title: "আপনি জমা দেন", body: "তথ্য ও প্রমাণ পর্যালোচনার সারিতে যায়।" },
-  { title: "পর্যালোচনা", body: "এলাকার পর্যালোচক প্রমাণ মিলিয়ে দেখেন।" },
+  { title: "পর্যালোচনা", body: "এলাকার নির্বাহী সম্পাদক প্রমাণ মিলিয়ে দেখেন।" },
   { title: "সিদ্ধান্ত", body: "গৃহীত হলে প্রোফাইলে প্রকাশিত হয়; বাতিল হলে কারণ জানানো হয়।" },
 ];
 
@@ -107,13 +107,13 @@ export function StaffAreaView() {
     { label: "থানা / ইউনিয়ন", value: staff.thana, icon: "pin" },
     { label: "ওয়ার্ড", value: staff.wards, icon: "grid" },
     { label: "সংসদীয় আসন", value: staff.seat, icon: "seat" },
-    { label: "কর্মী আইডি", value: staff.id, icon: "id" },
+    { label: "ALARM আইডি", value: staff.id, icon: "id" },
   ];
   const open = tasks.filter((t) => t.open).length;
 
   return (
     <>
-      <PageHeader crumb="মাঠকর্মী পোর্টাল / কর্মএলাকা" title="কর্মএলাকা ও কাজের নিয়ম" action={<NewSubmissionButton />} />
+      <PageHeader crumb="তদন্ত সম্পাদক পোর্টাল / কর্মএলাকা" title="কর্মএলাকা ও কাজের নিয়ম" action={<NewSubmissionButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -139,7 +139,7 @@ export function StaffAreaView() {
                     <rect x="4.5" y="9" width="11" height="8" rx="1.6" />
                     <path d="M7 9V6.8a3 3 0 0 1 6 0V9" strokeLinecap="round" />
                   </Svg>
-                  অ্যাডমিন নির্ধারিত
+                  প্রধান নির্বাহী সম্পাদক নির্ধারিত
                 </span>
               </div>
             </div>
@@ -157,7 +157,7 @@ export function StaffAreaView() {
               ))}
             </dl>
             <p className="border-t border-line bg-surface/60 px-5 py-3 text-[12px] leading-[1.7] text-muted text-pretty">
-              শুধু এই এলাকার প্রোফাইল নিয়ে তথ্য জমা দিন। এলাকা পরিবর্তনের প্রয়োজন হলে অ্যাডমিনের সাথে যোগাযোগ করুন।
+              শুধু এই এলাকার প্রোফাইল নিয়ে তথ্য জমা দিন। এলাকা পরিবর্তনের প্রয়োজন হলে প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।
             </p>
           </section>
 
@@ -172,7 +172,7 @@ export function StaffAreaView() {
               </div>
             </div>
             {tasks.length === 0 ? (
-              <p className="px-5 py-8 text-center text-[12.5px] leading-[1.7] text-muted">এখনও কোনো প্রোফাইল দেওয়া হয়নি। অ্যাডমিন কাজ দিলে এখানে দেখা যাবে।</p>
+              <p className="px-5 py-8 text-center text-[12.5px] leading-[1.7] text-muted">এখনও কোনো প্রোফাইল দেওয়া হয়নি। প্রধান নির্বাহী সম্পাদক কাজ দিলে এখানে দেখা যাবে।</p>
             ) : (
               <ul>
                 {tasks.map((t) => {

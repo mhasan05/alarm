@@ -49,12 +49,12 @@ export function ReviewerReportsView() {
 
   return (
     <>
-      <PageHeader crumb="পর্যালোচক পোর্টাল / প্রতিবেদন অনুমোদন" title="প্রতিবেদন অনুমোদন" />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / প্রতিবেদন অনুমোদন" title="প্রতিবেদন অনুমোদন" />
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-[14.5px] font-semibold leading-[1.6]">স্বাক্ষরের অপেক্ষায়</h2>
-            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">অ্যাডমিন বিশ্লেষণ থেকে তৈরি প্রতিবেদন — আপনার মন্তব্য ও স্বাক্ষরের পর চূড়ান্ত হবে</p>
+            <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">প্রধান নির্বাহী সম্পাদক বিশ্লেষণ থেকে তৈরি প্রতিবেদন — আপনার মন্তব্য ও স্বাক্ষরের পর চূড়ান্ত হবে</p>
           </div>
           {waiting.length === 0 ? (
             <p className="px-6 py-10 text-center text-[13px] text-muted">এই মুহূর্তে কোনো প্রতিবেদন আপনার স্বাক্ষরের অপেক্ষায় নেই।</p>

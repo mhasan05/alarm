@@ -15,9 +15,10 @@ import { useReviewer } from "../../use-reviewer";
 const MIN_REMARK = 20;
 
 /** Reviewers see a source label, never the field staff member's name. */
-const STAFF_NAME = /[^·,]*\((FS-\d+)\)/g;
-function hideStaff(r: FinalReport): FinalReport {
-  const mask = (t: string) => t.replace(STAFF_NAME, " মাঠকর্মী");
+/** "Name (KAR-123456)" — replaced only when that ID belongs to field staff. */
+const NAMED_ID = /[^·,]*\((KAR-\d{6})\)/g;
+function hideStaff(r: FinalReport, staffIds: Set<string>): FinalReport {
+  const mask = (t: string) => t.replace(NAMED_ID, (whole, id: string) => (staffIds.has(id) ? " তদন্ত সম্পাদক" : whole));
   return {
     ...r,
     sources: r.sources.map((s) => ({ ...s, meta: mask(s.meta).trim() })),
@@ -33,14 +34,14 @@ export function SignReportView({ code }: { code: string }) {
   const found = reports.find((r) => r.code === code);
   if (!found || !reviewer) return <RecordMissing title="প্রতিবেদনটি পাওয়া যায়নি" backHref="/reviewer/reports" backLabel="প্রতিবেদন তালিকায় ফিরুন" />;
 
-  const report = hideStaff(found);
+  const report = hideStaff(found, new Set(db.staff.map((x) => x.id)));
   const pending = report.state === "pending";
   const version = report.versions[0];
   const ok = remark.trim().length >= MIN_REMARK;
 
   return (
     <>
-      <PageHeader backHref="/reviewer/reports" crumb="পর্যালোচক পোর্টাল / প্রতিবেদন অনুমোদন / বিস্তারিত" title={`${report.code} · v${version.v}`} />
+      <PageHeader backHref="/reviewer/reports" crumb="নির্বাহী সম্পাদক পোর্টাল / প্রতিবেদন অনুমোদন / বিস্তারিত" title={`${report.code} · v${version.v}`} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {pending ? (
@@ -53,11 +54,11 @@ export function SignReportView({ code }: { code: string }) {
               if (ok) signReport(report.code, reviewer.id, remark);
             }}
           >
-            <h2 className="text-[14.5px] font-semibold">পর্যালোচকের মন্তব্য ও স্বাক্ষর</h2>
+            <h2 className="text-[14.5px] font-semibold">নির্বাহী সম্পাদকের মন্তব্য ও স্বাক্ষর</h2>
             <p className="mt-0.5 text-[12px] leading-relaxed text-muted text-pretty">
-              প্রতিবেদনটি পড়ে দেখুন। আপনার মন্তব্য প্রতিবেদনের ০৫ নম্বর অনুচ্ছেদে ছাপা হবে; স্বাক্ষরের পর অ্যাডমিন এটি শেয়ার ও ডাউনলোড করতে পারবেন।
+              প্রতিবেদনটি পড়ে দেখুন। আপনার মন্তব্য প্রতিবেদনের ০৫ নম্বর অনুচ্ছেদে ছাপা হবে; স্বাক্ষরের পর প্রধান নির্বাহী সম্পাদক এটি শেয়ার ও ডাউনলোড করতে পারবেন।
             </p>
-            {report.adminNote && <p className="mt-2 rounded-button bg-surface px-3 py-2 text-[12px] text-ink">অ্যাডমিনের নোট: {report.adminNote}</p>}
+            {report.adminNote && <p className="mt-2 rounded-button bg-surface px-3 py-2 text-[12px] text-ink">প্রধান নির্বাহী সম্পাদকের নোট: {report.adminNote}</p>}
             <label htmlFor="rv-remark" className="mt-3 block text-[12.5px] font-semibold">
               মন্তব্য <Required />
             </label>

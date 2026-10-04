@@ -7,7 +7,7 @@ import { inputClass } from "@/components/form";
 import { RecordMissing } from "@/components/record-missing";
 import { decide, undoDecision, type Decision } from "@/lib/db/actions";
 import { enDateTime, enRelative } from "@/lib/db/format";
-import { disputeForSubmission, nameOf, profileOf, STATE_EN, submissionOf, submissionsFor, tierOf } from "@/lib/db/selectors";
+import { disputeForSubmission, nameOf, profileOf, roleOfId, STATE_EN, submissionOf, submissionsFor, tierOf } from "@/lib/db/selectors";
 import type { Database, Submission, SubmissionEvent } from "@/lib/db/types";
 import { useAdmin } from "../../use-admin";
 
@@ -46,7 +46,8 @@ const initialsOf = (name: string) =>
 /** Admin-facing text for one history event. Admins see every name. */
 function eventText(db: Database, s: Submission, e: SubmissionEvent) {
   const who = nameOf(db, e.by);
-  const role = e.by.startsWith("REV") ? " (Reviewer)" : e.by.startsWith("ADM") ? " (Admin)" : "";
+  const r = roleOfId(db, e.by);
+  const role = r === "reviewer" ? " (Executive Editor)" : r === "admin" ? " (Chief Executive Editor)" : "";
   switch (e.type) {
     case "submitted":
       return { dot: "#006A4E", text: `Submitted by ${who} with ${s.evidence.length} item${s.evidence.length === 1 ? "" : "s"}.` };
@@ -108,7 +109,7 @@ export function FieldReportView({ code }: { code: string }) {
     s.state === "Pending"
       ? lastRevisit
         ? `Re-visit requested — ${s.reason}`
-        : "In review — the items sit at রিপোর্টেড until a reviewer decides."
+        : "In review — the items sit at রিপোর্টেড until an executive editor decides."
       : `${STATE_EN[s.state].label} — ${s.reason ?? ""}`;
   const noteTone = s.state === "Accepted" ? "border-l-success" : s.state === "Pending" ? "border-l-warning" : "border-l-danger";
 
@@ -195,7 +196,7 @@ export function FieldReportView({ code }: { code: string }) {
               );
             })}
           </ul>
-          <p className="px-4 py-3.5 text-[11.5px] leading-normal text-muted text-pretty">All submissions are locked. Field staff cannot edit a report after submitting.</p>
+          <p className="px-4 py-3.5 text-[11.5px] leading-normal text-muted text-pretty">All submissions are locked. Investigation editors cannot edit a report after submitting.</p>
         </aside>
 
         {/* Submission */}
@@ -205,7 +206,7 @@ export function FieldReportView({ code }: { code: string }) {
               <div className="flex items-center gap-3">
                 <span className="flex size-10 flex-none items-center justify-center rounded-full bg-warning/10 text-[13px] font-semibold text-warning">{byInitials}</span>
                 <div>
-                  {s.staffId?.startsWith("FS") ? (
+                  {s.staffId && roleOfId(db, s.staffId) === "staff" ? (
                     <Link href={`/admin/field-staff/${s.staffId}`} className="text-[14.5px] font-semibold text-ink hover:text-primary">
                       {by}
                     </Link>
@@ -322,7 +323,7 @@ export function FieldReportView({ code }: { code: string }) {
           </section>
 
           <section className={card}>
-            <CardHead title="Reviewer decision" sub="পর্যালোচকের সিদ্ধান্ত" />
+            <CardHead title="Executive Editor decision" sub="নির্বাহী সম্পাদকের সিদ্ধান্ত" />
             <div className="flex flex-col gap-2.5 px-5 py-4">
               {s.state === "Withdrawn" ? (
                 <p className="text-[12.5px] text-muted">Withdrawn after a dispute — decisions are closed.</p>
@@ -347,7 +348,7 @@ export function FieldReportView({ code }: { code: string }) {
                     rows={3}
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
-                    placeholder="What the evidence shows — recorded in the audit log and shown to the field staff."
+                    placeholder="What the evidence shows — recorded in the audit log and shown to the investigation editor."
                     className={`${inputClass} h-auto resize-y py-2.5 font-bn text-[13px]`}
                   />
                   <div className="flex gap-2">
@@ -381,7 +382,7 @@ export function FieldReportView({ code }: { code: string }) {
                   ? "No decision recorded yet. Accepting adds these items to the evidence set at the tiers shown."
                   : s.decidedBy
                     ? `Decided by ${nameOf(db, s.decidedBy)} · ${enRelative(s.decidedAt!)}. You can change it.`
-                    : "Waiting for the field staff's re-visit."}
+                    : "Waiting for the investigation editor's re-visit."}
               </p>
               {decidedHere && s.state !== "Withdrawn" && (
                 <button

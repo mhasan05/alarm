@@ -25,7 +25,7 @@ export function DisputesPage({ initialTab }: { initialTab: Tab }) {
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / অভিযোগ"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / অভিযোগ"
         title={
           <>
             Disputes · <span className="font-bn">অসঙ্গতির অভিযোগ</span>
@@ -44,7 +44,7 @@ export function DisputesPage({ initialTab }: { initialTab: Tab }) {
           </svg>
           <p className="text-[13px] leading-relaxed text-ink text-pretty">
             Only the political activist a report is about can dispute it. The report <strong className="font-semibold">stays on their profile unchanged</strong> while you
-            review — disputes are internal and carry no badge, so a challenge cannot quietly discredit a finding the reviewer already accepted.
+            review — disputes are internal and carry no badge, so a challenge cannot quietly discredit a finding the executive editor already accepted.
           </p>
         </div>
 

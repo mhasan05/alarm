@@ -8,5 +8,5 @@ export function useAdmin() {
   const db = useDb();
   const me = useMe();
   const admin = me?.admin ?? db.admins[0];
-  return { db, me, admin, adminId: admin?.id ?? "ADM-001" };
+  return { db, me, admin, adminId: admin?.id ?? "" };
 }

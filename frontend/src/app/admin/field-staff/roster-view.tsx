@@ -23,7 +23,7 @@ export const areaOf = (s: FieldStaff) => `${s.thana}, ${s.district}`;
 /** Saves the roster as a CSV file. */
 export function ExportRoster({ staff }: { staff: FieldStaff[] }) {
   const exportCsv = () => {
-    const head = ["Staff ID", "Name", "Phone", "Thana", "District", "Status", "Open", "Due in 48h", "Evidence this month"];
+    const head = ["ALARM ID", "Name", "Phone", "Thana", "District", "Status", "Open", "Due in 48h", "Evidence this month"];
     const rows = staff.map((s) => [s.id, s.name, s.phone, s.thana, s.district, s.status, s.open, s.dueSoon, s.evidenceMonth]);
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     // BOM so Excel reads the Bengali text as UTF-8.
@@ -77,12 +77,12 @@ export function RosterView({ staff, initialTab, limit }: { staff: FieldStaff[]; 
             <circle cx="7" cy="7" r="4.8" stroke="currentColor" strokeWidth="1.4" />
             <path d="m10.6 10.6 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
-          <span className="sr-only">Search staff</span>
+          <span className="sr-only">Search investigation editors</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name, staff ID or thana…"
+            placeholder="Search name, ALARM ID or thana…"
             className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-placeholder"
           />
         </label>
@@ -168,8 +168,8 @@ export function RosterView({ staff, initialTab, limit }: { staff: FieldStaff[]; 
             {shown.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-5 py-12 text-center">
-                  <p className="text-[14px] font-semibold text-ink">{q ? "No staff match this search" : "Nobody in this list"}</p>
-                  <p className="mt-1 text-[12.5px] text-muted">{q ? "Try a name, a staff ID like FS-018, or a thana." : "Change the filter to see more staff."}</p>
+                  <p className="text-[14px] font-semibold text-ink">{q ? "No investigation editor matches this search" : "Nobody in this list"}</p>
+                  <p className="mt-1 text-[12.5px] text-muted">{q ? "Try a name, an ALARM ID like KAR-615283, or a thana." : "Change the filter to see more investigation editors."}</p>
                 </td>
               </tr>
             )}

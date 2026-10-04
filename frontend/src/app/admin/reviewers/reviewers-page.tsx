@@ -20,7 +20,7 @@ export function ReviewersPage({ initialTab }: { initialTab: Tab }) {
 
   const stats = [
     { label: "ACTIVE REVIEWERS", value: String(active.length), color: "#0D1F17", note: `সক্রিয় · ${REVIEWERS.length - active.length} unavailable`, href: "/admin/reviewers?tab=active" },
-    { label: "WAITING IN QUEUES", value: String(queue), color: "#D97706", note: stranded ? `পর্যালোচনার অপেক্ষায় · ${stranded} with an unavailable reviewer` : "পর্যালোচনার অপেক্ষায়" },
+    { label: "WAITING IN QUEUES", value: String(queue), color: "#D97706", note: stranded ? `পর্যালোচনার অপেক্ষায় · ${stranded} with an unavailable executive editor` : "পর্যালোচনার অপেক্ষায়" },
     { label: "DECIDED THIS MONTH", value: String(decided), color: "#1A7A4A", note: `সিদ্ধান্ত · ${rate}% accepted` },
     { label: "AVG DECISION TIME", value: `${avgHours}h`, color: "#1D6FC0", note: "গড় সময় · submission to decision" },
   ];
@@ -40,10 +40,10 @@ export function ReviewersPage({ initialTab }: { initialTab: Tab }) {
   return (
     <>
       <PageHeader
-        crumb="অ্যাডমিন পোর্টাল / পর্যালোচক"
+        crumb="প্রধান নির্বাহী সম্পাদক পোর্টাল / নির্বাহী সম্পাদক"
         title={
           <>
-            Reviewers · <span className="font-bn">পর্যালোচক</span>
+            Executive Editors · <span className="font-bn">নির্বাহী সম্পাদক</span>
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
               {active.length} active · {queue} submissions waiting across all queues
             </span>
@@ -78,13 +78,13 @@ export function ReviewersPage({ initialTab }: { initialTab: Tab }) {
           <div className="flex flex-col gap-5">
             <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
               <h2 className="text-[15px] font-semibold text-ink">District Coverage</h2>
-              <p className="mt-0.5 font-bn text-[12px] text-muted">জেলাভিত্তিক পর্যালোচক</p>
+              <p className="mt-0.5 font-bn text-[12px] text-muted">জেলাভিত্তিক নির্বাহী সম্পাদক</p>
               <ul className="mt-3">
                 {districts.map((d) => (
                   <li key={d.name} className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 last:border-b-0">
                     <span className="font-bn text-[13.5px] font-semibold text-ink">{d.name}</span>
                     <span className={`text-right text-[12px] ${d.reviewers.length ? "text-muted" : "font-semibold text-danger"}`}>
-                      {d.reviewers.length ? d.reviewers.join(", ") : "No active reviewer"}
+                      {d.reviewers.length ? d.reviewers.join(", ") : "No active executive editor"}
                     </span>
                   </li>
                 ))}

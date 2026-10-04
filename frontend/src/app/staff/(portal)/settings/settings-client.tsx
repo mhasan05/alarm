@@ -13,10 +13,10 @@ export function StaffSettings() {
 
   return (
     <>
-      <PageHeader backHref="/staff/dashboard" crumb="মাঠকর্মী পোর্টাল / সেটিংস" title="সেটিংস" />
+      <PageHeader backHref="/staff/dashboard" crumb="তদন্ত সম্পাদক পোর্টাল / সেটিংস" title="সেটিংস" />
       <SettingsView
         name={staff.nameBn}
-        role={`মাঠকর্মী · ${staff.id}`}
+        role={`তদন্ত সম্পাদক · ${staff.id}`}
         status={staff.status === "On leave" ? "ছুটিতে" : "সক্রিয় অ্যাকাউন্ট"}
         statusTone={staff.status === "On leave" ? "warning" : "success"}
         facts={[
@@ -30,7 +30,6 @@ export function StaffSettings() {
             icon: "person",
             rows: [
               ["পূর্ণ নাম", staff.nameBn],
-              ["কর্মী নম্বর", staff.id],
               ["মোবাইল নম্বর", phoneBn(staff.phone)],
               ["ইমেইল", staff.email],
             ],
@@ -49,7 +48,7 @@ export function StaffSettings() {
             title: "অ্যাকাউন্ট",
             icon: "account",
             rows: [
-              ["ভূমিকা", "মাঠকর্মী"],
+              ["ভূমিকা", "তদন্ত সম্পাদক"],
               ["যোগদানের তারিখ", bnDate(staff.joined)],
             ],
           },

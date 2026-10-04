@@ -4,7 +4,7 @@
 import { SEED_REPORTS } from "./seed-reports";
 import type { AiFinding, Database, Evidence, Profile, Staff, Submission } from "./types";
 
-export const DB_VERSION = 9;
+export const DB_VERSION = 12;
 
 /** Demo password for every seeded account (frontend preview only). */
 export const DEMO_PASSWORD = "Alarm@2026";
@@ -17,7 +17,7 @@ const e = (kind: string, title: string, meta: string): Evidence => ({ id: `EV-${
 
 const profiles: Profile[] = [
   {
-    id: "PRF-001",
+    id: "KAR-702438",
     name: "আব্দুল করিম শেখ",
     initial: "আ",
     post: "ওয়ার্ড কাউন্সিলর",
@@ -37,10 +37,10 @@ const profiles: Profile[] = [
     since: "২০২১",
     registeredAt: t("2026-09-02", "11:20"),
     account: "Active",
-    audit: { code: "KAR-2026-0143", opened: t("2026-09-08") },
+    audit: { code: "AUD-2026-0143", opened: t("2026-09-08") },
   },
   {
-    id: "PRF-002",
+    id: "KAR-265917",
     name: "সাবরিনা আক্তার চৌধুরী",
     initial: "সা",
     post: "ওয়ার্ড কাউন্সিলর",
@@ -60,10 +60,10 @@ const profiles: Profile[] = [
     since: "২০২১",
     registeredAt: t("2026-08-28"),
     account: "Active",
-    audit: { code: "KAR-2026-0141", opened: t("2026-09-07") },
+    audit: { code: "AUD-2026-0141", opened: t("2026-09-07") },
   },
   {
-    id: "PRF-003",
+    id: "KAR-814369",
     name: "মোঃ রফিকুল ইসলাম",
     initial: "র",
     post: "ওয়ার্ড কাউন্সিলর",
@@ -83,10 +83,10 @@ const profiles: Profile[] = [
     since: "২০২১",
     registeredAt: t("2026-08-20"),
     account: "Active",
-    audit: { code: "KAR-2026-0147", opened: t("2026-09-12") },
+    audit: { code: "AUD-2026-0147", opened: t("2026-09-12") },
   },
   {
-    id: "PRF-004",
+    id: "KAR-539021",
     name: "তানভীর হোসেন ভূঁইয়া",
     initial: "তা",
     post: "পৌর মেয়র",
@@ -106,10 +106,10 @@ const profiles: Profile[] = [
     since: "২০২১",
     registeredAt: t("2026-08-10"),
     account: "Active",
-    audit: { code: "KAR-2026-0139", opened: t("2026-08-30") },
+    audit: { code: "AUD-2026-0139", opened: t("2026-08-30") },
   },
   {
-    id: "PRF-005",
+    id: "KAR-126784",
     name: "নুসরাত জাহান মীম",
     initial: "নু",
     post: "ইউপি সদস্য",
@@ -129,10 +129,10 @@ const profiles: Profile[] = [
     since: "২০২২",
     registeredAt: t("2026-08-05"),
     account: "Suspended",
-    audit: { code: "KAR-2026-0131", opened: t("2026-08-25") },
+    audit: { code: "AUD-2026-0131", opened: t("2026-08-25") },
   },
   {
-    id: "PRF-006",
+    id: "KAR-693152",
     name: "মোঃ জুয়েল রানা",
     initial: "জু",
     post: "ওয়ার্ড কাউন্সিলর",
@@ -152,28 +152,28 @@ const profiles: Profile[] = [
     since: "২০২১",
     registeredAt: t("2026-08-18"),
     account: "Active",
-    audit: { code: "KAR-2026-0149", opened: t("2026-09-11") },
+    audit: { code: "AUD-2026-0149", opened: t("2026-09-11") },
   },
 ];
 
 // ── Staff & reviewers ───────────────────────────────────────────────────────
 
 const staff: Staff[] = [
-  { id: "FS-018", name: "Jahidul Haque", nameBn: "জাহিদুল হক", initials: "JH", phone: "01712440918", email: "jahidul.haque@example.com", nid: "১৯৯০••••৪৩২১", division: "ঢাকা", district: "ঢাকা", upazila: "ঢাকা উত্তর সিটি কর্পোরেশন", thana: "মিরপুর মডেল", seat: "ঢাকা-১৪", wards: "ওয়ার্ড ১১, ১৩", status: "On duty", joined: t("2025-01-12"), completed: 9, device: { app: "v1.8", lastSync: "9 min ago", pending: 0 } },
-  { id: "FS-024", name: "Shirin Akter", nameBn: "শিরিন আক্তার", initials: "SA", phone: "01815220424", email: "shirin.akter@example.com", nid: "১৯৯২••••১১৮৭", division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "চট্টগ্রাম সিটি কর্পোরেশন", thana: "বাকলিয়া", seat: "চট্টগ্রাম-৯", wards: "ওয়ার্ড ১৭, ৩৪", status: "On duty", joined: t("2025-03-03"), completed: 6, device: { app: "v1.8", lastSync: "22 min ago", pending: 0 } },
-  { id: "FS-031", name: "Rasel Mahmud", nameBn: "রাসেল মাহমুদ", initials: "RM", phone: "01911330731", email: "rasel.mahmud@example.com", nid: "১৯৮৮••••৫০৯২", division: "সিলেট", district: "সিলেট", upazila: "সিলেট সিটি কর্পোরেশন", thana: "সদর", seat: "সিলেট-১", wards: "ওয়ার্ড ৩, ৫, ৭", status: "On duty", joined: t("2024-06-21"), completed: 14, device: { app: "v1.8", lastSync: "4 min ago", pending: 1 } },
-  { id: "FS-009", name: "Nazmun Nahar", nameBn: "নাজমুন নাহার", initials: "NN", phone: "01713900209", email: "nazmun.nahar@example.com", nid: "১৯৮৬••••৩৩৪০", division: "ঢাকা", district: "ঢাকা", upazila: "গাজীপুর সিটি কর্পোরেশন", thana: "গাজীপুর সদর", seat: "ঢাকা-১৭", wards: "ওয়ার্ড ৯, ১১", status: "On duty", joined: t("2024-02-08"), completed: 18, device: { app: "v1.8", lastSync: "1 hr ago", pending: 0 } },
-  { id: "FS-042", name: "Imran Chowdhury", nameBn: "ইমরান চৌধুরী", initials: "IC", phone: "01819554242", email: "imran.chowdhury@example.com", nid: "১৯৯৪••••৭৭১৫", division: "ঢাকা", district: "ঢাকা", upazila: "ঢাকা উত্তর সিটি কর্পোরেশন", thana: "মিরপুর মডেল", seat: "ঢাকা-১৪", wards: "ওয়ার্ড ১১, ১২", status: "Suspended", joined: t("2025-04-15"), completed: 3, device: { app: "v1.6", lastSync: "3 days ago", pending: 4 }, note: "Suspended after repeated late and incomplete uploads — open assignments need reassigning." },
-  { id: "FS-027", name: "Sumaiya Islam", nameBn: "সুমাইয়া ইসলাম", initials: "SI", phone: "01717270027", email: "sumaiya.islam@example.com", nid: "১৯৯১••••২০৫৮", division: "রাজশাহী", district: "রাজশাহী", upazila: "রাজশাহী সিটি কর্পোরেশন", thana: "বোয়ালিয়া", seat: "রাজশাহী-২", wards: "ওয়ার্ড ১২, ১৪", status: "On duty", joined: t("2024-09-30"), completed: 11, device: { app: "v1.8", lastSync: "15 min ago", pending: 0 } },
-  { id: "FS-033", name: "Mizanur Rahman", nameBn: "মিজানুর রহমান", initials: "MR", phone: "01816330933", email: "mizanur.rahman@example.com", nid: "১৯৮৯••••৬৬০৩", division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "চট্টগ্রাম সিটি কর্পোরেশন", thana: "কোতোয়ালী", seat: "চট্টগ্রাম-৯", wards: "ওয়ার্ড ৩২, ৩৫", status: "On duty", joined: t("2024-11-11"), completed: 8, device: { app: "v1.8", lastSync: "31 min ago", pending: 0 } },
-  { id: "FS-015", name: "Ferdous Alam", nameBn: "ফেরদৌস আলম", initials: "FA", phone: "01714150015", email: "ferdous.alam@example.com", nid: "১৯৮৭••••৯০২৬", division: "রংপুর", district: "রংপুর", upazila: "রংপুর সিটি কর্পোরেশন", thana: "সদর", seat: "রংপুর-৩", wards: "ওয়ার্ড ৪, ৬", status: "On leave", joined: t("2024-08-19"), completed: 7, device: { app: "v1.7", lastSync: "4 days ago", pending: 0 }, note: "Approved leave until 28 Sep." },
+  { id: "KAR-615283", name: "Jahidul Haque", nameBn: "জাহিদুল হক", initials: "JH", phone: "01712440918", email: "jahidul.haque@example.com", nid: "১৯৯০••••৪৩২১", division: "ঢাকা", district: "ঢাকা", upazila: "ঢাকা উত্তর সিটি কর্পোরেশন", thana: "মিরপুর মডেল", seat: "ঢাকা-১৪", wards: "ওয়ার্ড ১১, ১৩", status: "On duty", joined: t("2025-01-12"), completed: 9, device: { app: "v1.8", lastSync: "9 min ago", pending: 0 } },
+  { id: "KAR-274906", name: "Shirin Akter", nameBn: "শিরিন আক্তার", initials: "SA", phone: "01815220424", email: "shirin.akter@example.com", nid: "১৯৯২••••১১৮৭", division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "চট্টগ্রাম সিটি কর্পোরেশন", thana: "বাকলিয়া", seat: "চট্টগ্রাম-৯", wards: "ওয়ার্ড ১৭, ৩৪", status: "On duty", joined: t("2025-03-03"), completed: 6, device: { app: "v1.8", lastSync: "22 min ago", pending: 0 } },
+  { id: "KAR-839151", name: "Rasel Mahmud", nameBn: "রাসেল মাহমুদ", initials: "RM", phone: "01911330731", email: "rasel.mahmud@example.com", nid: "১৯৮৮••••৫০৯২", division: "সিলেট", district: "সিলেট", upazila: "সিলেট সিটি কর্পোরেশন", thana: "সদর", seat: "সিলেট-১", wards: "ওয়ার্ড ৩, ৫, ৭", status: "On duty", joined: t("2024-06-21"), completed: 14, device: { app: "v1.8", lastSync: "4 min ago", pending: 1 } },
+  { id: "KAR-460372", name: "Nazmun Nahar", nameBn: "নাজমুন নাহার", initials: "NN", phone: "01713900209", email: "nazmun.nahar@example.com", nid: "১৯৮৬••••৩৩৪০", division: "ঢাকা", district: "ঢাকা", upazila: "গাজীপুর সিটি কর্পোরেশন", thana: "গাজীপুর সদর", seat: "ঢাকা-১৭", wards: "ওয়ার্ড ৯, ১১", status: "On duty", joined: t("2024-02-08"), completed: 18, device: { app: "v1.8", lastSync: "1 hr ago", pending: 0 } },
+  { id: "KAR-193847", name: "Imran Chowdhury", nameBn: "ইমরান চৌধুরী", initials: "IC", phone: "01819554242", email: "imran.chowdhury@example.com", nid: "১৯৯৪••••৭৭১৫", division: "ঢাকা", district: "ঢাকা", upazila: "ঢাকা উত্তর সিটি কর্পোরেশন", thana: "মিরপুর মডেল", seat: "ঢাকা-১৪", wards: "ওয়ার্ড ১১, ১২", status: "Suspended", joined: t("2025-04-15"), completed: 3, device: { app: "v1.6", lastSync: "3 days ago", pending: 4 }, note: "Suspended after repeated late and incomplete uploads — open assignments need reassigning." },
+  { id: "KAR-528610", name: "Sumaiya Islam", nameBn: "সুমাইয়া ইসলাম", initials: "SI", phone: "01717270027", email: "sumaiya.islam@example.com", nid: "১৯৯১••••২০৫৮", division: "রাজশাহী", district: "রাজশাহী", upazila: "রাজশাহী সিটি কর্পোরেশন", thana: "বোয়ালিয়া", seat: "রাজশাহী-২", wards: "ওয়ার্ড ১২, ১৪", status: "On duty", joined: t("2024-09-30"), completed: 11, device: { app: "v1.8", lastSync: "15 min ago", pending: 0 } },
+  { id: "KAR-947263", name: "Mizanur Rahman", nameBn: "মিজানুর রহমান", initials: "MR", phone: "01816330933", email: "mizanur.rahman@example.com", nid: "১৯৮৯••••৬৬০৩", division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "চট্টগ্রাম সিটি কর্পোরেশন", thana: "কোতোয়ালী", seat: "চট্টগ্রাম-৯", wards: "ওয়ার্ড ৩২, ৩৫", status: "On duty", joined: t("2024-11-11"), completed: 8, device: { app: "v1.8", lastSync: "31 min ago", pending: 0 } },
+  { id: "KAR-381054", name: "Ferdous Alam", nameBn: "ফেরদৌস আলম", initials: "FA", phone: "01714150015", email: "ferdous.alam@example.com", nid: "১৯৮৭••••৯০২৬", division: "রংপুর", district: "রংপুর", upazila: "রংপুর সিটি কর্পোরেশন", thana: "সদর", seat: "রংপুর-৩", wards: "ওয়ার্ড ৪, ৬", status: "On leave", joined: t("2024-08-19"), completed: 7, device: { app: "v1.7", lastSync: "4 days ago", pending: 0 }, note: "Approved leave until 28 Sep." },
 ];
 
 const reviewers: Database["reviewers"] = [
-  { id: "REV-004", name: "Farhana Yasmin", nameBn: "ফারহানা ইয়াসমিন", initials: "FY", phone: "01755432198", email: "farhana.yasmin@example.com", nid: "১৯৮৫••••৭৭৪১", status: "Active", areas: ["রাজশাহী · বোয়ালিয়া", "চট্টগ্রাম · কোতোয়ালী", "ঢাকা · মিরপুর মডেল"], joined: t("2025-12-01"), history: { decided: 38, accepted: 27, avgHours: 19 } },
-  { id: "REV-009", name: "Tahmina Rahman", nameBn: "তাহমিনা রহমান", initials: "TR", phone: "01819660709", email: "tahmina.rahman@example.com", nid: "১৯৯০••••২২১৮", status: "Active", areas: ["চট্টগ্রাম · কোতোয়ালী", "চট্টগ্রাম · বাকলিয়া"], joined: t("2026-09-23"), history: { decided: 0, accepted: 0, avgHours: 0 }, note: "Coverage added yesterday — চট্টগ্রাম · কোতোয়ালী is shared with Farhana Yasmin." },
-  { id: "REV-011", name: "Arif Hossain", nameBn: "আরিফ হোসেন", initials: "AH", phone: "01711110311", email: "arif.hossain@example.com", nid: "১৯৮২••••৯০৩৫", status: "On leave", areas: ["সিলেট · সদর", "রংপুর · সদর"], joined: t("2025-03-14"), history: { decided: 17, accepted: 13, avgHours: 31 }, note: "On leave until 28 Sep — submissions from সিলেট and রংপুর need another reviewer." },
-  { id: "REV-013", name: "Nasrin Sultana", nameBn: "নাসরিন সুলতানা", initials: "NS", phone: "01913130413", email: "nasrin.sultana@example.com", nid: "১৯৮৮••••৪৪০৬", status: "Active", areas: ["ঢাকা · গাজীপুর সদর", "খুলনা · কুষ্টিয়া সদর"], joined: t("2025-07-02"), history: { decided: 26, accepted: 21, avgHours: 14 } },
+  { id: "KAR-736204", name: "Farhana Yasmin", nameBn: "ফারহানা ইয়াসমিন", initials: "FY", phone: "01755432198", email: "farhana.yasmin@example.com", nid: "১৯৮৫••••৭৭৪১", status: "Active", areas: ["রাজশাহী · বোয়ালিয়া", "চট্টগ্রাম · কোতোয়ালী", "ঢাকা · মিরপুর মডেল"], joined: t("2025-12-01"), history: { decided: 38, accepted: 27, avgHours: 19 } },
+  { id: "KAR-158392", name: "Tahmina Rahman", nameBn: "তাহমিনা রহমান", initials: "TR", phone: "01819660709", email: "tahmina.rahman@example.com", nid: "১৯৯০••••২২১৮", status: "Active", areas: ["চট্টগ্রাম · কোতোয়ালী", "চট্টগ্রাম · বাকলিয়া"], joined: t("2026-09-23"), history: { decided: 0, accepted: 0, avgHours: 0 }, note: "Coverage added yesterday — চট্টগ্রাম · কোতোয়ালী is shared with Farhana Yasmin." },
+  { id: "KAR-904617", name: "Arif Hossain", nameBn: "আরিফ হোসেন", initials: "AH", phone: "01711110311", email: "arif.hossain@example.com", nid: "১৯৮২••••৯০৩৫", status: "On leave", areas: ["সিলেট · সদর", "রংপুর · সদর"], joined: t("2025-03-14"), history: { decided: 17, accepted: 13, avgHours: 31 }, note: "On leave until 28 Sep — submissions from সিলেট and রংপুর need another reviewer." },
+  { id: "KAR-327548", name: "Nasrin Sultana", nameBn: "নাসরিন সুলতানা", initials: "NS", phone: "01913130413", email: "nasrin.sultana@example.com", nid: "১৯৮৮••••৪৪০৬", status: "Active", areas: ["ঢাকা · গাজীপুর সদর", "খুলনা · কুষ্টিয়া সদর"], joined: t("2025-07-02"), history: { decided: 26, accepted: 21, avgHours: 14 } },
 ];
 
 // ── Submissions ─────────────────────────────────────────────────────────────
@@ -191,15 +191,15 @@ function withEvents(s: SeedSub): Submission {
   return { ...s, events };
 }
 
-const R4 = "REV-004";
+const R4 = "KAR-736204";
 
 const seedSubmissions: SeedSub[] = [
-  // PRF-001 · আব্দুল করিম শেখ — Boalia, collected by FS-027; reviewed by REV-004.
+  // KAR-702438 · আব্দুল করিম শেখ — Boalia, collected by KAR-528610; reviewed by KAR-736204.
   {
     code: "SUB-0398",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "নেতিবাচক",
     title: "বিদেশে অঘোষিত সম্পত্তি রয়েছে বলে অনলাইন দাবি",
     source: "বেনামি ফেসবুক পোস্ট · উৎস যাচাই করা যায়নি",
@@ -214,9 +214,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0404",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "ইতিবাচক",
     title: "ওয়ার্ড পরিষদের ৫২টি সভার মধ্যে ৪৭টিতে উপস্থিতি নথিভুক্ত",
     source: "ওয়ার্ড পরিষদের হাজিরা খাতার অনুলিপি (২০২৪–২০২৬)",
@@ -231,9 +231,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0409",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "নেতিবাচক",
     title: "হলফনামায় ঘোষিত জমি ও দাখিলা রেকর্ডে ০.৩৩ একরের অসঙ্গতি",
     source: "ভূমি অফিসের দাখিলা রেকর্ড, বোয়ালিয়া",
@@ -248,9 +248,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0412",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "নেতিবাচক",
     title: "ড্রেন নির্মাণ দরপত্রে নিকটাত্মীয়ের মালিকানাধীন প্রতিষ্ঠান নির্বাচিত",
     source: "দরপত্র নথি ২০২৫/১১৮ ও আরজেএসসি মালিকানা রেকর্ড",
@@ -266,9 +266,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0418",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "ইতিবাচক",
     title: "ওয়ার্ডে ৩টি রাস্তা ও ২টি ড্রেন সংস্কার নির্ধারিত বাজেটে সম্পন্ন",
     source: "সিটি কর্পোরেশনের প্রকল্প সমাপ্তি প্রতিবেদন ও মাঠের ছবি",
@@ -283,9 +283,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0421",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "নেতিবাচক",
     title: "জলাশয় ভরাটের অনুমোদন প্রক্রিয়ায় সুপারিশকারী হিসেবে সম্পৃক্ততা",
     source: "পরিবেশ অধিদপ্তরের আদেশ, ২২ জুলাই ২০২৫",
@@ -297,9 +297,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0422",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "staff",
-    staffId: "FS-027",
+    staffId: "KAR-528610",
     category: "ইতিবাচক",
     title: "২০২৪ সালের বন্যায় ২১০টি পরিবারকে ত্রাণ সহায়তা",
     source: "দৈনিক সোনার দেশ, ২২ জুলাই ২০২৪ · একটি সংবাদ সূত্র",
@@ -311,7 +311,7 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0428",
-    profileId: "PRF-001",
+    profileId: "KAR-702438",
     origin: "self",
     category: "ইতিবাচক",
     title: "ওয়ার্ড ১৪-এ ২০০ মিটার নতুন পানির লাইন স্থাপন",
@@ -323,12 +323,12 @@ const seedSubmissions: SeedSub[] = [
     submittedAt: t("2026-09-23", "10:20"),
   },
 
-  // PRF-002 · সাবরিনা আক্তার চৌধুরী — Kotwali, collected by FS-024 and FS-033.
+  // KAR-265917 · সাবরিনা আক্তার চৌধুরী — Kotwali, collected by KAR-274906 and KAR-947263.
   {
     code: "SUB-0399",
-    profileId: "PRF-002",
+    profileId: "KAR-265917",
     origin: "staff",
-    staffId: "FS-024",
+    staffId: "KAR-274906",
     category: "ইতিবাচক",
     title: "ওয়ার্ড পরিষদের ৫২টি সভার মধ্যে ৪৭টিতে কাউন্সিলরের উপস্থিতি নথিভুক্ত",
     source: "ওয়ার্ড পরিষদের হাজিরা খাতার অনুলিপি",
@@ -346,16 +346,16 @@ const seedSubmissions: SeedSub[] = [
       device: "Android · app v1.8 · online",
       checks: [
         { status: "ok", label: "Capture times inside visit window", detail: "Both items captured between 09:40 and 09:52." },
-        { status: "ok", label: "Device registered to staff", detail: "FS-024 · same device as previous submissions." },
+        { status: "ok", label: "Device registered to staff", detail: "KAR-274906 · same device as previous submissions." },
         { status: "ok", label: "No duplicate uploads", detail: "File hashes are unique across the audit." },
       ],
     },
   },
   {
     code: "SUB-0400",
-    profileId: "PRF-002",
+    profileId: "KAR-265917",
     origin: "staff",
-    staffId: "FS-033",
+    staffId: "KAR-947263",
     category: "নেতিবাচক",
     title: "ড্রেন নির্মাণ দরপত্রে ঠিকাদারের মালিকানা ও হলফনামার তথ্য যাচাই",
     source: "প্রকল্প বোর্ড, দরপত্র নথি ও আরজেএসসি মালিকানা রেকর্ড",
@@ -373,16 +373,16 @@ const seedSubmissions: SeedSub[] = [
       device: "Android · app v1.8 · online",
       checks: [
         { status: "warn", label: "One item captured after the visit window", detail: "The RJSC ownership file was uploaded at 14:10, outside the 10:02–10:35 window. Staff noted it was collected from the RJSC office the same day." },
-        { status: "ok", label: "Device registered to staff", detail: "FS-033 · same device as previous submissions." },
+        { status: "ok", label: "Device registered to staff", detail: "KAR-947263 · same device as previous submissions." },
         { status: "ok", label: "No duplicate uploads", detail: "File hashes are unique across the audit." },
       ],
     },
   },
   {
     code: "SUB-0401",
-    profileId: "PRF-002",
+    profileId: "KAR-265917",
     origin: "staff",
-    staffId: "FS-024",
+    staffId: "KAR-274906",
     category: "নেতিবাচক",
     title: "প্রকল্প এলাকা পরিদর্শন ও স্থানীয় বাসিন্দার বক্তব্য",
     source: "প্রকল্প এলাকার ভিডিও ও স্থানীয় বাসিন্দার বক্তব্য",
@@ -401,15 +401,15 @@ const seedSubmissions: SeedSub[] = [
       checks: [
         { status: "ok", label: "Consent recorded before statement", detail: "Audio consent captured at 17:03, before the statement began." },
         { status: "warn", label: "Uploaded from the offline queue", detail: "Captured offline and synced at 17:22; original capture times preserved." },
-        { status: "ok", label: "Device registered to staff", detail: "FS-024 · same device as previous submissions." },
+        { status: "ok", label: "Device registered to staff", detail: "KAR-274906 · same device as previous submissions." },
       ],
     },
   },
   {
     code: "SUB-0403",
-    profileId: "PRF-002",
+    profileId: "KAR-265917",
     origin: "staff",
-    staffId: "FS-033",
+    staffId: "KAR-947263",
     category: "নেতিবাচক",
     title: "উৎসবিহীন অনুদান বিতরণের তালিকা",
     source: "অনুদান বিতরণের তালিকা · উৎস অনিশ্চিত",
@@ -428,17 +428,17 @@ const seedSubmissions: SeedSub[] = [
       checks: [
         { status: "bad", label: "Document has no issuing authority", detail: "No office name, seal or date. Cannot be attributed to a source." },
         { status: "bad", label: "Provider unidentified", detail: "The person supplying the list declined to be named, so the chain of custody is broken." },
-        { status: "ok", label: "Device registered to staff", detail: "FS-033 · same device as previous submissions." },
+        { status: "ok", label: "Device registered to staff", detail: "KAR-947263 · same device as previous submissions." },
       ],
     },
   },
 
-  // PRF-003 · মোঃ রফিকুল ইসলাম — Mirpur, collected by FS-018 (and earlier FS-042).
+  // KAR-814369 · মোঃ রফিকুল ইসলাম — Mirpur, collected by KAR-615283 (and earlier KAR-193847).
   {
     code: "SUB-0395",
-    profileId: "PRF-003",
+    profileId: "KAR-814369",
     origin: "staff",
-    staffId: "FS-042",
+    staffId: "KAR-193847",
     category: "ইতিবাচক",
     title: "ওয়ার্ড ১৩-এ কমিউনিটি ক্লিনিকের সংস্কার সম্পন্ন",
     source: "সিটি কর্পোরেশনের কার্যাদেশ ও সমাপ্তি সনদ",
@@ -453,9 +453,9 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0430",
-    profileId: "PRF-003",
+    profileId: "KAR-814369",
     origin: "staff",
-    staffId: "FS-018",
+    staffId: "KAR-615283",
     category: "ইতিবাচক",
     title: "ওয়ার্ড কার্যালয়ের হাজিরা খাতার ছবি",
     source: "হাজিরা খাতা ২০২৪–২০২৬ · ৬টি ছবি সংযুক্ত",
@@ -467,20 +467,20 @@ const seedSubmissions: SeedSub[] = [
   },
   {
     code: "SUB-0431",
-    profileId: "PRF-003",
+    profileId: "KAR-814369",
     origin: "staff",
-    staffId: "FS-018",
+    staffId: "KAR-615283",
     category: "নেতিবাচক",
     title: "হলফনামার সম্পদ বিবরণী ও দাখিলা রেকর্ডের তুলনা",
     source: "ভূমি অফিস ও নির্বাচন কমিশনের নথি · ৪টি সংযুক্ত",
     body: "নির্বাচন কমিশনে জমা দেওয়া হলফনামার সম্পদ বিবরণীর সাথে মিরপুর ভূমি অফিসের দাখিলা রেকর্ড মিলিয়ে দেখা হয়েছে। দুটি দাগে ঘোষিত পরিমাণের চেয়ে বেশি জমি রেকর্ডে পাওয়া গেছে। নথিগুলো ১৪ সেপ্টেম্বর ২০২৬ সংগ্রহ করা।",
     facts: [["দাগ", "৪১২ ও ৪১৯"], ["সংগ্রহ", "১৪ সেপ্টেম্বর ২০২৬"]],
-    evidence: [e("নথি · PDF", "নির্বাচন কমিশনের হলফনামা", "জমা ২০২১"), e("নথি · ছবি", "ভূমি অফিসের দাখিলা রেকর্ড", "মিরপুর, সংগ্রহ ১৪ সেপ্টেম্বর"), e("নথি · ছবি", "খতিয়ানের অনুলিপি", "দাগ ৪১২ ও ৪১৯"), e("নথি · PDF", "তুলনামূলক হিসাব", "মাঠকর্মীর প্রস্তুত করা")],
+    evidence: [e("নথি · PDF", "নির্বাচন কমিশনের হলফনামা", "জমা ২০২১"), e("নথি · ছবি", "ভূমি অফিসের দাখিলা রেকর্ড", "মিরপুর, সংগ্রহ ১৪ সেপ্টেম্বর"), e("নথি · ছবি", "খতিয়ানের অনুলিপি", "দাগ ৪১২ ও ৪১৯"), e("নথি · PDF", "তুলনামূলক হিসাব", "তদন্ত সম্পাদকের প্রস্তুত করা")],
     state: "Pending",
     submittedAt: t("2026-09-21", "13:30"),
   },
 
-  // PRF-004 · তানভীর হোসেন ভূঁইয়া — Sylhet, collected by FS-031 (basis of RPT-2026-0039).
+  // KAR-539021 · তানভীর হোসেন ভূঁইয়া — Sylhet, collected by KAR-839151 (basis of RPT-2026-0039).
   ...(
     [
       ["SUB-0371", "ইতিবাচক", "ওয়ার্ডে ২০২১–২০২৬ সময়ে ৭টি উন্নয়ন প্রকল্প নির্ধারিত বাজেটে সম্পন্ন", "ওয়ার্ড উন্নয়ন প্রকল্প নথি, সিলেট সিটি কর্পোরেশন", "2026-09-01"],
@@ -494,9 +494,9 @@ const seedSubmissions: SeedSub[] = [
   ).map(([code, category, title, source, date]) =>
     ({
       code,
-      profileId: "PRF-004",
+      profileId: "KAR-539021",
       origin: "staff",
-      staffId: "FS-031",
+      staffId: "KAR-839151",
       category,
       title,
       source,
@@ -506,12 +506,12 @@ const seedSubmissions: SeedSub[] = [
       state: "Accepted",
       submittedAt: t(date, "11:00"),
       decidedAt: t(date, "17:00"),
-      decidedBy: "REV-011",
+      decidedBy: "KAR-904617",
       reason: "দাপ্তরিক নথিতে সমর্থিত।",
     }) satisfies SeedSub,
   ),
 
-  // PRF-005 · নুসরাত জাহান মীম — Kushtia (basis of RPT-2026-0038).
+  // KAR-126784 · নুসরাত জাহান মীম — Kushtia (basis of RPT-2026-0038).
   ...(
     [
       ["SUB-0361", "ইউনিয়নে ৪টি গ্রামীণ সড়ক ও একটি কালভার্ট নির্ধারিত বাজেটে সম্পন্ন", "ইউনিয়ন পরিষদের প্রকল্প সমাপ্তি প্রতিবেদন"],
@@ -523,9 +523,9 @@ const seedSubmissions: SeedSub[] = [
   ).map(([code, title, source]) =>
     ({
       code,
-      profileId: "PRF-005",
+      profileId: "KAR-126784",
       origin: "staff",
-      staffId: "FS-024",
+      staffId: "KAR-274906",
       category: "ইতিবাচক",
       title,
       source,
@@ -535,15 +535,15 @@ const seedSubmissions: SeedSub[] = [
       state: "Accepted",
       submittedAt: t("2026-09-03", "11:00"),
       decidedAt: t("2026-09-04", "12:00"),
-      decidedBy: "REV-013",
+      decidedBy: "KAR-327548",
       reason: "দাপ্তরিক নথিতে সমর্থিত।",
     }) satisfies SeedSub,
   ),
   {
     code: "SUB-0391",
-    profileId: "PRF-005",
+    profileId: "KAR-126784",
     origin: "staff",
-    staffId: "FS-024",
+    staffId: "KAR-274906",
     category: "ইতিবাচক",
     title: "ত্রাণ বিতরণের সংবাদ প্রতিবেদন",
     source: "দৈনিক পত্রিকার কাটিং · একক সূত্র",
@@ -553,16 +553,16 @@ const seedSubmissions: SeedSub[] = [
     state: "Rejected",
     submittedAt: t("2026-09-05", "10:00"),
     decidedAt: t("2026-09-05", "16:00"),
-    decidedBy: "REV-013",
+    decidedBy: "KAR-327548",
     reason: "কেবল একটি সংবাদ সূত্র, কোনো দাপ্তরিক নথি সংযুক্ত হয়নি।",
   },
 
-  // PRF-006 · মোঃ জুয়েল রানা — Gazipur, collected by FS-018; reviewed by REV-013.
+  // KAR-693152 · মোঃ জুয়েল রানা — Gazipur, collected by KAR-615283; reviewed by KAR-327548.
   {
     code: "SUB-0426",
-    profileId: "PRF-006",
+    profileId: "KAR-693152",
     origin: "staff",
-    staffId: "FS-018",
+    staffId: "KAR-615283",
     category: "ইতিবাচক",
     title: "সড়ক সংস্কার প্রকল্প সম্পন্ন — ওয়ার্ড ২২",
     source: "গাজীপুর সিটি কর্পোরেশনের সমাপ্তি প্রতিবেদন ও মাঠের ছবি",
@@ -572,14 +572,14 @@ const seedSubmissions: SeedSub[] = [
     state: "Accepted",
     submittedAt: t("2026-09-13", "09:30"),
     decidedAt: t("2026-09-13", "15:20"),
-    decidedBy: "REV-013",
+    decidedBy: "KAR-327548",
     reason: "প্রকল্প সমাপ্তি প্রতিবেদন ও মাঠের ছবিতে তথ্যটি সমর্থিত।",
   },
   {
     code: "SUB-0427",
-    profileId: "PRF-006",
+    profileId: "KAR-693152",
     origin: "staff",
-    staffId: "FS-018",
+    staffId: "KAR-615283",
     category: "নেতিবাচক",
     title: "প্রকল্পের কাজের গুণগত মান নিয়ে স্থানীয় অভিযোগ",
     source: "২টি ছবি ও একটি বক্তব্য সংযুক্ত",
@@ -596,27 +596,27 @@ const submissions: Submission[] = seedSubmissions.map(withEvents);
 // ── Everything else ─────────────────────────────────────────────────────────
 
 const aiFindings: AiFinding[] = [
-  { id: "AI-01", profileId: "PRF-001", category: "ইতিবাচক", title: "গত পাঁচ বছরের আয়কর রিটার্ন নিয়মিত দাখিল, হলফনামার সাথে সঙ্গতিপূর্ণ", meta: "এনবিআর রেকর্ড ও নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 2, suggested: "keep" },
-  { id: "AI-02", profileId: "PRF-001", category: "ইতিবাচক", title: "জেলা জজ আদালতের দেওয়ানি ও ফৌজদারি নথিতে কোনো বিরুপ এন্ট্রি নেই", meta: "সুপ্রিম কোর্ট কজলিস্ট অনুসন্ধান · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
-  { id: "AI-03", profileId: "PRF-001", category: "ইতিবাচক", title: "২০২৪ সালের বন্যায় ২১০টি পরিবারকে ত্রাণ সহায়তার সংবাদ প্রতিবেদন", meta: "দৈনিক সোনার দেশ, ২২ জুলাই ২০২৪ · একক সংবাদ সূত্র", sources: 1, suggested: "exclude" },
-  { id: "AI-04", profileId: "PRF-001", category: "নেতিবাচক", title: "জলাশয় ভরাটের অনুমোদন প্রক্রিয়ায় সুপারিশকারী হিসেবে সম্পৃক্ততা", meta: "পরিবেশ অধিদপ্তরের আদেশ, ২২ জুলাই ২০২৫ · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
-  { id: "AI-05", profileId: "PRF-001", category: "নেতিবাচক", title: "২০২৫ সালের একটি রাজনৈতিক সংঘর্ষে সম্পৃক্ততার অভিযোগে সংবাদ প্রতিবেদন", meta: "দৈনিক সোনার দেশ, ১৪ মার্চ ২০২৫ · অভিযোগ, আদালতের কোনো নথি নেই", sources: 1, suggested: "exclude" },
-  { id: "AI-06", profileId: "PRF-002", category: "ইতিবাচক", title: "নির্বাচন কমিশনে জমা হলফনামা ও আয়কর রিটার্নের সম্পদ বিবরণী সঙ্গতিপূর্ণ", meta: "এনবিআর রেকর্ড ও নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 2, suggested: "keep" },
-  { id: "AI-07", profileId: "PRF-002", category: "নেতিবাচক", title: "ওয়ার্ড ৩৫-এ অনুদান বিতরণে অনিয়মের অভিযোগে সামাজিক মাধ্যমের পোস্ট", meta: "বেনামি ফেসবুক পেজ · উৎস যাচাই করা যায়নি", sources: 1, suggested: "exclude" },
-  { id: "AI-08", profileId: "PRF-003", category: "ইতিবাচক", title: "নির্বাচন কমিশনের হলফনামায় কোনো ফৌজদারি মামলার তথ্য নেই", meta: "নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
-  { id: "AI-09", profileId: "PRF-006", category: "ইতিবাচক", title: "২০২৫–২৬ অর্থবছরে ওয়ার্ড ২২-এ দুটি স্কুল ভবন সংস্কার", meta: "গাজীপুর সিটি কর্পোরেশনের বার্ষিক প্রতিবেদন · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
+  { id: "AI-01", profileId: "KAR-702438", category: "ইতিবাচক", title: "গত পাঁচ বছরের আয়কর রিটার্ন নিয়মিত দাখিল, হলফনামার সাথে সঙ্গতিপূর্ণ", meta: "এনবিআর রেকর্ড ও নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 2, suggested: "keep" },
+  { id: "AI-02", profileId: "KAR-702438", category: "ইতিবাচক", title: "জেলা জজ আদালতের দেওয়ানি ও ফৌজদারি নথিতে কোনো বিরুপ এন্ট্রি নেই", meta: "সুপ্রিম কোর্ট কজলিস্ট অনুসন্ধান · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
+  { id: "AI-03", profileId: "KAR-702438", category: "ইতিবাচক", title: "২০২৪ সালের বন্যায় ২১০টি পরিবারকে ত্রাণ সহায়তার সংবাদ প্রতিবেদন", meta: "দৈনিক সোনার দেশ, ২২ জুলাই ২০২৪ · একক সংবাদ সূত্র", sources: 1, suggested: "exclude" },
+  { id: "AI-04", profileId: "KAR-702438", category: "নেতিবাচক", title: "জলাশয় ভরাটের অনুমোদন প্রক্রিয়ায় সুপারিশকারী হিসেবে সম্পৃক্ততা", meta: "পরিবেশ অধিদপ্তরের আদেশ, ২২ জুলাই ২০২৫ · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
+  { id: "AI-05", profileId: "KAR-702438", category: "নেতিবাচক", title: "২০২৫ সালের একটি রাজনৈতিক সংঘর্ষে সম্পৃক্ততার অভিযোগে সংবাদ প্রতিবেদন", meta: "দৈনিক সোনার দেশ, ১৪ মার্চ ২০২৫ · অভিযোগ, আদালতের কোনো নথি নেই", sources: 1, suggested: "exclude" },
+  { id: "AI-06", profileId: "KAR-265917", category: "ইতিবাচক", title: "নির্বাচন কমিশনে জমা হলফনামা ও আয়কর রিটার্নের সম্পদ বিবরণী সঙ্গতিপূর্ণ", meta: "এনবিআর রেকর্ড ও নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 2, suggested: "keep" },
+  { id: "AI-07", profileId: "KAR-265917", category: "নেতিবাচক", title: "ওয়ার্ড ৩৫-এ অনুদান বিতরণে অনিয়মের অভিযোগে সামাজিক মাধ্যমের পোস্ট", meta: "বেনামি ফেসবুক পেজ · উৎস যাচাই করা যায়নি", sources: 1, suggested: "exclude" },
+  { id: "AI-08", profileId: "KAR-814369", category: "ইতিবাচক", title: "নির্বাচন কমিশনের হলফনামায় কোনো ফৌজদারি মামলার তথ্য নেই", meta: "নির্বাচন কমিশনের হলফনামা · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
+  { id: "AI-09", profileId: "KAR-693152", category: "ইতিবাচক", title: "২০২৫–২৬ অর্থবছরে ওয়ার্ড ২২-এ দুটি স্কুল ভবন সংস্কার", meta: "গাজীপুর সিটি কর্পোরেশনের বার্ষিক প্রতিবেদন · এআই কর্তৃক প্রাপ্ত", sources: 1, suggested: "keep" },
 ];
 
 export function createSeed(): Database {
   return {
     version: DB_VERSION,
-    admins: [{ id: "ADM-001", name: "Razib Khan", initials: "RK", email: "razib.khan@example.com", phone: "01711000001" }],
-    // ALARM IDs: political activists keep their audit file code; staff, reviewers and the admin share the same KAR series.
+    admins: [{ id: "KAR-482915", name: "Razib Khan", initials: "RK", email: "razib.khan@example.com", phone: "01711000001" }],
+    // Every account's id is its ALARM ID (KAR- + 6 digits) — the one identifier people use everywhere.
     users: [
-      { id: "ADM-001", role: "admin", phone: "01711000001", password: DEMO_PASSWORD, subjectId: "ADM-001", alarmId: "KAR-2026-0001" },
-      ...reviewers.map((r, i) => ({ id: r.id, role: "reviewer" as const, phone: r.phone, password: DEMO_PASSWORD, subjectId: r.id, alarmId: `KAR-2026-${String(301 + i).padStart(4, "0")}` })),
-      ...staff.map((x, i) => ({ id: x.id, role: "staff" as const, phone: x.phone, password: DEMO_PASSWORD, subjectId: x.id, alarmId: `KAR-2026-${String(201 + i).padStart(4, "0")}` })),
-      ...profiles.map((p) => ({ id: p.id, role: "politician" as const, phone: p.phone, password: DEMO_PASSWORD, subjectId: p.id, alarmId: p.audit.code })),
+      { id: "KAR-482915", role: "admin", phone: "01711000001", password: DEMO_PASSWORD, subjectId: "KAR-482915" },
+      ...reviewers.map((r) => ({ id: r.id, role: "reviewer" as const, phone: r.phone, password: DEMO_PASSWORD, subjectId: r.id })),
+      ...staff.map((x) => ({ id: x.id, role: "staff" as const, phone: x.phone, password: DEMO_PASSWORD, subjectId: x.id })),
+      ...profiles.map((p) => ({ id: p.id, role: "politician" as const, phone: p.phone, password: DEMO_PASSWORD, subjectId: p.id })),
     ],
     profiles,
     submissions,
@@ -624,20 +624,20 @@ export function createSeed(): Database {
       {
         code: "DSP-009",
         submissionCode: "SUB-0412",
-        profileId: "PRF-001",
+        profileId: "KAR-702438",
         reason: "প্রসঙ্গ অসম্পূর্ণ",
         claim: "দরপত্রটি উন্মুক্ত প্রক্রিয়ায় হয়েছে এবং আমি মূল্যায়ন কমিটিতে ছিলাম না — কমিটির কার্যবিবরণী সংযুক্ত।",
         attachments: ["মূল্যায়ন কমিটির কার্যবিবরণী"],
         filedAt: t("2026-09-12", "10:30"),
         state: "Response",
         decidedAt: t("2026-09-14", "12:02"),
-        decidedBy: "ADM-001",
+        decidedBy: "KAR-482915",
         decisionReason: "কার্যবিবরণী অনুযায়ী তিনি মূল্যায়ন কমিটিতে ছিলেন না — বক্তব্যটি রিপোর্টে যুক্ত হলো। তবে মালিকানার তথ্য নথিভিত্তিক, তাই রিপোর্ট বহাল।",
       },
       {
         code: "DSP-014",
         submissionCode: "SUB-0409",
-        profileId: "PRF-001",
+        profileId: "KAR-702438",
         reason: "তথ্য ভুল",
         claim: "দাখিলা রেকর্ডে যে জমি দেখানো হয়েছে তার ০.৩৩ একর ২০২২ সালে ওয়ারিশসূত্রে হস্তান্তরিত হয়েছে। হস্তান্তরের দলিল ও নামজারির কাগজ সংযুক্ত করেছি।",
         attachments: ["হস্তান্তর দলিল ৪৪৫২/২২", "নামজারি খতিয়ান"],
@@ -647,7 +647,7 @@ export function createSeed(): Database {
       {
         code: "DSP-015",
         submissionCode: "SUB-0400",
-        profileId: "PRF-002",
+        profileId: "KAR-265917",
         reason: "প্রসঙ্গ অসম্পূর্ণ",
         claim: "ঠিকাদারি প্রতিষ্ঠানটির মালিকানা ২০২৩ সালেই হস্তান্তর হয়েছে, দরপত্রের সময় আমার পরিবারের কেউ মালিক ছিলেন না। আরজেএসসি-র হালনাগাদ সনদ দিয়েছি।",
         attachments: ["আরজেএসসি হালনাগাদ সনদ, ১৪ সেপ্টেম্বর ২০২৬"],
@@ -657,7 +657,7 @@ export function createSeed(): Database {
       {
         code: "DSP-016",
         submissionCode: "SUB-0426",
-        profileId: "PRF-006",
+        profileId: "KAR-693152",
         reason: "অন্যান্য",
         claim: "প্রতিবেদনে ওয়ার্ড ২২-এর দুটি সড়কের কথা বলা হয়েছে, কিন্তু একটি সড়ক ওয়ার্ড ২১-এর — সমাপ্তি প্রতিবেদনে তা স্পষ্ট। সংশোধন চাই।",
         attachments: [],
@@ -667,15 +667,15 @@ export function createSeed(): Database {
     ],
     staff,
     assignments: [
-      { id: "ASG-01", staffId: "FS-018", profileId: "PRF-003", brief: "হলফনামায় ঘোষিত সম্পদের সাথে ভূমি অফিসের দাখিলা রেকর্ড মিলিয়ে দেখুন। ওয়ার্ড কার্যালয়ের হাজিরা খাতার ছবি নিন।", wards: "ওয়ার্ড ১৩, মিরপুর মডেল", due: "2026-09-29", open: true },
-      { id: "ASG-02", staffId: "FS-018", profileId: "PRF-006", brief: "চলতি অর্থবছরের দুটি সড়ক প্রকল্পের বর্তমান অবস্থা ছবিসহ নথিভুক্ত করুন। প্রকল্প সাইনবোর্ডের ছবি বাধ্যতামূলক।", wards: "ওয়ার্ড ২২, গাজীপুর সদর", due: "2026-09-26", open: true },
-      { id: "ASG-03", staffId: "FS-027", profileId: "PRF-001", brief: "জলাশয় ভরাট ও ত্রাণ বিতরণ নিয়ে সংগৃহীত তথ্যের দাপ্তরিক নথি সংগ্রহ করুন।", wards: "ওয়ার্ড ১২, ১৪, বোয়ালিয়া", due: "2026-09-27", open: true },
-      { id: "ASG-04", staffId: "FS-024", profileId: "PRF-002", brief: "অনুদান বিতরণের তালিকার দাপ্তরিক উৎস খুঁজে বের করুন।", wards: "ওয়ার্ড ১৭, ৩৪, কোতোয়ালী", due: "2026-09-30", open: true },
-      { id: "ASG-05", staffId: "FS-033", profileId: "PRF-002", brief: "ড্রেন প্রকল্পের ঠিকাদার মালিকানা হস্তান্তরের নথি যাচাই করুন।", wards: "ওয়ার্ড ৩২, ৩৫, কোতোয়ালী", due: "2026-09-28", open: true },
-      { id: "ASG-06", staffId: "FS-031", profileId: "PRF-004", brief: "নতুন অর্থবছরের প্রকল্প তালিকা ও অগ্রগতি সংগ্রহ করুন।", wards: "ওয়ার্ড ৩, ৫, ৭, সদর", due: "2026-10-02", open: true },
-      { id: "ASG-07", staffId: "FS-009", profileId: "PRF-006", brief: "ওয়ার্ড ২২-এর স্কুল ভবন সংস্কারের নথি সংগ্রহ করুন।", wards: "ওয়ার্ড ২২, গাজীপুর সদর", due: "2026-10-01", open: true },
-      { id: "ASG-08", staffId: "FS-042", profileId: "PRF-003", brief: "মিরপুরের ড্রেনেজ প্রকল্পের অগ্রগতি নথিভুক্ত করুন।", wards: "ওয়ার্ড ১১, ১২, মিরপুর মডেল", due: "2026-09-25", open: true },
-      { id: "ASG-09", staffId: "FS-018", profileId: "PRF-001", brief: "সংগ্রহ সম্পন্ন — রাজশাহী থেকে দায়িত্ব স্থানান্তরিত।", wards: "ওয়ার্ড ১২, বোয়ালিয়া", due: "2026-09-10", open: false },
+      { id: "ASG-01", staffId: "KAR-615283", profileId: "KAR-814369", brief: "হলফনামায় ঘোষিত সম্পদের সাথে ভূমি অফিসের দাখিলা রেকর্ড মিলিয়ে দেখুন। ওয়ার্ড কার্যালয়ের হাজিরা খাতার ছবি নিন।", wards: "ওয়ার্ড ১৩, মিরপুর মডেল", due: "2026-09-29", open: true },
+      { id: "ASG-02", staffId: "KAR-615283", profileId: "KAR-693152", brief: "চলতি অর্থবছরের দুটি সড়ক প্রকল্পের বর্তমান অবস্থা ছবিসহ নথিভুক্ত করুন। প্রকল্প সাইনবোর্ডের ছবি বাধ্যতামূলক।", wards: "ওয়ার্ড ২২, গাজীপুর সদর", due: "2026-09-26", open: true },
+      { id: "ASG-03", staffId: "KAR-528610", profileId: "KAR-702438", brief: "জলাশয় ভরাট ও ত্রাণ বিতরণ নিয়ে সংগৃহীত তথ্যের দাপ্তরিক নথি সংগ্রহ করুন।", wards: "ওয়ার্ড ১২, ১৪, বোয়ালিয়া", due: "2026-09-27", open: true },
+      { id: "ASG-04", staffId: "KAR-274906", profileId: "KAR-265917", brief: "অনুদান বিতরণের তালিকার দাপ্তরিক উৎস খুঁজে বের করুন।", wards: "ওয়ার্ড ১৭, ৩৪, কোতোয়ালী", due: "2026-09-30", open: true },
+      { id: "ASG-05", staffId: "KAR-947263", profileId: "KAR-265917", brief: "ড্রেন প্রকল্পের ঠিকাদার মালিকানা হস্তান্তরের নথি যাচাই করুন।", wards: "ওয়ার্ড ৩২, ৩৫, কোতোয়ালী", due: "2026-09-28", open: true },
+      { id: "ASG-06", staffId: "KAR-839151", profileId: "KAR-539021", brief: "নতুন অর্থবছরের প্রকল্প তালিকা ও অগ্রগতি সংগ্রহ করুন।", wards: "ওয়ার্ড ৩, ৫, ৭, সদর", due: "2026-10-02", open: true },
+      { id: "ASG-07", staffId: "KAR-460372", profileId: "KAR-693152", brief: "ওয়ার্ড ২২-এর স্কুল ভবন সংস্কারের নথি সংগ্রহ করুন।", wards: "ওয়ার্ড ২২, গাজীপুর সদর", due: "2026-10-01", open: true },
+      { id: "ASG-08", staffId: "KAR-193847", profileId: "KAR-814369", brief: "মিরপুরের ড্রেনেজ প্রকল্পের অগ্রগতি নথিভুক্ত করুন।", wards: "ওয়ার্ড ১১, ১২, মিরপুর মডেল", due: "2026-09-25", open: true },
+      { id: "ASG-09", staffId: "KAR-615283", profileId: "KAR-702438", brief: "সংগ্রহ সম্পন্ন — রাজশাহী থেকে দায়িত্ব স্থানান্তরিত।", wards: "ওয়ার্ড ১২, বোয়ালিয়া", due: "2026-09-10", open: false },
     ],
     reviewers,
     reports: SEED_REPORTS,
@@ -690,7 +690,7 @@ export function createSeed(): Database {
       { name: "স্বতন্ত্র", kind: "Party" },
       { name: "জাতীয় শ্রমিক লীগ", kind: "Organisation" },
       { name: "সুশাসনের জন্য নাগরিক (সুজন)", kind: "Organisation" },
-      { name: "অ্যাডমিন কর্তৃক শুরু", kind: "Organisation" },
+      { name: "প্রধান নির্বাহী সম্পাদক কর্তৃক শুরু", kind: "Organisation" },
     ],
     settings: {
       org: "ALARM Bangladesh",
@@ -726,12 +726,12 @@ export function createSeed(): Database {
         title: "অক্টোবরের মাঠ পর্যালোচনা সভা",
         agenda: "১. সেপ্টেম্বরের জমা ও সিদ্ধান্তের সারসংক্ষেপ\n২. বাকি থাকা পর্যালোচনা ও এলাকা বণ্টন\n৩. খোলা অভিযোগের অগ্রগতি",
         scheduledAt: t("2026-10-08", "11:00"),
-        createdBy: "ADM-001",
+        createdBy: "KAR-482915",
         createdAt: t("2026-09-28", "16:10"),
         status: "scheduled",
         area: { division: "ঢাকা", district: "ঢাকা", upazila: "", thana: "", ward: "" },
-        invitees: ["REV-004", "REV-013"],
-        requests: [{ userId: "FS-024", at: t("2026-09-29", "09:40"), note: "বাকলিয়ার কাজের অগ্রগতি জানাতে চাই।", state: "pending" }],
+        invitees: ["KAR-736204", "KAR-327548"],
+        requests: [{ userId: "KAR-274906", at: t("2026-09-29", "09:40"), note: "বাকলিয়ার কাজের অগ্রগতি জানাতে চাই।", state: "pending" }],
         presence: [],
         attended: [],
         removed: [],
@@ -742,7 +742,7 @@ export function createSeed(): Database {
         title: "রাজনৈতিক কর্মীদের সাথে প্রক্রিয়া পরিচিতি",
         agenda: "প্রোফাইল, কার্যক্রম যোগ করা ও অভিযোগ জানানোর প্রক্রিয়া নিয়ে প্রশ্নোত্তর।",
         scheduledAt: t("2026-10-14", "15:30"),
-        createdBy: "ADM-001",
+        createdBy: "KAR-482915",
         createdAt: t("2026-09-30", "12:00"),
         status: "scheduled",
         area: { division: "", district: "", upazila: "", thana: "", ward: "" },
@@ -755,33 +755,33 @@ export function createSeed(): Database {
       {
         id: "MTG-001",
         code: "f9xd-4gem-q2vr",
-        title: "পর্যালোচক সমন্বয় সভা",
+        title: "নির্বাহী সম্পাদক সমন্বয় সভা",
         agenda: "পর্যালোচনার মানদণ্ড ও ৪৮ ঘণ্টার মধ্যে সিদ্ধান্ত দেওয়ার নিয়ম।",
         scheduledAt: t("2026-09-22", "10:00"),
-        createdBy: "ADM-001",
+        createdBy: "KAR-482915",
         createdAt: t("2026-09-18", "14:20"),
         status: "ended",
         startedAt: t("2026-09-22", "10:02"),
         endedAt: t("2026-09-22", "10:41"),
         area: { division: "ঢাকা", district: "", upazila: "", thana: "", ward: "" },
-        invitees: ["REV-004", "REV-009", "REV-011", "REV-013"],
+        invitees: ["KAR-736204", "KAR-158392", "KAR-904617", "KAR-327548"],
         requests: [],
         presence: [],
-        attended: ["ADM-001", "REV-004", "REV-009", "REV-013"],
+        attended: ["KAR-482915", "KAR-736204", "KAR-158392", "KAR-327548"],
         removed: [],
       },
     ],
     audit: [
-      { at: t("2026-09-24", "09:15"), actor: "FS-018", action: "Submitted evidence", target: "SUB-0427" },
-      { at: t("2026-09-24", "08:30"), actor: "PRF-006", action: "Filed dispute", target: "DSP-016" },
-      { at: t("2026-09-23", "18:37"), actor: "ADM-001", action: "Assigned reviewer coverage", target: "REV-009" },
-      { at: t("2026-09-23", "10:20"), actor: "PRF-001", action: "Added own activity", target: "SUB-0428" },
-      { at: t("2026-09-23", "09:40"), actor: "PRF-002", action: "Filed dispute", target: "DSP-015" },
-      { at: t("2026-09-22", "15:10"), actor: "FS-027", action: "Submitted evidence", target: "SUB-0422" },
-      { at: t("2026-09-21", "10:08"), actor: "PRF-001", action: "Filed dispute", target: "DSP-014" },
-      { at: t("2026-09-16", "10:24"), actor: "REV-004", action: "Approved and signed report", target: "RPT-2026-0039" },
-      { at: t("2026-09-14", "12:02"), actor: "ADM-001", action: "Decided dispute — response added", target: "DSP-009" },
-      { at: t("2026-08-26", "17:40"), actor: "ADM-001", action: "Suspended account", target: "FS-042" },
+      { at: t("2026-09-24", "09:15"), actor: "KAR-615283", action: "Submitted evidence", target: "SUB-0427" },
+      { at: t("2026-09-24", "08:30"), actor: "KAR-693152", action: "Filed dispute", target: "DSP-016" },
+      { at: t("2026-09-23", "18:37"), actor: "KAR-482915", action: "Assigned executive editor coverage", target: "KAR-158392" },
+      { at: t("2026-09-23", "10:20"), actor: "KAR-702438", action: "Added own activity", target: "SUB-0428" },
+      { at: t("2026-09-23", "09:40"), actor: "KAR-265917", action: "Filed dispute", target: "DSP-015" },
+      { at: t("2026-09-22", "15:10"), actor: "KAR-528610", action: "Submitted evidence", target: "SUB-0422" },
+      { at: t("2026-09-21", "10:08"), actor: "KAR-702438", action: "Filed dispute", target: "DSP-014" },
+      { at: t("2026-09-16", "10:24"), actor: "KAR-736204", action: "Approved and signed report", target: "RPT-2026-0039" },
+      { at: t("2026-09-14", "12:02"), actor: "KAR-482915", action: "Decided dispute — response added", target: "DSP-009" },
+      { at: t("2026-08-26", "17:40"), actor: "KAR-482915", action: "Suspended account", target: "KAR-193847" },
     ],
   };
 }

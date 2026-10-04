@@ -81,7 +81,7 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
   };
 
   const stats = [
-    { label: "ACCEPTED SUBMISSIONS", value: String(staffAll), color: "#0D1F17", note: `গৃহীত জমা · from ${a.staffCount} field staff, queue clear` },
+    { label: "ACCEPTED SUBMISSIONS", value: String(staffAll), color: "#0D1F17", note: `গৃহীত জমা · from ${a.staffCount} investigation editors, queue clear` },
     { label: "AI FOUND ITSELF", value: String(aiAll.length), color: "#1D6FC0", note: `পাবলিক রেকর্ড · ${aiAll.filter((f) => choice[f.id] === "keep").length} kept` },
     { label: "KEPT FOR REPORT", value: String(kept.length), color: "#1A7A4A", note: `রাখা হয়েছে · of ${a.findings.length} findings` },
     { label: "EXCLUDED", value: String(excluded), color: "#4A7060", note: "বাদ · stays on the audit record" },
@@ -178,7 +178,7 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
               onClick={() => setAll((f) => (f.kind === "staff" ? "keep" : "exclude"))}
               className="h-9 cursor-pointer rounded-button border border-line bg-white px-3.5 text-[13px] font-semibold text-primary hover:border-primary hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Keep staff evidence only
+              Keep investigation evidence only
             </button>
           </div>
         </div>
@@ -219,9 +219,9 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,445px)]">
           <section className="rounded-card border border-line bg-white px-5 py-4 shadow-card">
             <label htmlFor="ai-note" className="block">
-              <span className="block text-[15px] font-semibold text-ink">Admin note on this selection</span>
+              <span className="block text-[15px] font-semibold text-ink">Chief Executive Editor&apos;s note on this selection</span>
               <span className="mt-0.5 block text-[12px] text-muted">
-                <span className="font-bn">নির্বাচনের ব্যাখ্যা</span> · Saved with the report version, visible to the reviewer
+                <span className="font-bn">নির্বাচনের ব্যাখ্যা</span> · Saved with the report version, visible to the executive editor
                 {excluded > 0 && <span className="text-danger"> · required when anything is excluded</span>}
               </span>
             </label>
@@ -272,7 +272,7 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
                   {a.reportCode} v{a.version} generated · {kept.length} findings, {sources} sources.
                 </p>
                 <p className="mt-1 text-[12px] leading-normal text-muted">
-                  The selection is locked and the report waits for the reviewer&apos;s sign-off. A new version is only created if more data is added and re-analysed.
+                  The selection is locked and the report waits for the executive editor&apos;s sign-off. A new version is only created if more data is added and re-analysed.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
@@ -300,7 +300,7 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
                 </p>
                 <div className="mt-4">{generateButton(true)}</div>
                 <p className="mt-2.5 text-center text-[11.5px] text-muted">
-                  {kept.length === 0 ? "Keep at least one finding to generate the report." : `Signed as ${admin} · Admin · ${today()}`}
+                  {kept.length === 0 ? "Keep at least one finding to generate the report." : `Signed as ${admin} · Chief Executive Editor · ${today()}`}
                 </p>
               </>
             )}

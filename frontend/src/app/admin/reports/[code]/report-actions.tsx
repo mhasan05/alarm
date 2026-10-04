@@ -32,7 +32,7 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
           type="button"
           onClick={share}
           disabled={!approved}
-          title={approved ? undefined : "Available once the reviewer approves the report"}
+          title={approved ? undefined : "Available once the executive editor approves the report"}
           className={`${btn} border-line bg-white text-ink hover:border-primary hover:text-primary`}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -44,7 +44,7 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
           type="button"
           onClick={() => window.print()}
           disabled={!approved}
-          title={approved ? `Save ${code} as PDF from the print dialog` : "Available once the reviewer approves the report"}
+          title={approved ? `Save ${code} as PDF from the print dialog` : "Available once the executive editor approves the report"}
           className={`${btn} border-primary bg-primary text-white hover:bg-primary-hover`}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -55,11 +55,11 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
       </div>
       <p role="status" className="text-[11.5px] text-muted">
         {copied === "ok"
-          ? "Link copied — only signed-in admins and reviewers can open it."
+          ? "Link copied — only signed-in chief executive and executive editors can open it."
           : copied === "fail"
             ? "Couldn't copy — copy the address from the browser bar."
             : !approved
-              ? "Sharing and PDF unlock once the reviewer approves."
+              ? "Sharing and PDF unlock once the executive editor approves."
               : ""}
       </p>
     </div>

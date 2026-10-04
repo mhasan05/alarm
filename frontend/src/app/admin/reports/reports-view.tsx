@@ -178,8 +178,8 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
         {showHow && (
           <div id="how-versions" className="border-t border-line bg-surface/60 px-5 py-4 text-[13px] leading-relaxed text-ink">
             <ol className="list-decimal space-y-1.5 pl-5 text-pretty">
-              <li>The admin keeps or excludes each AI finding; only kept items are written. That cut becomes <strong>v1</strong>, a draft.</li>
-              <li>The reviewer adds their remark and approves it — only then can it be shared or downloaded.</li>
+              <li>The chief executive editor keeps or excludes each AI finding; only kept items are written. That cut becomes <strong>v1</strong>, a draft.</li>
+              <li>The executive editor adds their remark and approves it — only then can it be shared or downloaded.</li>
               <li>A new version is cut only when more accepted data is added and re-analysed. The earlier version becomes superseded.</li>
               <li>Superseded versions stay readable with their own source index. Nothing is edited in place.</li>
             </ol>

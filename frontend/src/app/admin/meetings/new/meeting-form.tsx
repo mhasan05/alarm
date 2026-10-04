@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { PageHeader } from "@/components/app-shell";
 import { Field, inputClass } from "@/components/form";
 import { AreaPicker, areaFromGeo } from "@/components/meetings/area-picker";
 import { InvitePicker } from "@/components/meetings/invite-picker";
 import { bn } from "@/lib/db/format";
 import { areaMembers, createMeeting } from "@/lib/db/meetings";
+import { useNow } from "@/lib/use-client";
 import { useGeoCascade } from "@/lib/use-geo-cascade";
 import { useAdmin } from "../../use-admin";
 
@@ -35,29 +36,27 @@ export function MeetingForm() {
   const { db, adminId } = useAdmin();
   const [title, setTitle] = useState("");
   const [agenda, setAgenda] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  // null = untouched, so the field shows the default (today, the next full hour).
+  const [dateIn, setDate] = useState<string | null>(null);
+  const [timeIn, setTime] = useState<string | null>(null);
   const geo = useGeoCascade();
   const [invitees, setInvitees] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const memberList = areaMembers(db, areaFromGeo(geo));
   const memberIds = new Set(memberList.map((u) => u.id));
   const members = memberList.length;
-  const [today, setToday] = useState("");
-
-  // Defaults depend on the user's clock, so they're set after mount: today, the next full hour.
-  useEffect(() => {
-    const d = new Date();
-    d.setHours(d.getHours() + 1, 0, 0, 0);
-    setToday(localDate(new Date()));
-    setDate(localDate(d));
-    setTime(`${pad(d.getHours())}:00`);
-  }, []);
+  // The defaults depend on the user's clock, so they appear after hydration (now is 0 until then).
+  const now = useNow(60_000);
+  const nextHour = now ? new Date(now) : null;
+  nextHour?.setHours(nextHour.getHours() + 1, 0, 0, 0);
+  const today = now ? localDate(new Date(now)) : "";
+  const date = dateIn ?? (nextHour ? localDate(nextHour) : "");
+  const time = timeIn ?? (nextHour ? `${pad(nextHour.getHours())}:00` : "");
 
   const when = date && time ? new Date(`${date}T${time}:00`) : null;
   const errors = {
     title: title.trim().length < 5 ? "মিটিংয়ের শিরোনাম লিখুন (কমপক্ষে ৫ অক্ষর)।" : "",
-    when: !when || Number.isNaN(when.getTime()) ? "তারিখ ও সময় দিন।" : when.getTime() < Date.now() - 5 * 60_000 ? "অতীতের সময় দেওয়া যাবে না।" : "",
+    when: !when || Number.isNaN(when.getTime()) ? "তারিখ ও সময় দিন।" : when.getTime() < now - 5 * 60_000 ? "অতীতের সময় দেওয়া যাবে না।" : "",
   };
   const firstError = (Object.keys(errors) as (keyof typeof errors)[]).find((k) => errors[k]);
   const show = (k: keyof typeof errors) => (submitted ? errors[k] : "");

@@ -71,7 +71,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
     // Record the decision with any edits; edited evidence replaces the submitted list.
     const kept: Evidence[] = evidence
       .filter((e) => !e.removed)
-      .map((e) => (e.added && e.file ? { id: e.id, kind: evidenceKind(e.file), title: e.title, meta: "পর্যালোচকের সংযোজন" } : { id: e.id, kind: e.thumb, title: e.title, meta: e.meta }));
+      .map((e) => (e.added && e.file ? { id: e.id, kind: evidenceKind(e.file), title: e.title, meta: "নির্বাহী সম্পাদকের সংযোজন" } : { id: e.id, kind: e.thumb, title: e.title, meta: e.meta }));
     const edits = changedLabels.length ? { category: data.category, title: data.title, body: data.body, evidence: kept } : undefined;
     recordDecision(item.code, reviewerId, d === "গৃহীত" ? "Accepted" : "Rejected", reason.trim(), edits);
     setDecided(d);
@@ -82,7 +82,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
       <section className="rounded-card border border-line bg-white px-6 py-8 text-center shadow-card">
         <h2 className="text-[16px] font-semibold">এই জমার সিদ্ধান্ত হয়ে গেছে</h2>
         <p className="mx-auto mt-1.5 max-w-md text-[12.5px] leading-relaxed text-muted text-pretty">
-          {item.code} আর পর্যালোচনার সারিতে নেই।{item.decidedBy === reviewerId ? " আপনার সিদ্ধান্তের বিস্তারিত ইতিহাসে দেখুন।" : " অন্য একজন পর্যালোচক এটি নিষ্পত্তি করেছেন।"}
+          {item.code} আর পর্যালোচনার সারিতে নেই।{item.decidedBy === reviewerId ? " আপনার সিদ্ধান্তের বিস্তারিত ইতিহাসে দেখুন।" : " অন্য একজন নির্বাহী সম্পাদক এটি নিষ্পত্তি করেছেন।"}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2.5">
           {item.decidedBy === reviewerId && (
@@ -116,7 +116,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
           <span className="flex-none whitespace-nowrap font-mono text-[11px] font-semibold text-muted">{item.code}</span>
           {changedLabels.length > 0 && (
             <span className="flex-none whitespace-nowrap rounded-input bg-role-reviewer/10 px-2 py-[3px] text-[11px] font-semibold text-role-reviewer">
-              পর্যালোচক সম্পাদিত
+              নির্বাহী সম্পাদক সম্পাদিত
             </span>
           )}
           <span className="min-w-2.5 flex-1" />
@@ -285,7 +285,7 @@ export function ReviewWorkspace({ item, profileName, reviewerId, nextCode }: { i
             <textarea
               id="rv-reason"
               rows={3}
-              placeholder="কোন প্রমাণের ভিত্তিতে গ্রহণ করছেন, অথবা কেন বাতিল করছেন — স্পষ্ট করে লিখুন। জমাদানকারী মাঠকর্মী এটি দেখতে পাবেন।"
+              placeholder="কোন প্রমাণের ভিত্তিতে গ্রহণ করছেন, অথবা কেন বাতিল করছেন — স্পষ্ট করে লিখুন। জমাদানকারী তদন্ত সম্পাদক এটি দেখতে পাবেন।"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               aria-invalid={attempted && !reasonOk}
