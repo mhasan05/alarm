@@ -1,68 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand";
-import { DEMO_MODE } from "@/lib/demo";
-import { LoginForm, type DemoAccount } from "./login-form";
+import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "লগইন · ALARM" };
 
-const DEMO: DemoAccount[] = [
-  {
-    phone: "01711000000",
-    initials: "সু",
-    bnInitials: true,
-    name: "আরিফুর রহমান · সুপার অ্যাডমিন",
-    description: "প্রধান নির্বাহী সম্পাদক তৈরি, বন্ধ করা ও এক ক্লিকে তাঁদের অ্যাকাউন্টে প্রবেশ",
-    bnDescription: true,
-    fg: "text-[#3B2A6B]",
-    tint: "bg-[#3B2A6B]/12",
-    hover: "hover:border-[#3B2A6B] hover:bg-[#3B2A6B]/5",
-  },
-  {
-    phone: "01711000001",
-    initials: "রা",
-    bnInitials: true,
-    name: "রাজিব খান · প্রধান নির্বাহী সম্পাদক",
-    description: "অ্যাকাউন্ট তৈরি, জমা এডিট, অভিযোগের সমাধান, বিশ্লেষণ ও প্রতিবেদন",
-    bnDescription: true,
-    fg: "text-role-admin",
-    tint: "bg-role-admin/12",
-    hover: "hover:border-primary hover:bg-surface",
-  },
-  {
-    phone: "01711000002",
-    initials: "ফা",
-    bnInitials: true,
-    name: "ফারহানা ইয়াসমিন · নির্বাহী সম্পাদক",
-    description: "জমা গ্রহণ বা বাতিল করেন, চূড়ান্ত প্রতিবেদনে সই করেন",
-    bnDescription: true,
-    fg: "text-role-reviewer",
-    tint: "bg-role-reviewer/12",
-    hover: "hover:border-primary hover:bg-surface",
-  },
-  {
-    phone: "01711000003",
-    initials: "জা",
-    bnInitials: true,
-    name: "জাহিদুল হক · তদন্ত সম্পাদক",
-    description: "মাঠ থেকে তথ্য সংগ্রহ করে জমা দেন",
-    bnDescription: true,
-    fg: "text-role-staff",
-    tint: "bg-role-staff/12",
-    hover: "hover:border-primary hover:bg-surface",
-  },
-  {
-    phone: "01711000004",
-    initials: "র",
-    bnInitials: true,
-    name: "মোঃ রফিকুল ইসলাম · রাজনৈতিক কর্মী",
-    description: "নিজের প্রোফাইল দেখেন, নিজের কাজ যোগ করেন, অভিযোগ জানান",
-    bnDescription: true,
-    fg: "text-role-politician",
-    tint: "bg-role-politician/12",
-    hover: "hover:border-role-politician hover:bg-role-politician-tint",
-  },
-];
 
 /** `?next=` returns to the page that required sign-in. */
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -79,7 +21,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <h1 className="text-[19px] font-semibold leading-[1.5] text-ink">আপনার অ্যাকাউন্টে লগইন করুন</h1>
           <p className="mt-1 text-[13px] leading-[1.6] text-muted">অডিট ও জবাবদিহিতা ব্যবস্থা</p>
 
-          <LoginForm next={typeof next === "string" ? next : undefined} demo={DEMO_MODE ? DEMO : undefined} notice={notice} />
+          <LoginForm next={typeof next === "string" ? next : undefined} notice={notice} />
         </div>
       </div>
 

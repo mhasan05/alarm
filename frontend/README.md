@@ -33,7 +33,7 @@ Environment:
 
 | Variable | Meaning |
 |---|---|
-| `NEXT_PUBLIC_DEMO_MODE` | `true` shows one-click demo logins and "Reset demo data". Set `false` for real users. |
+| `NEXT_PUBLIC_DEMO_MODE` | `true` shows the "Reset demo data" button in Settings. Keep `false` on the live site. The login page never lists demo accounts. |
 | `NEXT_PUBLIC_SITE_URL` | Public URL used for link previews (default `https://bdalarm.org`). |
 
 Deploying to the VPS: see [DEPLOYMENT.md](DEPLOYMENT.md).

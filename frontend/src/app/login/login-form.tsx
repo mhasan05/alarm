@@ -5,11 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { inputClass } from "@/components/form";
 import { login } from "@/lib/auth-client";
-import { DEMO_PASSWORD } from "@/lib/db/seed";
 
-export type DemoAccount = { phone: string; initials: string; bnInitials?: boolean; name: string; description: string; bnDescription?: boolean; fg: string; tint: string; hover: string };
-
-export function LoginForm({ next, demo = [], notice }: { next?: string; demo?: DemoAccount[]; notice?: string }) {
+export function LoginForm({ next, notice }: { next?: string; notice?: string }) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -118,39 +115,6 @@ export function LoginForm({ next, demo = [], notice }: { next?: string; demo?: D
         </button>
       </form>
 
-      {demo.length > 0 && (
-      <div className="mt-[34px] border-t border-line pt-[18px]">
-        <div className="flex items-baseline justify-between gap-3">
-          <div className="text-[12px] font-semibold text-muted">ডেমো অ্যাকাউন্ট</div>
-          <div className="text-[11px] text-muted">
-            পাসওয়ার্ড <code className="rounded bg-surface px-1 font-mono text-[11px] text-ink">{DEMO_PASSWORD}</code>
-          </div>
-        </div>
-        <div className="mt-2.5 flex flex-col gap-2">
-          {demo.map((r) => (
-            <button
-              key={r.phone}
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setPhone(r.phone);
-                setPassword(DEMO_PASSWORD);
-                signIn(r.phone, DEMO_PASSWORD);
-              }}
-              className={`flex cursor-pointer items-center gap-[11px] rounded-button border border-line px-3 py-[11px] text-left ${r.hover}`}
-            >
-              <span className={`flex size-7 flex-none items-center justify-center rounded-full font-semibold ${r.fg} ${r.tint} ${r.bnInitials ? "font-bn text-[13px]" : "text-[10.5px]"}`}>
-                {r.initials}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[13px] font-semibold text-ink">{r.name}</span>
-                <span className={`block text-[11px] text-muted ${r.bnDescription ? "mt-0.5 font-bn leading-[1.55]" : "mt-px"}`}>{r.description}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-      )}
     </>
   );
 }

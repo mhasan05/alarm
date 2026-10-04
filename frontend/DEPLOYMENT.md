@@ -84,8 +84,7 @@ git clone https://github.com/mhasan05/alarm.git
 ```bash
 cd ~/projects/alarm/frontend
 cat > .env.production << 'EOF'
-# Live site: no demo account list on the login page and no "Reset demo data".
-# Set to true (and rebuild) only for a private demo.
+# Hides the "Reset demo data" button in Settings. (The login page never shows demo accounts.)
 NEXT_PUBLIC_DEMO_MODE=false
 EOF
 ```
@@ -286,7 +285,7 @@ sudo visudo -c        # must say: parsed OK
 | The other project's site opens instead | `sudo nginx -T \| grep server_name` — `bdalarm.org` must appear; check the symlink in `/etc/nginx/sites-enabled/`. |
 | Domain doesn't open at all | `ping bdalarm.org` shows the wrong IP (DNS), or ports 80/443 are blocked (ufw / hPanel firewall). |
 | Certbot fails | DNS isn't pointing at the server yet — wait and repeat step 7. |
-| Demo buttons missing / showing wrongly | Check `.env.production`, then rebuild and restart (steps 4 and 5d). |
+| Old page still showing after an update | Rebuild and restart (steps 4 and 5d), then hard-refresh the browser (Ctrl+F5). |
 
 ---
 
@@ -302,7 +301,7 @@ sudo visudo -c        # must say: parsed OK
 | তদন্ত সম্পাদক (Investigation Editor) | 01711000003 | KAR-615283 |
 | রাজনৈতিক কর্মী (Political Activist) | 01711000004 | KAR-814369 |
 
-Demo mode is off on the live site, so sign in with a mobile number and password. Setting `NEXT_PUBLIC_DEMO_MODE=true` in `.env.production` and rebuilding brings back the one-click demo list.
+Sign in with a mobile number and password — the login page has no demo-account shortcuts.
 
 - **Meetings:** open a meeting link and enter an ALARM ID, e.g. `KAR-814369` on the ward 13 meeting (inside its area, so they join directly). The same ID on the চট্টগ্রাম meeting gets the "request to join" screen instead. The প্রধান নির্বাহী সম্পাদক's own ID needs a sign-in.
 - **Data stays in each browser.** Until the backend is connected, whatever someone creates or changes is saved only in their own browser; every other person or device starts from the same sample data. Clearing the browser's site data restores it (the "Reset demo data" button appears only in demo mode).
