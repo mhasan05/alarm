@@ -14,7 +14,7 @@ const hindSiliguri = Hind_Siliguri({
   weight: ["400", "500", "600", "700"],
 });
 
-const DESCRIPTION = "ALARM Bangladesh — রাজনৈতিক কর্মীদের কাজের যাচাই করা অডিট ও জবাবদিহিতা ব্যবস্থা।";
+const DESCRIPTION = "Bangladesh Alarm — রাজনৈতিক কর্মীদের কাজের যাচাই করা অডিট ও জবাবদিহিতা ব্যবস্থা।";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://bdalarm.org"),
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   // Internal system: keep every page out of search engines.
   robots: { index: false, follow: false },
   // Link previews when the site or a meeting link is shared (WhatsApp, Messenger, email).
-  openGraph: { type: "website", siteName: "ALARM Bangladesh", title: "ALARM — অডিট ও জবাবদিহিতা প্ল্যাটফর্ম", description: DESCRIPTION, images: [{ url: "/logo.png", width: 497, height: 512, alt: "ALARM" }] },
+  openGraph: { type: "website", siteName: "Bangladesh Alarm", title: "ALARM — অডিট ও জবাবদিহিতা প্ল্যাটফর্ম", description: DESCRIPTION, images: [{ url: "/logo.png", width: 497, height: 512, alt: "ALARM" }] },
   twitter: { card: "summary", title: "ALARM — অডিট ও জবাবদিহিতা প্ল্যাটফর্ম", description: DESCRIPTION, images: ["/logo.png"] },
 };
 

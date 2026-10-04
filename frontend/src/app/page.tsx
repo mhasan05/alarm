@@ -363,7 +363,7 @@ export default async function HomePage() {
               {portal ? "আমার পোর্টাল" : "লগইন"}
             </Link>
           </nav>
-          <span className="ml-auto font-sans text-[12px] text-muted">© 2026 Alarm Bangladesh</span>
+          <span className="ml-auto font-sans text-[12px] text-muted">© 2026 Bangladesh Alarm</span>
         </div>
       </footer>
 

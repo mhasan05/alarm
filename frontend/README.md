@@ -1,6 +1,6 @@
 # ALARM — Frontend
 
-Audit and accountability system for ALARM Bangladesh (bdalarm.org). Next.js 16 (App Router), React 19, Tailwind CSS v4.
+Audit and accountability system for Bangladesh Alarm (bdalarm.org). Next.js 16 (App Router), React 19, Tailwind CSS v4.
 
 ## Roles
 

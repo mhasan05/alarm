@@ -239,7 +239,7 @@ export function AppShell({
           }`}
         >
           {footerNote && <div className="min-w-[200px] flex-1 text-[11.5px] leading-[1.65] text-muted text-pretty">{footerNote}</div>}
-          <div className="ml-auto text-[11.5px] text-muted">© 2026 Alarm Bangladesh</div>
+          <div className="ml-auto text-[11.5px] text-muted">© 2026 Bangladesh Alarm</div>
         </footer>
       </div>
 

@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <Link href="/" className="font-semibold text-primary hover:text-primary-hover">
           ← হোমপেজে ফিরুন
         </Link>
-        <span className="font-sans">© 2026 Alarm Bangladesh</span>
+        <span className="font-sans">© 2026 Bangladesh Alarm</span>
       </div>
     </main>
   );

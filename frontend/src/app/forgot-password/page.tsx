@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
         <Link href="/login" className="font-semibold text-primary hover:text-primary-hover">
           ← লগইন পাতায় ফিরুন
         </Link>
-        <span className="font-sans">© 2026 Alarm Bangladesh</span>
+        <span className="font-sans">© 2026 Bangladesh Alarm</span>
       </div>
     </main>
   );

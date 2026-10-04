@@ -14,7 +14,7 @@
 import { SEED_REPORTS } from "./seed-reports";
 import type { Admin, AiFinding, Database, Evidence, Party, Profile, RootStore, Settings, Staff, Submission } from "./types";
 
-export const DB_VERSION = 17;
+export const DB_VERSION = 18;
 
 /** Demo password for every seeded account (frontend preview only). */
 export const DEMO_PASSWORD = "Alarm@2026";
@@ -440,7 +440,7 @@ export function createSeed(): Database {
     reports: SEED_REPORTS,
     aiFindings,
     parties: DEFAULT_PARTIES.map((p) => ({ ...p })),
-    settings: defaultSettings("ALARM Bangladesh"),
+    settings: defaultSettings("Bangladesh Alarm"),
     meetings: [
       {
         id: "MTG-003",
@@ -565,7 +565,7 @@ export function createRoot(): RootStore {
   return {
     version: DB_VERSION,
     superAdmin: { id: SUPER_ADMIN_ID, name: "আরিফুর রহমান", phone: "01711000000", email: "superadmin@example.com", password: DEMO_PASSWORD },
-    orgs: [{ id: "ORG-001", name: "ALARM Bangladesh", adminId: ADMIN, status: "Active", createdAt: t("2026-09-01", "10:00"), db: createSeed() }],
+    orgs: [{ id: "ORG-001", name: "Bangladesh Alarm", adminId: ADMIN, status: "Active", createdAt: t("2026-09-01", "10:00"), db: createSeed() }],
     audit: [{ at: t("2026-09-01", "10:00"), actor: SUPER_ADMIN_ID, action: "প্রতিষ্ঠান ও প্রধান নির্বাহী সম্পাদকের অ্যাকাউন্ট তৈরি করেছেন", target: "ORG-001" }],
   };
 }

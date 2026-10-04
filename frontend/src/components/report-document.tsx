@@ -289,7 +289,7 @@ export function ReportDocument({
 
           <footer className="flex flex-wrap justify-between gap-3 border-t border-line px-5 py-3.5 font-bn text-[11px] text-muted sm:px-9">
             <span className="text-pretty">
-              ALARM Bangladesh তৈরি করেছে। সিস্টেমের তথ্য রাখার নিয়ম মেনে ব্যক্তিগত তথ্য গোপন রাখা হয়েছে। অনুমতি ছাড়া কাউকে দিলে তা লগে লেখা থাকে।
+              Bangladesh Alarm তৈরি করেছে। সিস্টেমের তথ্য রাখার নিয়ম মেনে ব্যক্তিগত তথ্য গোপন রাখা হয়েছে। অনুমতি ছাড়া কাউকে দিলে তা লগে লেখা থাকে।
             </span>
             <span className="whitespace-nowrap">
               পাতা ১ / ১ · {audit} · ভার্সন {bn(version.v)}

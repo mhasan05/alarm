@@ -10,7 +10,7 @@ Every account is identified by its ALARM ID (KAR- followed by 6 digits). Sign in
 | ৩ তদন্ত সম্পাদক (Investigation Editor) | জাহিদুল হক | 01711000003 | KAR-615283 |
 | ৪ রাজনৈতিক কর্মী (Political Activist) | মোঃ রফিকুল ইসলাম | 01711000004 | KAR-814369 |
 
-The সুপার অ্যাডমিন is above every organisation. The other four belong to the sample organisation **ALARM Bangladesh (ORG-001)** and all work in the same area: ঢাকা → মিরপুর মডেল থানা → ওয়ার্ড ১৩.
+The সুপার অ্যাডমিন is above every organisation. The other four belong to the sample organisation **Bangladesh Alarm (ORG-001)** and all work in the same area: ঢাকা → মিরপুর মডেল থানা → ওয়ার্ড ১৩.
 
 Sample content (one connected story):
 - Submissions SUB-0401 – SUB-0411 about রফিকুল ইসলাম, collected by জাহিদুল হক (two are his own):
