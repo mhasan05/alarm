@@ -13,9 +13,10 @@ import { decisionLabel } from "../decisions-view";
 
 /** A past decision reopened: the submission, the evidence judged, and the reason recorded. */
 export function DecisionDetailView({ code }: { code: string }) {
-  const { db, reviewer, decisions } = useReviewer();
-  const h = decisions.find((d) => d.code === code);
-  if (!h || !reviewer) return <RecordMissing title="সিদ্ধান্তটি পাওয়া যায়নি" backHref="/reviewer/decisions" backLabel="ইতিহাসে ফিরুন" />;
+  const { db, reviewer, allReports } = useReviewer();
+  // Any decided report from this area (decided by this নির্বাহী সম্পাদক or by the প্রধান নির্বাহী সম্পাদক).
+  const h = allReports.find((d) => d.code === code && d.state !== "Pending");
+  if (!h || !reviewer) return <RecordMissing title="সিদ্ধান্তটি পাওয়া যায়নি" backHref="/reviewer/decisions" backLabel="সকল প্রতিবেদনে ফিরুন" />;
 
   const profile = profileOf(db, h.profileId);
   const cat = CATEGORY_STYLE[h.category];
@@ -24,7 +25,7 @@ export function DecisionDetailView({ code }: { code: string }) {
 
   return (
     <>
-      <PageHeader backHref="/reviewer/decisions" crumb="নির্বাহী সম্পাদক পোর্টাল / সিদ্ধান্তের ইতিহাস / বিস্তারিত" title="সিদ্ধান্তের বিস্তারিত" action={<StartReviewButton />} />
+      <PageHeader backHref="/reviewer/decisions" crumb="নির্বাহী সম্পাদক পোর্টাল / সকল প্রতিবেদন / বিস্তারিত" title="প্রতিবেদনের বিস্তারিত" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-4 px-4 pt-[22px] pb-9 sm:px-7">
         <Link
@@ -34,7 +35,7 @@ export function DecisionDetailView({ code }: { code: string }) {
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M8.6 2.4 4 7l4.6 4.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          ইতিহাসে ফিরুন
+          সকল প্রতিবেদনে ফিরুন
         </Link>
 
         <article className="overflow-hidden rounded-card border border-line bg-white shadow-card">

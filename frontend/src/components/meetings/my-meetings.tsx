@@ -22,7 +22,7 @@ const ACCESS: Partial<Record<MeetingAccess, { label: string; cls: string }>> = {
   removed: { label: "সরানো হয়েছে", cls: "bg-danger/10 text-danger" },
 };
 
-const ORDER: Record<Meeting["status"], number> = { live: 0, scheduled: 1, ended: 2, cancelled: 3 };
+const ORDER: Record<Meeting["status"], number> = { live: 0, scheduled: 1, ended: 2, cancelled: 3 }; // live first, then upcoming
 const CODE = /([a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4})/i;
 
 /** "Meetings" page for political activists, field staff and reviewers. */
@@ -35,7 +35,11 @@ export function MyMeetings({ portal }: { portal: string }) {
   if (!me || me.role === "superadmin") return null;
   const role = me.role;
 
-  const mine = meetingsFor(db, me.userId).sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.status === "scheduled" ? a.scheduledAt.localeCompare(b.scheduledAt) : b.scheduledAt.localeCompare(a.scheduledAt)));
+  // Only ongoing and upcoming meetings this person may join (invited, in the area, or approved) —
+  // finished, cancelled, declined or still-waiting ones are not listed.
+  const mine = meetingsFor(db, me.userId)
+    .filter((m) => (m.status === "live" || m.status === "scheduled") && canEnter(accessOf(db, m, me.userId, role)))
+    .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.status === "scheduled" ? a.scheduledAt.localeCompare(b.scheduledAt) : b.scheduledAt.localeCompare(a.scheduledAt)));
   const live = mine.filter((m) => m.status === "live" && canEnter(accessOf(db, m, me.userId, role))).length;
 
   return (

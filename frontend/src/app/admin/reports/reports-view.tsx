@@ -5,8 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { bn } from "@/lib/db/format";
 
-export type Tab = "latest" | "all" | "draft" | "superseded";
-const TAB_LABEL: Record<Tab, string> = { latest: "সর্বশেষ", all: "সব ভার্সন", draft: "খসড়া", superseded: "পুরোনো ভার্সন" };
+export type Tab = "latest" | "all" | "superseded";
+const TAB_LABEL: Record<Tab, string> = { latest: "সর্বশেষ", all: "সব ভার্সন", superseded: "পুরোনো ভার্সন" };
 
 export type ReportRow = {
   code: string;
@@ -18,7 +18,6 @@ export type ReportRow = {
   meta: string;
   positive: number;
   negative: number;
-  approved: boolean;
   href: string;
 };
 
@@ -33,7 +32,6 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
   const lists: Record<Tab, ReportRow[]> = {
     latest: rows.filter((r) => r.latest),
     all: rows,
-    draft: rows.filter((r) => !r.approved),
     superseded: rows.filter((r) => !r.latest),
   };
   const q = query.trim().toLowerCase();
@@ -104,7 +102,7 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
                       {r.code}
                     </Link>
                     <div className="mt-0.5 text-[12px] text-muted">
-                      {r.approved ? "প্রকাশিত" : "তৈরি"} {r.date}
+                      প্রকাশিত {r.date}
                     </div>
                   </td>
                   <td className="px-3 py-4 align-middle">
@@ -132,11 +130,11 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
                   <td className="px-3 py-4 align-middle">
                     <span
                       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-0.5 text-[12px] font-medium ${
-                        !r.latest ? "bg-surface text-muted" : r.approved ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                        r.latest ? "bg-success/10 text-success" : "bg-surface text-muted"
                       }`}
                     >
                       <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-                      {!r.latest ? "পুরোনো ভার্সন" : r.approved ? "অনুমোদিত" : "অনুমোদনের অপেক্ষায়"}
+                      {r.latest ? "প্রকাশিত" : "পুরোনো ভার্সন"}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-right align-middle">
@@ -154,7 +152,7 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
                   <td colSpan={6} className="px-5 py-12 text-center">
                     <p className="text-[14px] font-semibold text-ink">{q ? "খুঁজে কিছু পাওয়া যায়নি" : "এখনও কিছু নেই"}</p>
                     <p className="mt-1 text-[12.5px] text-muted">
-                      {q ? "RPT-2026-0001 এর মতো প্রতিবেদন আইডি বা নামের অংশ দিয়ে চেষ্টা করুন।" : tab === "draft" ? "সব প্রতিবেদন অনুমোদিত হয়েছে।" : "কোনো পুরোনো ভার্সন নেই।"}
+                      {q ? "RPT-2026-0001 এর মতো প্রতিবেদন আইডি বা নামের অংশ দিয়ে চেষ্টা করুন।" : tab === "superseded" ? "কোনো পুরোনো ভার্সন নেই।" : "এখনও কোনো প্রতিবেদন তৈরি হয়নি।"}
                     </p>
                   </td>
                 </tr>
@@ -179,8 +177,8 @@ export function ReportsView({ rows, initialTab }: { rows: ReportRow[]; initialTa
         {showHow && (
           <div id="how-versions" className="border-t border-line bg-surface/60 px-5 py-4 text-[13px] leading-relaxed text-ink">
             <ol className="list-decimal space-y-1.5 pl-5 text-pretty">
-              <li>প্রধান নির্বাহী সম্পাদক এআই-এর পাওয়া প্রতিটি তথ্য রাখেন বা বাদ দেন; শুধু রাখা তথ্যই লেখা হয়। এটিই হয় <strong>ভার্সন ১</strong>, একটি খসড়া।</li>
-              <li>নির্বাহী সম্পাদক মন্তব্য যোগ করে অনুমোদন দিয়ে সই করেন — তারপরই শেয়ার বা ডাউনলোড করা যায়।</li>
+              <li>প্রধান নির্বাহী সম্পাদক এআই-এর পাওয়া প্রতিটি তথ্য রাখেন বা বাদ দেন; শুধু রাখা তথ্যই লেখা হয়। তিনি প্রতিবেদন তৈরি করলে এটিই হয় <strong>ভার্সন ১</strong>।</li>
+              <li>তৈরি করার সাথে সাথেই প্রতিবেদনটি চূড়ান্ত — তখনই শেয়ার বা ডাউনলোড করা যায়।</li>
               <li>নতুন গ্রহণ করা তথ্য যোগ করে আবার বিশ্লেষণ করলে তবেই নতুন ভার্সন তৈরি হয়। আগের ভার্সনটি পুরোনো হয়ে যায়।</li>
               <li>পুরোনো ভার্সনগুলো নিজের উৎসের তালিকাসহ পড়া যায়। কিছুই সরাসরি এডিট করা হয় না।</li>
             </ol>

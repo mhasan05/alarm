@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell";
-import { ChartCard, hatch, Meter, StackedDayChart, StatTiles } from "@/components/charts";
+import { ChartCard, hatch, StackedDayChart, StatTiles } from "@/components/charts";
 import { RecordMissing } from "@/components/record-missing";
-import { bn } from "@/lib/db/format";
-import { disputesForReviewer } from "@/lib/db/selectors";
+import { bn, bnDate } from "@/lib/db/format";
+import { disputesForReviewer, profileOf } from "@/lib/db/selectors";
 import { StartReviewButton } from "../start-review-button";
 import { OVERDUE_DAYS, useReviewer } from "../use-reviewer";
 
@@ -13,7 +13,7 @@ const ACCEPT = "#006A4E";
 const REJECT = "#F42A41";
 
 export function ReviewerDashboardView() {
-  const { db, reviewer, queue, profiles, stats: s } = useReviewer();
+  const { db, reviewer, queue, allReports, stats: s } = useReviewer();
   if (!reviewer) return <RecordMissing title="অ্যাকাউন্ট পাওয়া যায়নি" backHref="/login" backLabel="আবার লগইন করুন" />;
   const openDisputes = disputesForReviewer(db, reviewer.id).filter((d) => d.state === "Open").length;
 
@@ -31,14 +31,12 @@ export function ReviewerDashboardView() {
 
   const weekTotal = s.weekAccepted + s.weekRejected;
 
-  const maxPending = Math.max(1, ...profiles.map((p) => p.pending));
-
-  const bands = [
-    { label: "আজ জমা", count: queue.filter((q) => q.days === 0).length, color: "#1A7A4A" },
-    { label: "১ দিন", count: queue.filter((q) => q.days === 1).length, color: "#D97706" },
-    { label: "২ দিনের বেশি", count: queue.filter((q) => q.days >= OVERDUE_DAYS).length, color: "#F42A41" },
-  ];
-  const maxBand = Math.max(1, ...bands.map((b) => b.count));
+  // Oldest waiting first, and the latest decided reports in the area.
+  const next = [...queue].sort((x, y) => x.submittedAt.localeCompare(y.submittedAt)).slice(0, 4);
+  const recent = allReports
+    .filter((r) => r.state !== "Pending")
+    .sort((x, y) => (y.decidedAt ?? y.submittedAt).localeCompare(x.decidedAt ?? x.submittedAt))
+    .slice(0, 4);
 
   return (
     <>
@@ -104,35 +102,65 @@ export function ReviewerDashboardView() {
         </div>
 
         <div className="flex flex-wrap items-stretch gap-5">
-          <ChartCard title="প্রোফাইল অনুযায়ী তালিকা" sub="কোন প্রোফাইলে কতটি জমা অপেক্ষায়" className="flex-[1_1_320px]">
-            <ul className="mt-4 flex flex-col gap-3.5">
-              {profiles.length === 0 && <li className="text-[12.5px] text-muted">কোনো এলাকা দেওয়া হয়নি — প্রধান নির্বাহী সম্পাদকের সাথে যোগাযোগ করুন।</li>}
-              {profiles.map((p) => {
-                const n = p.pending;
-                return (
-                  <Meter
-                    key={p.id}
-                    label={p.name}
-                    value={n ? `${bn(n)}টি অপেক্ষায়` : "তালিকা খালি"}
-                    pct={(n / maxPending) * 100}
-                    color={n >= 2 ? "#F42A41" : n ? "#D97706" : "#1A7A4A"}
-                  />
-                );
-              })}
-            </ul>
+          {/* The oldest waiting reports — open one to decide. */}
+          <ChartCard title="এখনই যাচাই করুন" sub="সবচেয়ে পুরোনো জমা আগে — একটিতে চাপ দিয়ে সিদ্ধান্ত দিন" className="flex-[1_1_320px]">
+            {next.length === 0 ? (
+              <p className="mt-4 rounded-button bg-success/5 px-3.5 py-3 text-[12.5px] text-success">যাচাইয়ের অপেক্ষায় কোনো জমা নেই — সব কাজ শেষ।</p>
+            ) : (
+              <ul className="mt-3 flex flex-col">
+                {next.map((q) => {
+                  const late = q.days >= OVERDUE_DAYS;
+                  return (
+                    <li key={q.code} className="border-b border-line last:border-b-0">
+                      <Link href={`/reviewer/queue/${q.code}`} className="-mx-2 flex items-center gap-3 rounded-button px-2 py-2.5 hover:bg-surface">
+                        <span className="size-2 flex-none rounded-full" style={{ background: late ? REJECT : q.days ? "#D97706" : "#1A7A4A" }} aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[13.5px] font-semibold text-ink">{q.title}</span>
+                          <span className="mt-0.5 block truncate text-[12px] text-muted">
+                            {profileOf(db, q.profileId)?.name} · {q.origin === "self" ? "নিজের দেওয়া তথ্য" : "তদন্ত সম্পাদকের তথ্য"}
+                          </span>
+                        </span>
+                        <span className={`flex-none text-[12px] ${late ? "font-semibold text-danger" : "text-muted"}`}>{q.days ? `${bn(q.days)} দিন` : "আজ"}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {queue.length > next.length && (
+              <Link href="/reviewer/queue" className="mt-3 block border-t border-line pt-3 text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+                আরও {bn(queue.length - next.length)}টি দেখুন →
+              </Link>
+            )}
           </ChartCard>
 
-          <ChartCard title="অপেক্ষার সময়" sub="তালিকায় থাকা জমাগুলো কত দিন ধরে অপেক্ষা করছে" className="flex-[1_1_320px]">
-            <ul className="mt-4 flex flex-col gap-3.5">
-              {bands.map((b) => (
-                <Meter key={b.label} label={b.label} value={`${bn(b.count)}টি`} pct={(b.count / maxBand) * 100} color={b.color} dot />
-              ))}
-            </ul>
-            <p className="mt-4 border-t border-[#E3EEEA] pt-3.5 text-[11.5px] leading-[1.7] text-muted text-pretty">
-              {s.overdue
-                ? `${bn(s.overdue)}টি জমা ৪৮ ঘণ্টার সীমা পার করেছে — এগুলোর সিদ্ধান্ত আগে দিন।`
-                : "সব জমা ঠিক সময়ের মধ্যে আছে।"}
-            </p>
+          {/* Latest decisions in the area. */}
+          <ChartCard title="সাম্প্রতিক প্রতিবেদন" sub="আপনার এলাকায় শেষ যেগুলোর সিদ্ধান্ত হয়েছে" className="flex-[1_1_320px]">
+            {recent.length === 0 ? (
+              <p className="mt-4 text-[12.5px] text-muted">এখনও কোনো সিদ্ধান্ত হয়নি।</p>
+            ) : (
+              <ul className="mt-3 flex flex-col">
+                {recent.map((r) => {
+                  const ok = r.state === "Accepted";
+                  return (
+                    <li key={r.code} className="border-b border-line last:border-b-0">
+                      <Link href={`/reviewer/decisions/${r.code}`} className="-mx-2 flex items-center gap-3 rounded-button px-2 py-2.5 hover:bg-surface">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[13.5px] font-semibold text-ink">{r.title}</span>
+                          <span className="mt-0.5 block truncate text-[12px] text-muted">
+                            {profileOf(db, r.profileId)?.name} · {bnDate(r.decidedAt ?? r.submittedAt)}
+                          </span>
+                        </span>
+                        <span className={`flex-none rounded-md px-2 py-0.5 text-[11.5px] font-semibold ${ok ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>{ok ? "গ্রহণ হয়েছে" : "বাতিল"}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <Link href="/reviewer/decisions" className="mt-3 block border-t border-line pt-3 text-[12.5px] font-semibold text-primary hover:text-primary-hover">
+              সকল প্রতিবেদন দেখুন →
+            </Link>
           </ChartCard>
         </div>
       </div>

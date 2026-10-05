@@ -14,7 +14,7 @@ export function ReviewerCreatePolitician() {
 
   return (
     <>
-      <PageHeader backHref="/reviewer/profiles" crumb="নির্বাহী সম্পাদক পোর্টাল / নতুন রাজনৈতিক কর্মী" title="নতুন রাজনৈতিক কর্মী" />
+      <PageHeader backHref="/reviewer/dashboard" crumb="নির্বাহী সম্পাদক পোর্টাল / নতুন রাজনৈতিক কর্মী" title="নতুন রাজনৈতিক কর্মী" />
       <div className="flex flex-1 flex-col px-4 pt-[22px] pb-9 sm:px-7">
         {reviewer.areas.length === 0 ? (
           <p className="rounded-card border border-l-[3px] border-line border-l-warning bg-white px-5 py-4 text-[13px] shadow-card">
@@ -30,8 +30,8 @@ export function ReviewerCreatePolitician() {
             takenPhones={allPhones()}
             parties={db.parties.map((p) => p.name)}
             allowedAreas={reviewer.areas}
-            listHref="/reviewer/profiles"
-            listLabel="প্রোফাইল তালিকায় ফিরুন"
+            listHref="/reviewer/dashboard"
+            listLabel="ড্যাশবোর্ডে ফিরুন"
             profileHref={null}
           />
         )}

@@ -14,22 +14,20 @@ export function ReviewerShell({ children }: { children: ReactNode }) {
       heading: "আমার যাচাই",
       items: [
         { href: "/reviewer/dashboard", label: "ড্যাশবোর্ড" },
-        { href: "/reviewer/queue", label: "যাচাইয়ের তালিকা" },
+        { href: "/reviewer/decisions", label: "সকল প্রতিবেদন" },
+        { href: "/reviewer/queue", label: "যাচাইয়ের অপেক্ষায়" },
         { href: "/reviewer/disputes", label: "অভিযোগ" },
-        { href: "/reviewer/reports", label: "প্রতিবেদন অনুমোদন" },
-        { href: "/reviewer/profiles", label: "আমার প্রোফাইল" },
         { href: "/reviewer/politicians/new", label: "নতুন রাজনৈতিক কর্মী" },
-        { href: "/reviewer/decisions", label: "সিদ্ধান্তের ইতিহাস" },
         { href: "/reviewer/meetings", label: "মিটিং" },
       ],
     },
   ];
   const mobileTabs: MobileTab[] = [
     { href: "/reviewer/dashboard", label: "ড্যাশবোর্ড", icon: "M2.4 2.4h4.8v5.2H2.4zM8.8 2.4h4.8v3.2H8.8zM8.8 7.2h4.8v6.4H8.8zM2.4 9.2h4.8v4.4H2.4z" },
+    { href: "/reviewer/decisions", label: "প্রতিবেদন", icon: "M3.6 2.4h5.6l3.2 3.2v8H3.6zM9.2 2.6v3.2h3.2M6 9.2h4M6 11.4h2.6" },
     { href: "/reviewer/queue", label: "যাচাই", icon: "M2.6 2.6h10.8M2.6 6.4h10.8M2.6 10.2h10.8M2.6 13.4h6.4" },
     { href: "/reviewer/disputes", label: "অভিযোগ", icon: "M8 1.8 15 14H1zM8 6.2v3.4M8 11.6v.2" },
-    { href: "/reviewer/reports", label: "প্রতিবেদন", icon: "M3.6 2.4h5.6l3.2 3.2v8H3.6zM9.2 2.6v3.2h3.2M6 9.2h4M6 11.4h2.6" },
-    { href: "/reviewer/profiles", label: "প্রোফাইল", icon: "M8 7.6a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM3 13.6c0-2.6 2.2-4.4 5-4.4s5 1.8 5 4.4" },
+    { href: "/reviewer/politicians/new", label: "নতুন কর্মী", icon: "M8 3.2v9.6M3.2 8h9.6" },
     { href: "/reviewer/meetings", label: "মিটিং", icon: MEETING_ICON },
   ];
 

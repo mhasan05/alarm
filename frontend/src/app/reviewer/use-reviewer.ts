@@ -22,7 +22,9 @@ export function useReviewer() {
   const queue = reviewer ? queueFor(db, reviewer.id).map((s) => ({ ...s, days: daysSince(s.submittedAt) })) : [];
   const decisions = reviewer ? decisionsBy(db, reviewer.id) : [];
   const profiles = reviewer ? coveredProfiles(db, reviewer) : [];
-  const reports = reviewer ? db.reports.filter((r) => r.reviewerId === reviewer.id) : [];
+  // Every submission from this নির্বাহী সম্পাদক's area — waiting or decided — newest first ("সকল প্রতিবেদন").
+  const areaIds = new Set(profiles.map((p) => p.id));
+  const allReports = db.submissions.filter((s) => areaIds.has(s.profileId)).sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
 
   // Last 7 days of decisions, today last.
   const now = new Date();
@@ -44,7 +46,7 @@ export function useReviewer() {
     reviewer,
     queue,
     decisions,
-    reports,
+    allReports,
     profiles: profiles.map((p) => {
       const subs = submissionsFor(db, p.id);
       return {
@@ -65,7 +67,6 @@ export function useReviewer() {
       monthRejected: monthTotal - monthAccepted,
       monthTotal,
       acceptRate: monthTotal ? Math.round((monthAccepted / monthTotal) * 100) : 0,
-      reportsWaiting: reports.filter((r) => r.state === "pending").length,
     },
   };
 }

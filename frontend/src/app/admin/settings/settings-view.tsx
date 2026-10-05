@@ -12,7 +12,7 @@ import { coverageKey, nameOf, queueFor, roleOfId } from "@/lib/db/selectors";
 import { resetDb, useDb } from "@/lib/db/store";
 import { DEMO_MODE } from "@/lib/demo";
 import type { Database } from "@/lib/db/types";
-import { auditHref, NOTIFICATION_META, PERMISSION_META, RULE_META, type UserRole } from "@/lib/settings-data";
+import { auditHref, type UserRole } from "@/lib/settings-data";
 
 type Account = { id: string; name: string; initials: string; email: string; role: UserRole; suspended: boolean; lastActive: string };
 
@@ -32,13 +32,9 @@ function accountsOf(db: Database): Account[] {
 export const SECTIONS = {
   general: { label: "সাধারণ" },
   users: { label: "ব্যবহারকারীর তালিকা" },
-  roles: { label: "ভূমিকা ও অনুমতি" },
   coverage: { label: "নির্বাহী সম্পাদকের দায়িত্বের এলাকা" },
   parties: { label: "দল ও সংগঠন" },
-  rules: { label: "অডিটের নিয়ম" },
-  notifications: { label: "নোটিফিকেশন" },
-  audit: { label: "নিরাপত্তা ও অডিট লগ" },
-  system: { label: "সিস্টেমের তথ্য" },
+  audit: { label: "অডিট লগ" },
 } as const;
 export type Section = keyof typeof SECTIONS;
 
@@ -127,10 +123,8 @@ export function AdminSettings({ initial, admin, adminId }: { initial: Section; a
   const db = useDb();
   const COUNTS: Partial<Record<Section, string>> = {
     users: bn(accountsOf(db).length),
-    roles: bn(3),
     coverage: bn(db.reviewers.length),
     parties: bn(db.parties.length),
-    system: bn("v3.0"),
   };
 
   const go = (s: Section) => {
@@ -177,13 +171,9 @@ export function AdminSettings({ initial, admin, adminId }: { initial: Section; a
       <div key={section} className="flex min-w-0 flex-col gap-5">
         {section === "general" && <General admin={admin} adminId={adminId} />}
         {section === "users" && <Users admin={admin} adminId={adminId} />}
-        {section === "roles" && <Roles admin={admin} adminId={adminId} />}
         {section === "coverage" && <Coverage admin={admin} adminId={adminId} />}
         {section === "parties" && <Parties admin={admin} adminId={adminId} />}
-        {section === "rules" && <Rules admin={admin} adminId={adminId} />}
-        {section === "notifications" && <Notifications admin={admin} adminId={adminId} />}
-        {section === "audit" && <AuditLog admin={admin} adminId={adminId} />}
-        {section === "system" && <SystemInfo />}
+        {section === "audit" && <AuditLog />}
       </div>
     </div>
   );
@@ -247,6 +237,7 @@ function General({ admin, adminId }: { admin: string; adminId: string }) {
         </div>
       </section>
       <SaveBar section="general" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
+      {DEMO_MODE && <DemoReset />}
     </>
   );
 }
@@ -481,65 +472,6 @@ function Users({ admin, adminId }: { admin: string; adminId: string }) {
   );
 }
 
-// ── Roles & Permissions ──────────────────────────────────────────────────────
-
-const ROLE_KEY: Record<UserRole, "admin" | "reviewer" | "staff"> = { "প্রধান নির্বাহী সম্পাদক": "admin", "নির্বাহী সম্পাদক": "reviewer", "তদন্ত সম্পাদক": "staff" };
-
-function Roles({ admin, adminId }: { admin: string; adminId: string }) {
-  const db = useDb();
-  const s = useStaged(db.settings.permissions, (v) => saveSettings({ permissions: v }, adminId, "roles & permissions"));
-  const roles: UserRole[] = ["প্রধান নির্বাহী সম্পাদক", "নির্বাহী সম্পাদক", "তদন্ত সম্পাদক"];
-  const PERMISSIONS = PERMISSION_META;
-  return (
-    <>
-      <section className={card}>
-        <Head section="roles" extra={`${bn(3)}টি ভূমিকা`} />
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] text-left">
-            <thead>
-              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">অনুমতি</th>
-                {roles.map((r) => (
-                  <th key={r} scope="col" className="px-3 py-3 text-center font-semibold">
-                    <span className={`rounded-md px-2 py-0.5 ${ROLE_STYLE[r]}`}>{r}</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {PERMISSIONS.map((p) => (
-                <tr key={p.label} className="border-b border-line last:border-b-0">
-                  <td className="px-5 py-3 text-[13px] text-ink">
-                    <span className="mr-2 text-[11.5px] font-semibold text-muted">{p.area}</span>
-                    {p.label}
-                    {p.locked && <span className="ml-2 text-[11px] text-muted">· নিয়ম অনুযায়ী ঠিক করা</span>}
-                  </td>
-                  {roles.map((r) => (
-                    <td key={r} className="px-3 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={!!s.draft[p.key]?.[ROLE_KEY[r]]}
-                        disabled={p.locked}
-                        onChange={() => s.setDraft((d) => ({ ...d, [p.key]: { ...d[p.key], [ROLE_KEY[r]]: !d[p.key]?.[ROLE_KEY[r]] } }))}
-                        aria-label={`${r}: ${p.label}`}
-                        className="size-4 cursor-pointer accent-primary disabled:cursor-not-allowed"
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="border-t border-line px-5 py-3 text-[12px] text-muted">
-          তদন্ত সম্পাদকরা কখনো নির্বাহী সম্পাদকের নাম দেখেন না, আর নির্বাহী সম্পাদকরা তদন্ত সম্পাদকের নামের বদলে একটি উৎসের লেবেল দেখেন — এটা ওপরের অনুমতি থেকেই ঠিক হয়।
-        </p>
-      </section>
-      <SaveBar section="roles" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
-    </>
-  );
-}
-
 // ── Reviewer Coverage ────────────────────────────────────────────────────────
 
 function Coverage({ admin, adminId }: { admin: string; adminId: string }) {
@@ -693,117 +625,12 @@ function Parties({ admin, adminId }: { admin: string; adminId: string }) {
   );
 }
 
-// ── Audit Configuration ──────────────────────────────────────────────────────
-
-function Rules({ admin, adminId }: { admin: string; adminId: string }) {
-  const db = useDb();
-  const RULES = RULE_META;
-  const s = useStaged(Object.fromEntries(RULES.map((r) => [r.key, String(db.settings.rules[r.key])])) as Record<string, string>, (v) =>
-    saveSettings({ rules: { sources: Number(v.sources), dispute: Number(v.dispute), caseload: Number(v.caseload), window: Number(v.window) } }, adminId, "audit rules"),
-  );
-  const invalid = RULES.filter((r) => {
-    const n = Number(s.draft[r.key]);
-    return !Number.isInteger(n) || n < r.min || n > r.max;
-  }).map((r) => r.key);
-  return (
-    <>
-      <section className={card}>
-        <Head section="rules" extra="শুধু নতুন অডিটে কাজ করবে" />
-        <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2">
-          {RULES.map((r) => {
-            const bad = invalid.includes(r.key);
-            return (
-              <Field
-                key={r.key}
-                id={`r-${r.key}`}
-                label={r.label}
-                hint={bad ? `${bn(r.min)} থেকে ${bn(r.max)}-এর মধ্যে একটি পূর্ণ সংখ্যা লিখুন।` : r.note}
-                hintClassName={bad ? "text-danger" : "text-muted"}
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    id={`r-${r.key}`}
-                    type="number"
-                    inputMode="numeric"
-                    min={r.min}
-                    max={r.max}
-                    value={s.draft[r.key]}
-                    onChange={(e) => s.setDraft((d) => ({ ...d, [r.key]: e.target.value }))}
-                    aria-invalid={bad}
-                    className={`${inputClass} w-[120px] ${bad ? "border-danger!" : ""}`}
-                  />
-                  <span className="text-[13px] text-muted">{r.unit}</span>
-                </div>
-              </Field>
-            );
-          })}
-        </div>
-      </section>
-      <SaveBar section="rules" dirty={s.dirty && invalid.length === 0} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
-    </>
-  );
-}
-
-// ── Notification Settings ────────────────────────────────────────────────────
-
-function Notifications({ admin, adminId }: { admin: string; adminId: string }) {
-  const db = useDb();
-  const s = useStaged(
-    NOTIFICATION_META.map((n) => ({ ...n, sms: db.settings.notifications[n.key]?.sms ?? false, email: db.settings.notifications[n.key]?.email ?? false })),
-    (v) => saveSettings({ notifications: Object.fromEntries(v.map((n) => [n.key, { sms: n.sms, email: n.email }])) }, adminId, "notifications"),
-  );
-  const flip = (key: string, ch: "sms" | "email") => s.setDraft((d) => d.map((n) => (n.key === key ? { ...n, [ch]: !n[ch] } : n)));
-  return (
-    <>
-      <section className={card}>
-        <Head section="notifications" extra="প্রধান নির্বাহী সম্পাদকের কাছে পাঠানো হয়" />
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left">
-            <thead>
-              <tr className="border-b border-line bg-surface/60 text-[12px] font-semibold text-muted">
-                <th scope="col" className="px-5 py-3 font-semibold">ঘটনা</th>
-                <th scope="col" className="w-24 px-3 py-3 text-center font-semibold">এসএমএস</th>
-                <th scope="col" className="w-24 px-5 py-3 text-center font-semibold">ইমেইল</th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.draft.map((n) => (
-                <tr key={n.key} className="border-b border-line last:border-b-0">
-                  <td className="px-5 py-3 text-[13px] text-ink">{n.label}</td>
-                  {(["sms", "email"] as const).map((ch) => (
-                    <td key={ch} className="px-3 py-3 text-center">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={n[ch]}
-                        aria-label={`${ch === "sms" ? "এসএমএস" : "ইমেইল"}: ${n.label}`}
-                        onClick={() => flip(n.key, ch)}
-                        className={`relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors ${n[ch] ? "bg-primary" : "bg-line"}`}
-                      >
-                        <span className={`size-4 rounded-full bg-white shadow transition-transform ${n[ch] ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-                      </button>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-      <SaveBar section="notifications" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
-    </>
-  );
-}
-
-// ── Security & Audit Log ─────────────────────────────────────────────────────
+// ── Audit Log ────────────────────────────────────────────────────────────────
 
 const ROLE_LABEL = { admin: "প্রধান নির্বাহী সম্পাদক", reviewer: "নির্বাহী সম্পাদক", staff: "তদন্ত সম্পাদক", politician: "রাজনৈতিক কর্মী", system: "সিস্টেম" } as const;
 
-function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
+function AuditLog() {
   const db = useDb();
-  const s = useStaged({ twoFactor: db.settings.security.twoFactor, timeout: String(db.settings.security.timeout) }, (v) =>
-    saveSettings({ security: { twoFactor: v.twoFactor, timeout: Number(v.timeout) } }, adminId, "security"),
-  );
   const [who, setWho] = useState<"all" | string>("all");
   const roles = Object.values(ROLE_LABEL);
   const all = db.audit.map((e) => ({ when: bnDateTime(e.at), actor: nameOf(db, e.actor), role: ROLE_LABEL[roleOfId(db, e.actor)], action: e.action, target: e.target }));
@@ -823,36 +650,6 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
 
   return (
     <>
-      <section className={card}>
-        <Head section="audit" extra="নিরাপত্তা" />
-        <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2">
-          <div className="flex items-start justify-between gap-4 rounded-card border border-line px-4 py-3.5">
-            <div>
-              <div className="text-[13.5px] font-semibold text-ink">প্রধান নির্বাহী সম্পাদক ও নির্বাহী সম্পাদকের জন্য দুই-ধাপের সাইন-ইন</div>
-              <p className="mt-0.5 text-[12px] text-muted">প্রতিটি নতুন ডিভাইসে একটি এসএমএস কোড লাগবে।</p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={s.draft.twoFactor}
-              aria-label="দুই-ধাপের সাইন-ইন"
-              onClick={() => s.setDraft((d) => ({ ...d, twoFactor: !d.twoFactor }))}
-              className={`relative mt-1 inline-flex h-5 w-9 flex-none cursor-pointer items-center rounded-full ${s.draft.twoFactor ? "bg-primary" : "bg-line"}`}
-            >
-              <span className={`size-4 rounded-full bg-white shadow transition-transform ${s.draft.twoFactor ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-            </button>
-          </div>
-          <Field id="sec-timeout" label="কিছু না করলে নিজে থেকে সাইন-আউট">
-            <select id="sec-timeout" value={s.draft.timeout} onChange={(e) => s.setDraft((d) => ({ ...d, timeout: e.target.value }))} className={selectClass}>
-              <option value="15">১৫ মিনিট</option>
-              <option value="30">৩০ মিনিট</option>
-              <option value="60">১ ঘণ্টা</option>
-            </select>
-          </Field>
-        </div>
-      </section>
-      <SaveBar section="audit" dirty={s.dirty} saved={s.justSaved} admin={admin} onSave={s.save} onDiscard={s.discard} />
-
       <section id="audit-log" className={card}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
           <div>
@@ -918,29 +715,14 @@ function AuditLog({ admin, adminId }: { admin: string; adminId: string }) {
   );
 }
 
-// ── System Info ──────────────────────────────────────────────────────────────
+// ── Demo data (demo mode only) ───────────────────────────────────────────────
 
-function SystemInfo() {
+function DemoReset() {
   const [confirming, setConfirming] = useState(false);
   const [done, setDone] = useState(false);
-  const rows: [string, string][] = [
-    ["ভার্সন", `ALARM ${bn("v1.0")} · ওয়েব`],
-    ["পোর্টাল", "প্রধান নির্বাহী সম্পাদক · নির্বাহী সম্পাদক · তদন্ত সম্পাদক · রাজনৈতিক কর্মী"],
-    ["ভাষা", "বাংলা · ইংরেজি"],
-  ];
   return (
     <section className={card}>
-      <Head section="system" />
-      <dl className="px-5 py-2">
-        {rows.map(([k, v]) => (
-          <div key={k} className="flex flex-wrap justify-between gap-2 border-b border-line py-3 last:border-b-0">
-            <dt className="text-[13px] text-muted">{k}</dt>
-            <dd className="text-[13px] font-semibold text-ink">{v}</dd>
-          </div>
-        ))}
-      </dl>
-      {DEMO_MODE && (
-      <div className="border-t border-line px-5 py-4">
+      <div className="px-5 py-4">
         <h3 className="text-[13.5px] font-semibold text-ink">ডেমো ডেটা</h3>
         <p className="mt-0.5 text-[12px] leading-relaxed text-muted text-pretty">
           এই প্রিভিউয়ের ডেটা ব্রাউজারে রাখা হয়। রিসেট করলে এই ডিভাইসে আপনার প্রতিষ্ঠানের মূল নমুনা রেকর্ড ফিরে আসবে। অন্য কোনো প্রতিষ্ঠানের ডেটা বদলাবে না।
@@ -981,7 +763,6 @@ function SystemInfo() {
           </p>
         )}
       </div>
-      )}
     </section>
   );
 }

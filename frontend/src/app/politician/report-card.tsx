@@ -6,6 +6,7 @@ import type { Dispute, Submission } from "@/lib/db/types";
 /** One-line status under a report; empty for a normally published one. */
 export function reportFootNote(r: Submission, dispute?: Dispute) {
   if (r.state === "Rejected" && dispute?.state === "Removed") return "আপনার অভিযোগ গ্রহণ হয়েছে — রিপোর্টটি বাতিল করে প্রোফাইল ও স্কোর থেকে সরানো হয়েছে।";
+  if (dispute?.state === "Partial" && r.state === "Accepted") return "আপনার অভিযোগ আংশিক গ্রহণ হয়েছে — রিপোর্টের ভুল অংশ সংশোধন করা হয়েছে।";
   if (r.state === "Rejected") return "নির্বাহী সম্পাদক বাতিল করেছেন — এটি প্রোফাইলে দেখা যায় না, তবে রেকর্ডে রাখা আছে।";
   if (r.state === "Pending") return "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায় · স্কোরে যোগ হয়নি";
   if (dispute?.state === "Open") return "আপনি এই তথ্যের বিরুদ্ধে অভিযোগ জানিয়েছেন — সম্পাদক যাচাই করছেন।";

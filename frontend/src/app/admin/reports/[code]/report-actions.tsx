@@ -3,10 +3,10 @@
 import { useState } from "react";
 
 const btn =
-  "inline-flex h-9 cursor-pointer items-center gap-2 rounded-button border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-9 cursor-pointer items-center gap-2 rounded-button border px-3.5 text-[13px] font-semibold";
 
 /** Print / share / PDF. PDF uses the browser's print-to-PDF; the page hides the portal chrome when printed. */
-export function ReportActions({ approved, code }: { approved: boolean; code: string }) {
+export function ReportActions({ code }: { code: string }) {
   const [copied, setCopied] = useState<"ok" | "fail" | null>(null);
 
   const share = async () => {
@@ -31,8 +31,6 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
         <button
           type="button"
           onClick={share}
-          disabled={!approved}
-          title={approved ? undefined : "নির্বাহী সম্পাদক প্রতিবেদন অনুমোদন করলে পাওয়া যাবে"}
           className={`${btn} border-line bg-white text-ink hover:border-primary hover:text-primary`}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -43,8 +41,7 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
         <button
           type="button"
           onClick={() => window.print()}
-          disabled={!approved}
-          title={approved ? `প্রিন্ট ডায়ালগ থেকে ${code} PDF হিসেবে সেভ করুন` : "নির্বাহী সম্পাদক প্রতিবেদন অনুমোদন করলে পাওয়া যাবে"}
+          title={`প্রিন্ট ডায়ালগ থেকে ${code} PDF হিসেবে সেভ করুন`}
           className={`${btn} border-primary bg-primary text-white hover:bg-primary-hover`}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -58,9 +55,7 @@ export function ReportActions({ approved, code }: { approved: boolean; code: str
           ? "লিংক কপি হয়েছে — শুধু লগইন করা প্রধান নির্বাহী সম্পাদক ও নির্বাহী সম্পাদকরা এটি খুলতে পারবেন।"
           : copied === "fail"
             ? "কপি করা যায়নি — ব্রাউজারের ঠিকানা বার থেকে লিংকটি কপি করুন।"
-            : !approved
-              ? "নির্বাহী সম্পাদক অনুমোদন করলে শেয়ার ও PDF চালু হবে।"
-              : ""}
+            : ""}
       </p>
     </div>
   );

@@ -272,7 +272,7 @@ export function AiReviewView({ analysis, admin, adminId, onGenerated }: { analys
                   {a.reportCode} ভার্সন {bn(a.version)} তৈরি হয়েছে · {bn(kept.length)}টি তথ্য, {bn(sources)}টি উৎস।
                 </p>
                 <p className="mt-1 text-[12px] leading-normal text-muted">
-                  বাছাই লক করা হয়েছে, প্রতিবেদনটি নির্বাহী সম্পাদকের অনুমোদন ও সইয়ের অপেক্ষায়। নতুন তথ্য যোগ করে আবার বিশ্লেষণ করলে তবেই নতুন ভার্সন তৈরি হবে।
+                  বাছাই লক করা হয়েছে। প্রতিবেদনটি চূড়ান্ত — এখনই খুলে শেয়ার বা ডাউনলোড করা যাবে। নতুন তথ্য যোগ করে আবার বিশ্লেষণ করলে তবেই নতুন ভার্সন তৈরি হবে।
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link

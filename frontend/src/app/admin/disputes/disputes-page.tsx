@@ -13,12 +13,13 @@ export function DisputesPage({ initialTab }: { initialTab: DisputeTab }) {
   const resolved = db.disputes.filter((d) => d.state !== "Open");
   const overdue = open.filter((d) => daysSince(d.filedAt) >= 2).length;
   const withdrawn = resolved.filter((d) => d.state === "Removed").length;
+  const corrected = resolved.filter((d) => d.state === "Partial").length;
   const profiles = new Set(open.map((d) => d.profileId)).size;
 
   const stats = [
     { label: "খোলা অভিযোগ", value: bn(open.length), color: "#F42A41", note: "আপনার সিদ্ধান্তের অপেক্ষায়" },
     { label: "৪৮ ঘণ্টার বেশি পুরোনো", value: bn(overdue), color: "#D97706", note: "এগুলোর সিদ্ধান্ত আগে দিন" },
-    { label: "সমাধান হয়েছে", value: bn(resolved.length), color: "#1A7A4A", note: `${bn(withdrawn)}টি জমা সরিয়ে নেওয়া হয়েছে`, href: "/admin/disputes?tab=resolved" },
+    { label: "সমাধান হয়েছে", value: bn(resolved.length), color: "#1A7A4A", note: `${bn(withdrawn)}টি জমা বাতিল · ${bn(corrected)}টি সংশোধন`, href: "/admin/disputes?tab=resolved" },
     { label: "জড়িত প্রোফাইল", value: bn(profiles), color: "#0D1F17", note: "এই সময়ে জমাগুলো দেখা যায়", href: "/admin/politicians" },
   ];
 

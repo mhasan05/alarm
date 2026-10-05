@@ -14,7 +14,7 @@ export function ReviewerQueueView() {
 
   return (
     <>
-      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের তালিকা" title="অপেক্ষায় থাকা কাজ" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের অপেক্ষায়" title="যাচাইয়ের অপেক্ষায়" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         {overdue.length > 0 && (
@@ -61,7 +61,7 @@ export function ReviewerQueueView() {
                 href="/reviewer/decisions"
                 className="inline-flex h-10 items-center rounded-button border border-line bg-white px-[17px] text-[13px] font-semibold text-primary hover:border-primary hover:bg-surface"
               >
-                সিদ্ধান্তের ইতিহাস দেখুন
+                সকল প্রতিবেদন দেখুন
               </Link>
             </div>
           ) : (

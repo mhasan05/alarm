@@ -10,14 +10,15 @@ import { RichText } from "@/components/rich-text";
 import { SubmissionEditor } from "@/components/submission-editor";
 import { decideDispute, editSubmission, undoDisputeDecision, type DisputeOutcome } from "@/lib/db/actions";
 import { bn, bnAge, bnDate, bnDateTime } from "@/lib/db/format";
-import { canResolveDispute, CATEGORY_STYLE, disputeOf, nameOf, profileOf, roleOfId, STATE_CHIP, submissionOf } from "@/lib/db/selectors";
+import { canResolveDispute, CATEGORY_STYLE, editedSinceDispute, disputeOf, nameOf, profileOf, roleOfId, STATE_CHIP, submissionOf } from "@/lib/db/selectors";
 import { useDb } from "@/lib/db/store";
 import type { Database, Dispute, Evidence } from "@/lib/db/types";
 
-/** The two ways a dispute can end — the same words everywhere. */
+/** The three ways a dispute can end — the same words everywhere. */
 export const OUTCOMES: Record<DisputeOutcome, { label: string; done: string; help: string; tone: string }> = {
-  Kept: { label: "অভিযোগ বাতিল — তথ্য ঠিক রাখুন", done: "অভিযোগ বাতিল — তথ্য ঠিক আছে", help: "অভিযোগের পক্ষে প্রমাণ নেই। জমাটি যেমন আছে তেমনই থাকবে।", tone: "#4A7060" },
-  Removed: { label: "অভিযোগ গ্রহণ — জমা বাতিল করুন", done: "অভিযোগ গ্রহণ — জমা বাতিল", help: "অভিযোগ ঠিক। জমাটি বাতিল হবে এবং প্রোফাইল ও স্কোর থেকে সরে যাবে।", tone: "#F42A41" },
+  Kept: { label: "অভিযোগ বাতিল", done: "অভিযোগ বাতিল — তথ্য ঠিক আছে", help: "অভিযোগের পক্ষে প্রমাণ নেই। জমাটি যেমন আছে তেমনই থাকবে।", tone: "#4A7060" },
+  Removed: { label: "অভিযোগ গ্রহণ", done: "অভিযোগ গ্রহণ — জমা বাতিল", help: "অভিযোগ পুরোপুরি ঠিক। জমাটি বাতিল হবে এবং প্রোফাইল ও স্কোর থেকে সরে যাবে।", tone: "#F42A41" },
+  Partial: { label: "অভিযোগ আংশিক গ্রহণ", done: "অভিযোগ আংশিক গ্রহণ — জমা সংশোধন", help: "অভিযোগের কিছু অংশ ঠিক। ধাপ ২-এ জমার ভুল অংশ এডিট করে ঠিক করুন — সংশোধিত জমাটি প্রোফাইলে থাকবে।", tone: "#1D6FC0" },
 };
 
 export const disputeStatus = (d: Dispute) => (d.state === "Open" ? { label: "সিদ্ধান্তের অপেক্ষায়", tone: "#D97706" } : { label: OUTCOMES[d.state].done, tone: OUTCOMES[d.state].tone });
@@ -72,9 +73,10 @@ export function DisputeResolver({ code, actorId, portal, listHref, showStaffName
   const source = s.origin === "self" ? "রাজনৈতিক কর্মীর নিজের দেওয়া তথ্য" : showStaffNames ? `${nameOf(db, s.staffId ?? "")} (${s.staffId}) · তদন্ত সম্পাদক` : "তদন্ত সম্পাদকের তথ্য";
   const trail = historyOf(db, d, showStaffNames);
 
+  const needsEdit = pick === "Partial" && !editedSinceDispute(db, d);
   const decide = () => {
     setTried(true);
-    if (!pick || reason.trim().length < 9) return;
+    if (!pick || needsEdit || reason.trim().length < 9) return;
     decideDispute(d.code, actorId, pick, reason.trim());
     setDecidedHere(true);
     setPick(null);
@@ -212,6 +214,16 @@ export function DisputeResolver({ code, actorId, portal, listHref, showStaffName
                   })}
                 </fieldset>
                 {tried && !pick && <p className="text-[12px] text-danger">একটি সিদ্ধান্ত বেছে নিন।</p>}
+                {needsEdit && (
+                  <p role={tried ? "alert" : undefined} className={`rounded-button border border-l-[3px] border-line px-3 py-2 text-[12px] leading-[1.6] ${tried ? "border-l-danger bg-danger/5 text-danger" : "border-l-[#1D6FC0] bg-[#1D6FC0]/5 text-ink"}`}>
+                    আংশিক গ্রহণের আগে ধাপ ২-এ “জমা এডিট করুন” চেপে ভুল অংশটি ঠিক করুন।
+                    {!editing && (
+                      <button type="button" onClick={() => { setEditing(true); setSaved(false); }} className="ml-1 cursor-pointer font-semibold text-primary hover:text-primary-hover">
+                        এখন এডিট করুন
+                      </button>
+                    )}
+                  </p>
+                )}
                 <label htmlFor="dr-reason" className="mt-1 text-[12.5px] font-semibold text-ink">
                   সিদ্ধান্তের কারণ <span className="text-danger">*</span>
                 </label>

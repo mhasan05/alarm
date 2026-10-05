@@ -11,27 +11,27 @@ import { useReviewer } from "../use-reviewer";
 import { FILTERS, type Filter } from "./filters";
 
 const accepted = (s: Submission) => s.state === "Accepted";
-export const decisionLabel = (s: Submission) => (accepted(s) ? "গ্রহণ হয়েছে" : "বাতিল");
+export const decisionLabel = (s: Submission) => (s.state === "Pending" ? "যাচাইয়ের অপেক্ষায়" : accepted(s) ? "গ্রহণ হয়েছে" : "বাতিল");
+
+const matches = (s: Submission, f: Filter) => f === "সব" || (f === "অপেক্ষায়" ? s.state === "Pending" : f === "গ্রহণ হয়েছে" ? s.state === "Accepted" : s.state === "Rejected");
 
 export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
-  const { db, decisions, stats } = useReviewer();
-  const count = (f: Filter) => (f === "সব" ? decisions.length : decisions.filter((d) => (f === "গ্রহণ হয়েছে") === accepted(d)).length);
-  const list = filter === "সব" ? decisions : decisions.filter((d) => (filter === "গ্রহণ হয়েছে") === accepted(d));
+  const { db, allReports, stats } = useReviewer();
+  const count = (f: Filter) => allReports.filter((s) => matches(s, f)).length;
+  const list = allReports.filter((s) => matches(s, filter));
 
   return (
     <>
-      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / সিদ্ধান্তের ইতিহাস" title="আমার সাম্প্রতিক সিদ্ধান্ত" action={<StartReviewButton />} />
+      <PageHeader crumb="নির্বাহী সম্পাদক পোর্টাল / সকল প্রতিবেদন" title="সকল প্রতিবেদন" action={<StartReviewButton />} />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7">
         <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
           <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
             <div className="min-w-[180px] flex-1">
-              <h2 className="text-[14.5px] font-semibold leading-[1.6]">সাম্প্রতিক সিদ্ধান্ত</h2>
-              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                এ মাসের {bn(stats.monthTotal)}টি সিদ্ধান্তের মধ্যে রেকর্ডে থাকা {bn(decisions.length)}টি · প্রতিটি সিদ্ধান্ত অডিট লগে লেখা থাকে
-              </p>
+              <h2 className="text-[14.5px] font-semibold leading-[1.6]">সকল প্রতিবেদন</h2>
+              <p className="mt-0.5 text-[12px] leading-[1.65] text-muted text-pretty">আপনার এলাকার সব জমা — যাচাইয়ের অপেক্ষায় থাকা ও সিদ্ধান্ত হওয়া · মোট {bn(allReports.length)}টি</p>
             </div>
-            <nav aria-label="সিদ্ধান্ত অনুযায়ী ফিল্টার" className="flex flex-wrap gap-2">
+            <nav aria-label="অবস্থা অনুযায়ী ফিল্টার" className="flex flex-wrap gap-2">
               {FILTERS.map((f) => {
                 const on = f === filter;
                 return (
@@ -52,18 +52,19 @@ export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
           </div>
 
           {list.length === 0 ? (
-            <p className="px-6 py-10 text-center text-[13px] text-muted">{decisions.length === 0 ? "এখনও কোনো সিদ্ধান্ত নেননি।" : "এই ফিল্টারে কোনো সিদ্ধান্ত নেই।"}</p>
+            <p className="px-6 py-10 text-center text-[13px] text-muted">{allReports.length === 0 ? "আপনার এলাকায় এখনও কোনো জমা নেই।" : "এই ফিল্টারে কোনো প্রতিবেদন নেই।"}</p>
           ) : (
             <ul className="grid gap-4 px-[18px] pt-4 pb-[18px] sm:grid-cols-2 xl:grid-cols-3">
               {list.map((h) => {
                 const cat = CATEGORY_STYLE[h.category];
                 const ok = accepted(h);
+                const waiting = h.state === "Pending";
                 return (
                   <li key={h.code} className="flex">
                     <Link
-                      href={`/reviewer/decisions/${h.code}`}
+                      href={waiting ? `/reviewer/queue/${h.code}` : `/reviewer/decisions/${h.code}`}
                       className={`group flex w-full flex-col rounded-card border border-l-[3px] border-line p-[15px] hover:border-primary hover:bg-[#FAFDFC] ${ok ? "bg-white" : "bg-[#FAFDFC]"}`}
-                      style={{ borderLeftColor: ok ? cat.fg : "#C8DDD6" }}
+                      style={{ borderLeftColor: waiting ? "#D97706" : ok ? cat.fg : "#C8DDD6" }}
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex flex-none items-center gap-[5px] whitespace-nowrap rounded-input px-[9px] py-[3px] text-[11px] font-semibold" style={{ color: cat.fg, background: cat.bg }}>
@@ -72,22 +73,28 @@ export function ReviewerDecisionsView({ filter }: { filter: Filter }) {
                         </span>
                         <span className="flex-none whitespace-nowrap font-mono text-[11px] font-semibold text-muted">{h.code}</span>
                         <span className="min-w-2.5 flex-1" />
-                        <span className={`inline-flex flex-none items-center gap-[5px] whitespace-nowrap rounded-input px-[9px] py-[3px] text-[11px] font-semibold ${ok ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
-                          <span className={`size-[5px] rounded-full ${ok ? "bg-success" : "bg-danger"}`} />
+                        <span className={`inline-flex flex-none items-center gap-[5px] whitespace-nowrap rounded-input px-[9px] py-[3px] text-[11px] font-semibold ${waiting ? "bg-warning/10 text-warning" : ok ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
+                          <span className={`size-[5px] rounded-full ${waiting ? "bg-warning" : ok ? "bg-success" : "bg-danger"}`} />
                           {decisionLabel(h)}
                         </span>
                       </div>
-                      <div className={`mt-2.5 text-[13.5px] font-semibold leading-[1.65] text-pretty ${ok ? "text-ink" : "text-muted"}`}>{h.title}</div>
+                      <div className={`mt-2.5 text-[13.5px] font-semibold leading-[1.65] text-pretty ${ok || waiting ? "text-ink" : "text-muted"}`}>{h.title}</div>
                       <div className="mt-1.5 text-[12px] leading-[1.65] text-muted text-pretty">
-                        রাজনৈতিক কর্মী: {profileOf(db, h.profileId)?.name} · সিদ্ধান্ত: {bnDate(h.decidedAt!)}
+                        রাজনৈতিক কর্মী: {profileOf(db, h.profileId)?.name} · {waiting ? `জমা: ${bnDate(h.submittedAt)}` : `সিদ্ধান্ত: ${bnDate(h.decidedAt ?? h.submittedAt)}`}
                       </div>
                       <div aria-hidden="true" className="min-h-[11px] flex-1" />
                       <div className="flex flex-wrap items-center gap-2.5 border-t border-[#E3EEEA] pt-2.5">
                         <p className="min-w-[180px] flex-1 text-[11.5px] leading-[1.7] text-muted text-pretty">
-                          <span className="font-semibold text-ink">আপনার কারণ:</span> {h.reason}
+                          {waiting ? (
+                            <span className="font-semibold text-warning">সিদ্ধান্ত দেওয়া বাকি</span>
+                          ) : (
+                            <>
+                              <span className="font-semibold text-ink">কারণ:</span> {h.reason}
+                            </>
+                          )}
                         </p>
                         <span className="inline-flex h-[30px] flex-none items-center gap-[7px] rounded-button border border-line px-[11px] text-[11.5px] font-semibold text-primary group-hover:border-primary group-hover:bg-surface">
-                          বিস্তারিত দেখুন
+                          {waiting ? "যাচাই করুন" : "বিস্তারিত দেখুন"}
                           <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                             <path d="M5.4 2.4 10 7l-4.6 4.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>

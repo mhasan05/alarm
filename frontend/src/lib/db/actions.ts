@@ -174,7 +174,10 @@ export function fileDispute(input: { submissionCode: string; reason: string; cla
 
 export type DisputeOutcome = Exclude<DisputeState, "Open">;
 
-/** Keep the report, add the politician's response under it, or withdraw it from the profile. */
+/**
+ * Three outcomes: reject the dispute (submission unchanged), accept it (submission rejected), or accept it
+ * in part (the submission was corrected while resolving and stays published).
+ */
 export function decideDispute(code: string, actorId: string, outcome: DisputeOutcome, reason: string) {
   update((db) => {
     const d = db.disputes.find((x) => x.code === code);
@@ -192,7 +195,8 @@ export function decideDispute(code: string, actorId: string, outcome: DisputeOut
       s.reason = `অভিযোগ ${d.code} গ্রহণ করা হয়েছে: ${reason.trim()}`;
       s.events.push({ at: d.decidedAt, by: actorId, type: "rejected", note: s.reason });
     }
-    log(db, actorId, outcome === "Kept" ? "অভিযোগ বাতিল করেছেন — তথ্য ঠিক আছে" : "অভিযোগ গ্রহণ করেছেন — জমা বাতিল", code);
+    const what = { Kept: "অভিযোগ বাতিল করেছেন — তথ্য ঠিক আছে", Removed: "অভিযোগ গ্রহণ করেছেন — জমা বাতিল", Partial: "অভিযোগ আংশিক গ্রহণ করেছেন — জমা সংশোধন করা হয়েছে" } as const;
+    log(db, actorId, what[outcome], code);
   });
 }
 
@@ -486,7 +490,7 @@ const REPORT_SIGNATURE = () => {
 
 /**
  * Cut a report from the kept findings. A profile that already has a report gets a new version;
- * otherwise a new report code is issued. The report waits for the reviewer's sign-off.
+ * otherwise a new report code is issued. The report is final immediately.
  */
 export function generateReport(profileId: string, actorId: string, keptSubmissions: string[], keptAi: string[], note: string): { code: string; version: number } {
   let result = { code: "", version: 0 };
@@ -532,7 +536,9 @@ export function generateReport(profileId: string, actorId: string, keptSubmissio
     const report: FinalReport = {
       code: existing?.code ?? nextCode(db.reports.map((r) => r.code), "RPT-2026", 4),
       profileId,
-      state: "pending",
+      // Final as soon as it is created — there is no separate sign-off step.
+      state: "approved",
+      approval: { at, signature: REPORT_SIGNATURE() },
       published: at,
       versions: [
         {
@@ -551,7 +557,7 @@ export function generateReport(profileId: string, actorId: string, keptSubmissio
       reviewerId: reviewer?.id ?? "",
       confidence: { pct: confidence, label: confidence >= 80 ? "বেশি" : confidence >= 65 ? "মাঝারি–বেশি" : "মাঝারি" },
       summary: `ব্যক্তির ${p.post} হিসেবে কাজের সময়টি যাচাই করা হয়েছে — তদন্ত সম্পাদকদের সংগ্রহ করা ও নির্বাহী সম্পাদকের গ্রহণ করা তথ্য এবং পাবলিক রেকর্ডের সঙ্গে মিলিয়ে। {pos}টি ইতিবাচক এবং {neg}টি নেতিবাচক সিদ্ধান্ত এই ভার্সনে রাখা হয়েছে। যে দাবিগুলো নিশ্চিত করা যায়নি সেগুলো প্রধান নির্বাহী সম্পাদক প্রতিবেদনে রাখেননি; সেগুলো অডিট রেকর্ডে কারণসহ রাখা আছে।`,
-      summaryNote: "এই সারাংশ এআই বিশ্লেষণ থেকে তৈরি। নির্বাহী সম্পাদকের অনুমোদনের পর এটি চূড়ান্ত হবে।",
+      summaryNote: "এই সারাংশ এআই বিশ্লেষণ থেকে তৈরি এবং প্রধান নির্বাহী সম্পাদক যাচাই করে চূড়ান্ত করেছেন।",
       positive,
       negative,
       negativeIntro: "যেসব সিদ্ধান্ত নির্বাহী সম্পাদক গ্রহণ করেছেন এবং প্রধান নির্বাহী সম্পাদক প্রতিবেদনে রেখেছেন।",
@@ -565,19 +571,6 @@ export function generateReport(profileId: string, actorId: string, keptSubmissio
     log(db, actorId, version === 1 ? "প্রতিবেদন তৈরি করেছেন" : `প্রতিবেদনের ভার্সন ${bn(version)} তৈরি করেছেন`, report.code);
   });
   return result;
-}
-
-/** The reviewer approves and signs the latest version. */
-export function signReport(code: string, reviewerId: string, remark: string) {
-  update((db) => {
-    const r = db.reports.find((x) => x.code === code);
-    if (!r) return;
-    r.state = "approved";
-    r.remark = remark.trim();
-    r.reviewerId = reviewerId;
-    r.approval = { at: nowIso(), signature: REPORT_SIGNATURE() };
-    log(db, reviewerId, "প্রতিবেদন অনুমোদন দিয়ে সই করেছেন", code);
-  });
 }
 
 /** Coverage key for display, e.g. in success messages. */

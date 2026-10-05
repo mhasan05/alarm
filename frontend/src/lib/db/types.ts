@@ -97,7 +97,8 @@ export type Profile = {
  * A dispute is either rejected (the submission stays as it is) or accepted (the submission is
  * rejected and leaves the profile). Open until someone decides.
  */
-export type DisputeState = "Open" | "Kept" | "Removed";
+/** Kept = dispute rejected · Removed = dispute accepted (submission rejected) · Partial = partly accepted (submission corrected, stays published). */
+export type DisputeState = "Open" | "Kept" | "Removed" | "Partial";
 
 export type Dispute = {
   code: string;
@@ -182,7 +183,8 @@ export type ReportVersion = { v: number; title: string; why: string; date: strin
 export type FinalReport = {
   code: string;
   profileId: string;
-  state: "approved" | "pending";
+  /** Reports are final as soon as the প্রধান নির্বাহী সম্পাদক creates them (no separate sign-off). */
+  state: "approved";
   published: string; // ISO
   versions: ReportVersion[];
   subject: { name: string; father: string; nid: string; job: string; address: string };

@@ -25,12 +25,9 @@ export function ReportsPage({ initialTab }: { initialTab: Tab }) {
         meta: p ? `${p.post} · ${p.seat}, ${p.thana}` : "",
         positive: v.positive,
         negative: v.negative,
-        // Superseded versions were approved before they were replaced.
-        approved: i > 0 || r.state === "approved",
         href: i === 0 ? `/admin/reports/${r.code}` : `/admin/reports/${r.code}?v=${v.v}`,
       }));
     });
-  const drafts = db.reports.filter((r) => r.state !== "approved").length;
 
   return (
     <>
@@ -40,7 +37,7 @@ export function ReportsPage({ initialTab }: { initialTab: Tab }) {
           <>
             <span className="font-bn">প্রতিবেদন</span>
             <span className="mt-1 block text-[12.5px] font-normal text-muted max-md:hidden">
-              এখন প্রতিবেদন {bn(db.reports.length)}টি · মোট ভার্সন {bn(rows.length)}টি · অনুমোদনের অপেক্ষায় {bn(drafts)}টি
+              এখন প্রতিবেদন {bn(db.reports.length)}টি · মোট ভার্সন {bn(rows.length)}টি
             </span>
           </>
         }

@@ -125,6 +125,8 @@ export const strandedCount = (db: Database) =>
 
 export const disputeForSubmission = (db: Database, code: string) => db.disputes.find((d) => d.submissionCode === code);
 export const isDisputeOpen = (d?: Dispute) => d?.state === "Open";
+/** Was the disputed submission edited after the dispute was filed? ("আংশিক গ্রহণ" needs a correction first.) */
+export const editedSinceDispute = (db: Database, d: Dispute) => !!submissionOf(db, d.submissionCode)?.events.some((e) => e.type === "edited" && e.at >= d.filedAt);
 export const openDisputes = (db: Database) => db.disputes.filter((d) => d.state === "Open");
 export const disputesFor = (db: Database, profileId: string) =>
   db.disputes.filter((d) => d.profileId === profileId).sort((a, b) => b.filedAt.localeCompare(a.filedAt));

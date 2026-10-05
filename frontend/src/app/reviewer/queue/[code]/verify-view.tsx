@@ -19,7 +19,7 @@ export function VerifyView({ code }: { code: string }) {
 
   return (
     <>
-      <PageHeader backHref="/reviewer/queue" crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের তালিকা / যাচাই" title="জমা যাচাই করুন" />
+      <PageHeader backHref="/reviewer/queue" crumb="নির্বাহী সম্পাদক পোর্টাল / যাচাইয়ের অপেক্ষায় / যাচাই" title="জমা যাচাই করুন" />
 
       <div className="flex flex-1 flex-col gap-4 px-4 pt-[22px] pb-9 sm:px-7">
         <Link

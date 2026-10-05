@@ -139,6 +139,7 @@ export function disputeView(d: Dispute, workingDays: number): { state: string; o
     Open: { state: "সম্পাদক যাচাই করছেন", outcome: `সিদ্ধান্তের অপেক্ষায় · সাধারণত ${new Intl.NumberFormat("bn-BD").format(workingDays)} কাজের দিন`, fg: "#D97706", outcomeFg: "#D97706" },
     Kept: { state: "অভিযোগ বাতিল হয়েছে", outcome: "সম্পাদক রিপোর্টটি ঠিক রেখেছেন", fg: "#4A7060", outcomeFg: "#4A7060" },
     Removed: { state: "অভিযোগ গ্রহণ হয়েছে", outcome: "সম্পাদক রিপোর্টটি বাতিল করেছেন · প্রোফাইল থেকে সরানো হয়েছে", fg: "#1A7A4A", outcomeFg: "#1A7A4A" },
+    Partial: { state: "অভিযোগ আংশিক গ্রহণ হয়েছে", outcome: "সম্পাদক রিপোর্টের ভুল অংশ সংশোধন করেছেন · সংশোধিত রিপোর্টটি প্রোফাইলে আছে", fg: "#1D6FC0", outcomeFg: "#1D6FC0" },
   };
   const v = map[d.state];
   return { ...v, bg: `${v.fg}1A` };

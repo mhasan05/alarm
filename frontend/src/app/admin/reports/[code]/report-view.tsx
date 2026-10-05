@@ -16,7 +16,6 @@ export function ReportView({ code, v }: { code: string; v?: string }) {
 
   const current = report.versions[0];
   const version = report.versions.find((x) => String(x.v) === v) ?? current;
-  const approved = report.state === "approved";
   const profile = profileOf(db, report.profileId);
   const reviewer = reviewerOf(db, report.reviewerId);
   const profileHref = `/admin/politicians/${report.profileId}`;
@@ -41,28 +40,23 @@ export function ReportView({ code, v }: { code: string; v?: string }) {
         title={
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="font-bn">চূড়ান্ত অডিট প্রতিবেদন</span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-bn text-[12px] font-medium ${
-                approved ? "border-success/30 bg-success/10 text-success" : "border-warning/30 bg-warning/10 text-warning"
-              }`}
-            >
-              {approved ? "✓ অনুমোদিত" : "অনুমোদনের অপেক্ষায়"}
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-success/30 bg-success/10 px-2 py-0.5 font-bn text-[12px] font-medium text-success">
+              ✓ অনুমোদিত
             </span>
           </span>
         }
-        action={<ReportActions approved={approved} code={code} />}
+        action={<ReportActions code={code} />}
       />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pt-[22px] pb-9 sm:px-7 print:p-0">
         {/* Header actions are hidden in the phone app bar, so repeat them here. */}
         <div className="md:hidden print:hidden [&>div]:items-start">
-          <ReportActions approved={approved} code={code} />
+          <ReportActions code={code} />
         </div>
 
-        {!approved && (
-          <p role="status" className="rounded-card border border-l-[3px] border-line border-l-warning bg-white px-5 py-3 text-[13px] text-ink shadow-card print:hidden">
-            {reviewer?.nameBn ?? "নির্বাহী সম্পাদক"} (নির্বাহী সম্পাদক)-এর মন্তব্য ও সইয়ের অপেক্ষায়। অনুমোদন ও সইয়ের পর শেয়ার ও PDF চালু হবে।
-            {report.adminNote && <span className="mt-1 block text-[12px] text-muted">বাছাই নিয়ে আপনার নোট: {report.adminNote}</span>}
+        {report.adminNote && (
+          <p className="rounded-card border border-line bg-white px-5 py-3 text-[13px] text-ink shadow-card print:hidden">
+            <span className="text-muted">বাছাই নিয়ে আপনার নোট:</span> {report.adminNote}
           </p>
         )}
 

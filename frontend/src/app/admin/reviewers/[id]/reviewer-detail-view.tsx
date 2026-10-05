@@ -25,17 +25,12 @@ export function ReviewerDetailView({ id }: { id: string }) {
   if (!r) return <RecordMissing title="নির্বাহী সম্পাদক পাওয়া যায়নি" backHref="/admin/reviewers" backLabel="নির্বাহী সম্পাদক তালিকায় ফিরুন" />;
 
   const decisions = decisionsBy(db, r.id);
-  const reports = db.reports.filter((rep) => rep.reviewerId === r.id);
-  const signed = reports.filter((rep) => rep.state === "approved");
-  const awaiting = reports.filter((rep) => rep.state !== "approved");
 
   const stats = [
     { label: "অপেক্ষায়", value: bn(r.queue), color: r.queue >= 5 ? "#D97706" : "#0D1F17", note: `যাচাই বাকি · সবচেয়ে পুরোনো ${bn(r.oldest)} দিন` },
     { label: "এই মাসে সিদ্ধান্ত", value: bn(r.decidedMonth), color: "#1A7A4A", note: "গ্রহণ ও বাতিল মিলিয়ে" },
     { label: "গ্রহণের হার", value: `${bn(r.acceptRate)}%`, color: "#0D1F17", note: "এই মাসে গ্রহণ হয়েছে" },
     { label: "সিদ্ধান্তের গড় সময়", value: `${bn(r.avgHours)} ঘণ্টা`, color: r.avgHours > 24 ? "#D97706" : "#1D6FC0", note: r.avgHours > 24 ? "২৪ ঘণ্টার লক্ষ্যের চেয়ে ধীর" : "২৪ ঘণ্টার লক্ষ্যের মধ্যে" },
-    { label: "সই করা প্রতিবেদন", value: bn(signed.length), color: "#1A7A4A", note: "অনুমোদন ও সই শেষ" },
-    { label: "সইয়ের অপেক্ষায়", value: bn(awaiting.length), color: awaiting.length ? "#D97706" : "#0D1F17", note: "অনুমোদনের অপেক্ষায়" },
   ];
 
   const facts = [
@@ -105,7 +100,7 @@ export function ReviewerDetailView({ id }: { id: string }) {
           </dl>
         </section>
 
-        <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2.5 md:gap-4 xl:grid-cols-4">
           {stats.map((st) => (
             <div key={st.label} className={`${card} p-3 md:p-[18px]`}>
               <div className="text-[11px] font-semibold text-muted">{st.label}</div>
@@ -163,48 +158,16 @@ export function ReviewerDetailView({ id }: { id: string }) {
             )}
           </section>
 
-          <div className="flex flex-col gap-5">
-            <section className={`${card} overflow-hidden`}>
-              <div className="px-5 pt-4">
-                <h2 className="text-[15px] font-semibold text-ink">চূড়ান্ত প্রতিবেদন</h2>
-                <p className="mt-0.5 font-bn text-[12px] text-muted">অনুমোদন ও সই</p>
-              </div>
-              {reports.length === 0 ? (
-                <p className="px-5 py-8 text-center text-[13px] text-muted">সইয়ের জন্য কোনো প্রতিবেদন দেওয়া হয়নি।</p>
-              ) : (
-                <ul className="px-5 pt-2 pb-2">
-                  {reports.map((rep) => (
-                    <li key={rep.code} className="relative flex cursor-pointer items-center gap-3 border-b border-line py-3 last:border-b-0 hover:bg-surface/60">
-                      <div className="min-w-0 flex-1">
-                        <Link href={`/admin/reports/${rep.code}`} className="font-mono text-[12.5px] font-semibold text-primary after:absolute after:inset-0 after:content-[''] hover:text-primary-hover">
-                          {rep.code}
-                        </Link>
-                        <div className="font-bn text-[12px] text-muted">{rep.subject.name}</div>
-                      </div>
-                      <span
-                        className={`whitespace-nowrap rounded-md px-2 py-0.5 text-[11.5px] font-semibold ${
-                          rep.state === "approved" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                        }`}
-                      >
-                        {rep.state === "approved" ? "সই করা হয়েছে" : "সইয়ের অপেক্ষায়"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            <AccountActions
-              name={r.nameBn || r.name}
-              status={r.status as AccountStatus}
-              maskedPhone={phoneMasked(r.phone)}
-              open={r.queue}
-              activeLabel="Active"
-              openNoun="অপেক্ষায় থাকা জমা"
-              onStatus={(st) => setReviewerStatus(r.id, adminId, st as ReviewerStatus)}
-              onReset={() => resetPassword(r.id, adminId)}
-            />
-          </div>
+          <AccountActions
+            name={r.nameBn || r.name}
+            status={r.status as AccountStatus}
+            maskedPhone={phoneMasked(r.phone)}
+            open={r.queue}
+            activeLabel="Active"
+            openNoun="অপেক্ষায় থাকা জমা"
+            onStatus={(st) => setReviewerStatus(r.id, adminId, st as ReviewerStatus)}
+            onReset={() => resetPassword(r.id, adminId)}
+          />
         </div>
       </div>
     </>

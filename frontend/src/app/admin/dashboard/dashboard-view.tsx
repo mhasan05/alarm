@@ -24,7 +24,6 @@ const ICON = {
   inbox: "M2.4 9.6h3.2l1.2 2h2.4l1.2-2h3.2M2.4 9.6 4 3.2h8l1.6 6.4v3.6H2.4z",
   alert: "M8 1.8 15 14H1zM8 6.2v3.4M8 11.6v.2",
   spark: "M8 1.6v3M8 11.4v3M1.6 8h3M11.4 8h3M3.5 3.5l2 2M10.5 10.5l2 2M3.5 12.5l2-2M10.5 5.5l2-2",
-  sign: "M3.6 2.4h5.6l3.2 3.2v8H3.6zM9.2 2.6v3.2h3.2M5.6 10.6c1-.9 1.8-.9 2.4 0s1.4.9 2.4 0",
   person: "M8 7.4a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM3 14c0-2.8 2.2-4.6 5-4.6s5 1.8 5 4.6",
   plus: "M8 3v10M3 8h10",
   meeting: "M2.4 4.4h7.2v7.2H2.4zM9.6 7l4-2.4v6.8l-4-2.4",
@@ -62,7 +61,6 @@ export function AdminDashboardView() {
   const overdue = pendingSubs.filter((s) => daysSince(s.submittedAt) >= 2).length;
   const disputes = openDisputes(db).sort((a, b) => a.filedAt.localeCompare(b.filedAt));
   const ready = db.profiles.filter((p) => analysisStatus(db, p.id).ready);
-  const awaitingSignOff = db.reports.filter((r) => r.state === "pending");
   const stranded = pendingSubs.filter((s) => activeReviewersFor(db, s.profileId).length === 0);
   const joinRequests = db.meetings.filter((m) => m.status === "scheduled" || m.status === "live").reduce((n, m) => n + pendingRequests(m).length, 0);
 
@@ -70,7 +68,6 @@ export function AdminDashboardView() {
     { key: "pending", label: "যাচাই চলছে এমন জমা", count: pendingSubs.length, note: overdue ? `${bn(overdue)}টি ৪৮ ঘণ্টার বেশি পুরনো` : "নির্বাহী সম্পাদকের সিদ্ধান্তের অপেক্ষায়", href: "/admin/submissions?tab=pending", button: "জমাগুলো দেখুন", icon: ICON.inbox, tone: "text-role-reviewer bg-role-reviewer/10" },
     { key: "disputes", label: "খোলা অভিযোগ", count: disputes.length, note: "আপনার সিদ্ধান্তের অপেক্ষায়", href: "/admin/disputes", button: "অভিযোগের সমাধান করুন", icon: ICON.alert, tone: "text-danger bg-danger/10" },
     { key: "ready", label: "বিশ্লেষণের জন্য তৈরি", count: ready.length, note: "যাচাইয়ের তালিকা খালি, নতুন গ্রহণ করা তথ্য আছে", href: "/admin/ai-review", button: "বিশ্লেষণ শুরু করুন", icon: ICON.spark, tone: "text-primary bg-primary/10" },
-    { key: "sign", label: "সইয়ের অপেক্ষায় প্রতিবেদন", count: awaitingSignOff.length, note: "নির্বাহী সম্পাদকের অনুমোদন বাকি", href: "/admin/reports?tab=draft", button: "প্রতিবেদন দেখুন", icon: ICON.sign, tone: "text-warning bg-warning/10" },
   ];
 
   const QUICK = [
@@ -104,14 +101,6 @@ export function AdminDashboardView() {
       urgency: "তৈরি",
       urgent: false,
       href: `/admin/ai-review?profile=${p.id}`,
-    })),
-    ...awaitingSignOff.map((r) => ({
-      stage: "প্রতিবেদন",
-      title: `${r.code} · ${r.subject.name} — নির্বাহী সম্পাদকের সইয়ের অপেক্ষায়`,
-      detail: `${nameOf(db, r.reviewerId)} অনুমোদন দিলে প্রতিবেদনটি শেয়ার ও ডাউনলোড করা যাবে।`,
-      urgency: "অপেক্ষায়",
-      urgent: false,
-      href: `/admin/reports/${r.code}`,
     })),
     ...(joinRequests
       ? [{ stage: "মিটিং", title: `${bn(joinRequests)}টি মিটিংয়ে যোগ দেওয়ার অনুরোধ`, detail: "এলাকার বাইরের কেউ যোগ দিতে চেয়েছেন — অনুমতি দিন বা না করুন।", urgency: "অপেক্ষায়", urgent: false, href: "/admin/meetings" }]
@@ -158,7 +147,7 @@ export function AdminDashboardView() {
           <h2 id="todo-h" className="mb-3 text-[15px] font-semibold text-ink">
             এখন যা করতে হবে
           </h2>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {TODO.map((t) => (
               <li key={t.key}>
                 <Link href={t.href} className="group flex h-full flex-col rounded-card border border-line bg-white p-4 shadow-card hover:border-primary">

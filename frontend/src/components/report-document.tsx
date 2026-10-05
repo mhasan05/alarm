@@ -120,7 +120,6 @@ export function ReportDocument({
   reviewerInitials: string;
 }) {
   const { positive, negative, sources } = versionView(report, version);
-  const approved = report.state === "approved";
   return (
         <article className="overflow-hidden rounded-card border border-line bg-white shadow-card print:rounded-none print:border-0 print:shadow-none">
           <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-primary px-5 py-5 sm:px-9">
@@ -133,7 +132,7 @@ export function ReportDocument({
             </div>
             <div className="text-right font-bn text-[12px] leading-relaxed text-muted">
               <div className="font-sans text-[13px] font-semibold text-ink">{audit}</div>
-              <div>{approved ? "প্রকাশিত" : "তৈরি"} {bnDate(report.published)}</div>
+              <div>প্রকাশিত {bnDate(report.published)}</div>
               <div>ভার্সন {bn(version.v)}.০ · গোপনীয়</div>
             </div>
           </header>
@@ -183,7 +182,7 @@ export function ReportDocument({
                 {[
                   ["অডিটের উদ্দেশ্য", report.purpose],
                   ["অনুরোধ করেছেন", report.requester],
-                  ["নির্বাহী সম্পাদক", reviewerName],
+                  ["এলাকার নির্বাহী সম্পাদক", reviewerName],
                 ].map(([k, val]) => (
                   <div key={k}>
                     <dt className="text-[11px] text-muted">{k}</dt>
@@ -249,39 +248,29 @@ export function ReportDocument({
               </ol>
             </Section>
 
-            <Section num="০৫" title="নির্বাহী সম্পাদকের মন্তব্য">
+            <Section num="০৫" title="অনুমোদন">
               <div className="mt-3 rounded-card border border-line px-5 py-4">
-                {report.remark ? (
-                  <p className="font-bn text-[13.5px] leading-[1.85] text-ink">{report.remark}</p>
-                ) : (
-                  <p className="font-bn text-[13px] text-muted">নির্বাহী সম্পাদক এখনও মন্তব্য যোগ করেননি — অনুমোদনের সময় যোগ হবে।</p>
-                )}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-4">
+                {report.remark && <p className="mb-4 border-b border-line pb-4 font-bn text-[13.5px] leading-[1.85] text-ink">{report.remark}</p>}
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <span className="flex size-10 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-primary">
                       {reviewerInitials}
                     </span>
                     <div>
                       <div className="font-bn text-[14px] font-semibold text-ink">{reviewerName}</div>
-                      <div className="font-bn text-[12px] text-muted">
-                        নির্বাহী সম্পাদক · {report.approval ? `অনুমোদিত ${bnDate(report.approval.at)}` : "অনুমোদনের অপেক্ষায়"}
-                      </div>
+                      <div className="font-bn text-[12px] text-muted">এলাকার নির্বাহী সম্পাদক</div>
                     </div>
                   </div>
-                  {report.approval ? (
-                    <div className="flex items-center gap-2.5 rounded-button border-2 border-success px-4 py-2 text-success">
-                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                        <circle cx="8" cy="8" r="6.3" stroke="currentColor" strokeWidth="1.3" />
-                        <path d="m5.3 8.2 1.8 1.8 3.6-3.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <div className="font-bn leading-tight">
-                        <div className="text-[13.5px] font-semibold">অনুমোদিত</div>
-                        <div className="text-[11px]">সই আইডি {report.approval.signature}</div>
-                      </div>
+                  <div className="flex items-center gap-2.5 rounded-button border-2 border-success px-4 py-2 text-success">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <circle cx="8" cy="8" r="6.3" stroke="currentColor" strokeWidth="1.3" />
+                      <path d="m5.3 8.2 1.8 1.8 3.6-3.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="font-bn leading-tight">
+                      <div className="text-[13.5px] font-semibold">চূড়ান্ত · {bnDate(report.approval?.at ?? report.published)}</div>
+                      {report.approval?.signature && <div className="text-[11px]">সই আইডি {report.approval.signature}</div>}
                     </div>
-                  ) : (
-                    <div className="rounded-button border-2 border-dashed border-line px-4 py-2 font-bn text-[12.5px] text-muted">সইয়ের অপেক্ষায়</div>
-                  )}
+                  </div>
                 </div>
               </div>
             </Section>
